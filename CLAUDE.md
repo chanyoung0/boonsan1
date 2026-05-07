@@ -40,28 +40,37 @@
 ## 패키지 구조
 ```
 src/
- ├─ app/              # Main 실행 클래스
- ├─ model/
- │   ├─ common/       # enum 등 공통 상태값
- │   ├─ product/
- │   ├─ underwriting/
- │   ├─ contract/
- │   └─ claim/
- ├─ service/          # 유스케이스 내부 시나리오 흐름 구현
- ├─ repository/       # DB 대신 사용하는 메모리 저장소
- ├─ external/         # 외부 API 연동 예정 Mock 클래스
- └─ util/             # 입력 처리, ID 생성 등 공통 유틸
+ ├─ Main.java          # 메인 실행 클래스 (루트)
+ ├─ common/            # ConsoleUtil (입력/출력 유틸)
+ ├─ enums/             # 모든 enum 클래스
+ ├─ insurance/         # Insurance, AutoInsurance, FireInsurance, MarineInsurance,
+ │                     # Authorization, FinancialSupervisoryService, UnderwritingService
+ ├─ underwriting/      # InsuranceApplication, Underwriting, UnderwritingResult,
+ │                     # UnderwritingHistory, UnderwritingRequest, Coinsurance, Coinsurer, Reinsurance
+ ├─ contract/          # Contract 관련 모델 + EndorsementService, ReinstatementService,
+ │                     # PaymentCollectionService, MaturityContractService
+ ├─ accident/          # AccidentReport, DamageInvestigation, InsurancePayment,
+ │                     # Objection, OutsourceRequest, Subrogation, AccidentHistory,
+ │                     # AccidentReportService, DamageInvestigationService
+ ├─ document/          # Document, AccidentDocument, PaymentApprovalDocument
+ ├─ person/            # InsuredPerson, Account, Manager
+ └─ partner/           # Partner
 ```
 
 ## 유스케이스 → 코드 변환 규칙
-유스케이스 하나는 Service 메서드 하나로 구현한다.
+유스케이스 하나는 Service의 run() 또는 메서드 하나로 구현한다.
 
-- 상품을 설계한다 → ProductService.designInsurance()
-- 상품 인가를 요청한다 → ProductService.requestAuthorization()
-- 보험청약을 심사한다 → UnderwritingService.reviewApplication()
-- 신용정보를 조회한다 → UnderwritingService.searchCreditInformation()
-- 사고를 접수한다 → ClaimService.registerAccident()
-- 보험금을 지급한다 → ClaimService.payInsuranceMoney()
+- 보험청약을 심사한다 → UnderwritingService.run() (insurance 패키지)
+- 신용정보를 조회한다 → UnderwritingService 내부 메서드 (include)
+- 청약서 및 증권발행을 한다 → UnderwritingService 내부 메서드 (include)
+- 공동인수를 처리한다 → UnderwritingService 내부 메서드 (extend)
+- 재보험 처리를 한다 → UnderwritingService 내부 메서드 (extend)
+- 배서를 관리한다 → EndorsementService.run() (contract 패키지)
+- 부활을 관리한다 → ReinstatementService.run() (contract 패키지)
+- 분납/수금을 관리한다 → PaymentCollectionService.run() (contract 패키지)
+- 만기계약을 관리한다 → MaturityContractService.run() (contract 패키지)
+- 사고를 접수한다 → AccidentReportService.run() (accident 패키지)
+- 손해조사를 한다 → DamageInvestigationService.run() (accident 패키지)
 
 - Basic Path: 기본 실행 흐름으로 구현한다
 - Alternate Flow: 사용자 입력 또는 조건문으로 분기한다
@@ -75,107 +84,59 @@ src/
 - 입력은 Scanner 또는 InputUtil을 사용한다
 - 출력은 System.out.println()을 사용한다
 
-기능 실행 출력 형식:
-[유스케이스명] 기능을 실행합니다.
-예) [보험청약을 심사한다] 기능을 실행합니다.
+유스케이스 시작 출력 형식:
+[유스케이스] 유스케이스명
+액터: 액터명
+예) [유스케이스] 보험청약을 심사한다
+    액터: 언더라이터
 
-외부 연동 출력 형식:
-[외부 연동 예정] OO API를 연동시킬 예정입니다.
-예) [외부 연동 예정] 한국신용정보원(ICIS) API를 연동시킬 예정입니다.
+시스템 메시지 형식:
+[시스템] 메시지 내용
+예) [시스템] 계약정보 조회 중...
+    [시스템] DB에 저장 중...
+    [시스템] 상태: '심사 완료'
 
-DB 저장 출력 형식:
-[DB 연동 예정] OO 정보를 DB에 저장할 예정입니다.
-[메모리 저장 완료] OO 정보가 프로그램 실행 중 임시 저장되었습니다.
+액터 행동 형식:
+[액터명] 행동 내용
+예) [언더라이터] '심사점수 계산 및 보고서 출력' 버튼을 누릅니다.
+    [보험가입자] '사고 접수' 버튼을 누릅니다.
 
-상태 변경 출력 형식:
-[상태 변경] 청약 상태: REVIEW_COMPLETED
+오류 메시지 형식:
+[오류] 오류 내용
+예) [오류] 저장 실패.
+    [오류] ICIS API가 응답하지 않습니다.
 
-## 상태값 Enum
+입력 프롬프트 형식:
+>> 선택: (메뉴 선택)
+  필드명: (데이터 입력)
 
-ProductStatus
-- PLANNED: 상품 기획 완료
-- DESIGNED: 상품 설계 완료
-- AUTHORIZATION_REQUESTED: 인가 요청
-- AUTHORIZED: 인가 완료
-- REJECTED: 인가 불허
-- REVISION_REQUESTED: 보완 요청
+include/extend 호출 형식:
+>> <<include>> [유스케이스명] 시나리오 시작
+>> <<extend>> [유스케이스명] 시나리오 자동 시작
 
-ContractStatus
-- ACTIVE: 유효
-- LAPSED: 실효
-- TERMINATED: 해지
-- MATURED: 만기
-- UNPAID: 미납
-- REINSURANCE_COMPLETED: 재보험 처리 완료
+## 상태값 Enum (실제 코드 기준)
 
-ApplicationStatus
-- RECEIVED: 청약 접수
-- UNDER_REVIEW: 심사 중
-- REVIEW_COMPLETED: 심사 완료
-- POLICY_ISSUED: 증권 발행 완료
+모든 enum은 `enums` 패키지에 위치한다.
 
-UnderwritingDecision
-- APPROVED: 승인
-- EXTRA_PREMIUM: 할증
-- REJECTED: 거절
+실제 구현된 주요 enum:
+- ApplicationStatus: PENDING, APPROVED, REJECTED, CANCELLED
+- AccidentType: VEHICLE_ACCIDENT, PROPERTY_DAMAGE, INJURY, FIRE, NATURAL_DISASTER
+- CompensationStatus: IN_PROGRESS, COMPLETED, CLOSED
+- UnderwritingResultType, UnderwritingType, RejectionReason, RequestStatus 등
 
-AccidentStatus
-- REGISTERED: 사고 접수
-- FIELD_INVESTIGATION_REQUIRED: 현장 조사 필요
-- APPROVAL_REQUIRED: 결재 필요
-- PAYMENT_COMPLETED: 보험금 지급 완료
-- SUBROGATION_REQUIRED: 구상 처리 필요
-- CLOSED: 종결
-- REJECTED: 반려
-- FRAUD_INVESTIGATION: 보험사기 조사
-- TEMP_SAVED: 임시 저장
+※ 실제 enum 값은 src/enums/ 디렉토리의 파일을 직접 확인할 것
 
-## 메뉴 구조
+## 메뉴 구조 (실제 Main.java 기준)
 
-메인 메뉴:
-1. 상품 개발
-2. U/W 언더라이팅
-3. 계약 관리
-4. 보상 처리
-5. 보상 기획
-0. 종료
-
-상품 개발 메뉴:
-1. 상품을 설계한다
-2. 상품 인가를 요청한다
-3. 상품 목록 조회
-0. 뒤로가기
-
-U/W 메뉴:
-1. 보험청약을 심사한다
-2. 신용정보를 조회한다
-3. 청약서 및 증권발행을 한다
-4. 공동인수를 처리한다
-5. 재보험 처리를 한다
-0. 뒤로가기
-
-계약 관리 메뉴:
-1. 배서를 관리한다
-2. 부활을 관리한다
-3. 심사를 요청한다
-4. 제지급금을 관리한다
-5. 분납/수금을 관리한다
-6. 만기계약을 관리한다
-0. 뒤로가기
-
-보상 처리 메뉴:
-1. 사고를 접수한다
-2. 손해조사를 한다
-3. 손해조사를 위탁한다
-4. 보험금을 지급한다
-5. 구상을 처리한다
-6. 이의 제기를 처리한다
-0. 뒤로가기
-
-보상 기획 메뉴:
-1. 보상 평가를 관리한다
-2. 협력업체를 관리한다
-0. 뒤로가기
+메인 메뉴 (flat 구조):
+1. 보험청약 심사
+2. 배서 관리
+3. 부활 관리
+4. 분납/수금 관리
+5. 만기계약 관리
+6. 사고 접수
+7. 손해조사
+8. 종료
 
 ## 클래스 매핑 (한글 → Java)
 
@@ -193,9 +154,9 @@ U/W:
 - 심사결과 → UnderwritingResult
 - 심사이력 → UnderwritingHistory
 - 사고이력 → AccidentHistory
-- 공동인수 → CoInsurance
-- 공동인수사 → CoInsurer
-- 재보험 → ReInsurance
+- 공동인수 → Coinsurance
+- 공동인수사 → Coinsurer
+- 재보험 → Reinsurance
 
 계약 관리:
 - 계약 → Contract
