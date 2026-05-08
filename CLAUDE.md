@@ -40,37 +40,58 @@
 ## 패키지 구조
 ```
 src/
- ├─ Main.java          # 메인 실행 클래스 (루트)
- ├─ common/            # ConsoleUtil (입력/출력 유틸)
- ├─ enums/             # 모든 enum 클래스
- ├─ insurance/         # Insurance, AutoInsurance, FireInsurance, MarineInsurance,
- │                     # Authorization, FinancialSupervisoryService, UnderwritingService
- ├─ underwriting/      # InsuranceApplication, Underwriting, UnderwritingResult,
- │                     # UnderwritingHistory, UnderwritingRequest, Coinsurance, Coinsurer, Reinsurance
- ├─ contract/          # Contract 관련 모델 + EndorsementService, ReinstatementService,
- │                     # PaymentCollectionService, MaturityContractService
- ├─ accident/          # AccidentReport, DamageInvestigation, InsurancePayment,
- │                     # Objection, OutsourceRequest, Subrogation, AccidentHistory,
- │                     # AccidentReportService, DamageInvestigationService
- ├─ document/          # Document, AccidentDocument, PaymentApprovalDocument
- ├─ person/            # InsuredPerson, Account, Manager
- └─ partner/           # Partner
+ ├─ Main.java                        # 메인 실행 클래스 (루트)
+ ├─ common/                          # ConsoleUtil (입력/출력 유틸)
+ ├─ enums/                           # 모든 enum 클래스
+ │
+ ├─ model/                           # 도메인 모델 계층 (순수 데이터 + 도메인 로직)
+ │   ├─ insurance/                   # Insurance, AutoInsurance, FireInsurance,
+ │   │                               # MarineInsurance, Authorization
+ │   ├─ underwriting/                # InsuranceApplication, Underwriting, UnderwritingResult,
+ │   │                               # UnderwritingHistory, UnderwritingRequest,
+ │   │                               # Coinsurance, Coinsurer, Reinsurance
+ │   ├─ contract/                    # Contract, Endorsement, Reinstatement,
+ │   │                               # PaymentCollection, UnpaidNotice, Payout,
+ │   │                               # Transfer, MaturityNotice, CompensationEvaluation
+ │   ├─ accident/                    # AccidentReport, AccidentHistory, DamageInvestigation,
+ │   │                               # InsurancePayment, Objection, OutsourceRequest, Subrogation
+ │   ├─ document/                    # Document, AccidentDocument, PaymentApprovalDocument
+ │   ├─ person/                      # InsuredPerson, Account, Manager
+ │   └─ partner/                     # Partner
+ │
+ ├─ service/                         # 서비스 계층 (유스케이스 시나리오 실행, 콘솔 입출력)
+ │   ├─ underwriting/                # UnderwritingService
+ │   ├─ contract/                    # EndorsementService, ReinstatementService,
+ │   │                               # PaymentCollectionService, MaturityContractService
+ │   └─ accident/                    # AccidentReportService, DamageInvestigationService
+ │
+ ├─ repository/                      # 메모리 저장소 계층 (List<T>로 객체 보관 및 조회)
+ │   ├─ ContractRepository
+ │   ├─ InsuranceApplicationRepository
+ │   └─ AccidentReportRepository
+ │
+ └─ external/                        # 외부 시스템 Mock (랜덤값으로 외부 응답 시뮬레이션)
+     ├─ FinancialSupervisoryService   # 금융감독원 Mock
+     ├─ IcisApiMock                   # 신용정보원 API Mock
+     ├─ CoinsuranceSystemMock         # 공동인수사 시스템 Mock
+     ├─ ReinsuranceSystemMock         # 재보험사 시스템 Mock
+     └─ BankApiMock                   # 은행 계좌이체 API Mock
 ```
 
 ## 유스케이스 → 코드 변환 규칙
 유스케이스 하나는 Service의 run() 또는 메서드 하나로 구현한다.
 
-- 보험청약을 심사한다 → UnderwritingService.run() (insurance 패키지)
+- 보험청약을 심사한다 → UnderwritingService.run() (service.underwriting 패키지)
 - 신용정보를 조회한다 → UnderwritingService 내부 메서드 (include)
 - 청약서 및 증권발행을 한다 → UnderwritingService 내부 메서드 (include)
 - 공동인수를 처리한다 → UnderwritingService 내부 메서드 (extend)
 - 재보험 처리를 한다 → UnderwritingService 내부 메서드 (extend)
-- 배서를 관리한다 → EndorsementService.run() (contract 패키지)
-- 부활을 관리한다 → ReinstatementService.run() (contract 패키지)
-- 분납/수금을 관리한다 → PaymentCollectionService.run() (contract 패키지)
-- 만기계약을 관리한다 → MaturityContractService.run() (contract 패키지)
-- 사고를 접수한다 → AccidentReportService.run() (accident 패키지)
-- 손해조사를 한다 → DamageInvestigationService.run() (accident 패키지)
+- 배서를 관리한다 → EndorsementService.run() (service.contract 패키지)
+- 부활을 관리한다 → ReinstatementService.run() (service.contract 패키지)
+- 분납/수금을 관리한다 → PaymentCollectionService.run() (service.contract 패키지)
+- 만기계약을 관리한다 → MaturityContractService.run() (service.contract 패키지)
+- 사고를 접수한다 → AccidentReportService.run() (service.accident 패키지)
+- 손해조사를 한다 → DamageInvestigationService.run() (service.accident 패키지)
 
 - Basic Path: 기본 실행 흐름으로 구현한다
 - Alternate Flow: 사용자 입력 또는 조건문으로 분기한다

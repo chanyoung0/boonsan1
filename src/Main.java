@@ -1,10 +1,10 @@
-import insurance.UnderwritingService;
-import contract.EndorsementService;
-import contract.ReinstatementService;
-import contract.PaymentCollectionService;
-import contract.MaturityContractService;
-import accident.AccidentReportService;
-import accident.DamageInvestigationService;
+import service.underwriting.UnderwritingService;
+import service.contract.EndorsementService;
+import service.contract.ReinstatementService;
+import service.contract.PaymentCollectionService;
+import service.contract.MaturityContractService;
+import service.accident.AccidentReportService;
+import service.accident.DamageInvestigationService;
 
 import static common.ConsoleUtil.*;
 
