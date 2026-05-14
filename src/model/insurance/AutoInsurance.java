@@ -1,10 +1,5 @@
 package model.insurance;
 
-import model.accident.AccidentHistory;
-
-import java.math.BigDecimal;
-import java.util.List;
-
 public class AutoInsurance extends Insurance {
 
     private int drivingAge;
@@ -12,16 +7,10 @@ public class AutoInsurance extends Insurance {
     private String vehicleType;
 
     @Override
-    public BigDecimal calculatePremium() {
-        return null;
-    }
+    public void calculatePremium() {}
 
     @Override
-    public BigDecimal calculateMaturityRefund() {
-        return null;
-    }
+    public void calculateMaturityRefund() {}
 
-    public List<AccidentHistory> getAccidentHistory() {
-        return null;
-    }
+    public void getAccidentHistory() {}
 }

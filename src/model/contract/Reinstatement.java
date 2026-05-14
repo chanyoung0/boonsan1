@@ -18,9 +18,7 @@ public class Reinstatement {
 
     public void applyReinstatement() {}
 
-    public BigDecimal calculateUnpaidPremium() {
-        return null;
-    }
+    public void calculateUnpaidPremium() {}
 
     public void processReinstatement() {}
 }

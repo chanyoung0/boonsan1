@@ -18,5 +18,5 @@ public class CompensationEvaluation {
 
     public void calculateCompensationStatistics() {}
 
-    public void saveDamageResult() {}
+    public void saveEvaluationResult() {}
 }

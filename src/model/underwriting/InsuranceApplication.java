@@ -23,7 +23,7 @@ public class InsuranceApplication {
 
     public void changeApplicationStatus() {}
 
-    public void notifyInsuredPerson() {}
+    public void confirmApplication() {}
 
     public void issuePolicyNumber() {}
 

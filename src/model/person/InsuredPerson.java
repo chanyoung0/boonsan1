@@ -7,15 +7,11 @@ public class InsuredPerson {
     private String name;
     private String residentialRegistrationNumber;
 
-    public InsuredPerson getInsuredPerson() {
-        return null;
-    }
+    public void getInsuredPersonInfo() {}
 
     public void registerInsuredPerson() {}
 
     public void updateInsuredPerson() {}
 
-    public boolean verifyAccount() {
-        return false;
-    }
+    public void verifyAccountInfo() {}
 }

@@ -4,6 +4,7 @@ import enums.Gender;
 
 import java.math.BigDecimal;
 
+// 언더라이팅 이력 도메인 모델 — 피보험자 심사 판단 결과 이력 관리
 public class UnderwritingHistory {
 
     private int age;
@@ -24,9 +25,12 @@ public class UnderwritingHistory {
     private String vehicleModel;
     private String vehicleNumber;
 
-    public UnderwritingHistory getHistory() {
-        return null;
-    }
+    // 심사 이력 조회
+    public void getHistory() {}
 
+    // 심사 이력 등록
+    public void registerHistory() {}
+
+    // 심사 이력 수정
     public void updateHistory() {}
 }

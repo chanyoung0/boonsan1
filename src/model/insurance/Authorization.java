@@ -1,6 +1,5 @@
 package model.insurance;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Authorization {
@@ -16,9 +15,7 @@ public class Authorization {
 
     public void cancelAuthorizationRequest() {}
 
-    public BigDecimal calculateSanctionAmount() {
-        return null;
-    }
+    public void sendAuthorizationRequest() {}
 
     public void updateProductStatus() {}
 }

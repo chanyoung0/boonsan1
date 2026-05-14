@@ -1,23 +1,17 @@
 package model.insurance;
 
-import java.math.BigDecimal;
-
 public class FireInsurance extends Insurance {
 
     private String buildingType;
     private String location;
 
     @Override
-    public BigDecimal calculateMaturityRefund() {
-        return null;
-    }
+    public void calculateMaturityRefund() {}
 
     @Override
-    public BigDecimal calculatePremium() {
-        return null;
-    }
+    public void calculatePremium() {}
 
-    public void analyzeRiskFactor() {}
+    public void analyzeRiskFactors() {}
 
     public void setCoverageScope() {}
 }

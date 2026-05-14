@@ -2,6 +2,7 @@ package model.underwriting;
 
 import java.math.BigDecimal;
 
+// 공동보험사 도메인 모델 — 공동인수 계약에 참여하는 보험사 정보 관리
 public class Coinsurer {
 
     private BigDecimal allocatedPremium;
@@ -9,4 +10,10 @@ public class Coinsurer {
     private float maxAcceptableShareRate;
     private BigDecimal retainedAmount;
     private float shareRate;
+
+    // 참여 결과 조회
+    public void getResult() {}
+
+    // 참여 결과 등록
+    public void registerResult() {}
 }

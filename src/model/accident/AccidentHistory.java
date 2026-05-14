@@ -21,7 +21,5 @@ public class AccidentHistory {
 
     public void applyToUnderwriting() {}
 
-    public AccidentHistory getAccidentHistory() {
-        return null;
-    }
+    public void getAccidentHistory() {}
 }

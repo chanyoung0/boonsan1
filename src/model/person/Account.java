@@ -13,5 +13,5 @@ public class Account {
 
     public void changeAccount() {}
 
-    public void handleBalance() {}
+    public void checkBalance() {}
 }

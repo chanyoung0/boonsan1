@@ -12,5 +12,5 @@ public abstract class Document {
 
     public void save() {}
 
-    public void template() {}
+    public void tempSave() {}
 }

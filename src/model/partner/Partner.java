@@ -16,9 +16,7 @@ public class Partner {
 
     public void save() {}
 
-    public Partner searchPartner() {
-        return null;
-    }
+    public void searchPartner() {}
 
     public void update() {}
 }

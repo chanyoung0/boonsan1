@@ -18,9 +18,7 @@ public class Payout {
 
     public void approvePayment() {}
 
-    public BigDecimal calculatePayment() {
-        return null;
-    }
+    public void calculatePayment() {}
 
     public void cancelPayment() {}
 

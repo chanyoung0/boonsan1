@@ -9,6 +9,7 @@ import enums.UnderwritingType;
 
 import java.time.LocalDateTime;
 
+// 언더라이팅 요청 도메인 모델 — 배서/부활 심사 요청 정보 관리
 public class UnderwritingRequest {
 
     private LocalDateTime appliedAt;
@@ -20,11 +21,12 @@ public class UnderwritingRequest {
     private UnderwritingResultType underwritingResult;
     private UnderwritingType underwritingType;
 
-    public void changeStatus() {}
+    // U/W 요청 상태 변경
+    public void changeUWStatus() {}
 
+    // U/W 결과 등록
     public void registerUWResult() {}
 
-    public void renewalIntention() {}
-
+    // 언더라이팅 요청
     public void requestUnderwriting() {}
 }

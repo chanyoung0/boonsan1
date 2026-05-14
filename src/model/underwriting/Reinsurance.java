@@ -15,9 +15,7 @@ public class Reinsurance {
     private BigDecimal settlementAmount;
     private String settlementMethod;
 
-    public BigDecimal calculatePremium() {
-        return null;
-    }
+    public void calculatePremium() {}
 
     public void recognizeAccounting() {}
 

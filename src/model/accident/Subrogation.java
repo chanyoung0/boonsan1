@@ -5,6 +5,7 @@ import enums.SubrogationStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// 구상권 도메인 모델 — 보험금 지급 후 제3자 구상 처리 정보 관리
 public class Subrogation {
 
     private String depositAccount;
@@ -15,11 +16,15 @@ public class Subrogation {
     private BigDecimal subrogationAmount;
     private SubrogationStatus subrogationStatus;
 
+    // 입금 확인
     public void confirmDeposit() {}
 
-    public void generateSubrogationDetails() {}
+    // 구상 문서 생성
+    public void generateSubrogationDocument() {}
 
-    public void retrieveSubrogationDetails() {}
+    // 지급 상세 조회
+    public void retrievePaymentDetails() {}
 
-    public void retrieveSums() {}
+    // 구상 청구 발송
+    public void sendClaim() {}
 }
