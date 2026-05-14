@@ -2,8 +2,7 @@ package model.insurance;
 
 public class AutoInsurance extends Insurance {
 
-    private int drivingAge;
-    private String location;
+    private int driverAge;
     private String vehicleType;
 
     @Override

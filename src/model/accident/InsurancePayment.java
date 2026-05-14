@@ -3,19 +3,21 @@ package model.accident;
 import enums.PaymentStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 // 보험금 지급 도메인 모델 — 손해조사 결과 기반 보험금 지급 처리 정보 관리
 public class InsurancePayment {
 
-    private String confirmId;
+    private BigDecimal finalLostIncome;
     private BigDecimal finalMedicalExpense;
+    private BigDecimal finalRepairCost;
     private BigDecimal finalSettlementAmount;
-    private BigDecimal investigationCost;
-    private LocalDate paidAt;
+    private LocalDateTime paidAt;
     private String paymentAccount;
+    private String paymentId;
     private PaymentStatus paymentStatus;
-    private BigDecimal retainedEstimate;
+    private String processorEmployeeNo;
+    private BigDecimal retentionEstimate;
 
     // 사건 종결
     public void closeCase() {}

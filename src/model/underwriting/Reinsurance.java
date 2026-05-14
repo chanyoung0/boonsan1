@@ -1,25 +1,32 @@
 package model.underwriting;
 
+import enums.ReinsuranceMethod;
+import enums.SettlementMethod;
+
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+// 재보험 도메인 모델 — 재보험 계약 및 정산 정보 관리
 public class Reinsurance {
 
     private LocalDateTime accountingDate;
     private float cessionRate;
-    private String contract;
-    private LocalDateTime expectedSettlementDate;
-    private String reinsuranceMethod;
-    private String reinsuranceName;
+    private String contractId;
+    private LocalDate expectedSettlementDate;
+    private ReinsuranceMethod reinsuranceMethod;
+    private BigDecimal reinsurancePremium;
+    private float reinsuranceRate;
+    private String reinsurerName;
     private float retentionRate;
     private BigDecimal settlementAmount;
-    private String settlementMethod;
+    private SettlementMethod settlementMethod;
 
     public void calculatePremium() {}
 
     public void recognizeAccounting() {}
 
-    public void setConditions() {}
-
     public void registerSettlementSchedule() {}
+
+    public void setConditions() {}
 }

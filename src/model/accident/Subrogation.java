@@ -12,8 +12,9 @@ public class Subrogation {
     private float faultRatio;
     private String offenderContact;
     private String offenderName;
+    private BigDecimal paymentAmount;
     private LocalDateTime paymentDeadline;
-    private BigDecimal subrogationAmount;
+    private String subrogationId;
     private SubrogationStatus subrogationStatus;
 
     // 입금 확인

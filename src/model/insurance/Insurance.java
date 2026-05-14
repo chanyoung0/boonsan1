@@ -6,8 +6,9 @@ import java.math.BigDecimal;
 public abstract class Insurance {
 
     protected String insurancePeriod;
-    protected BigDecimal premium;
+    protected BigDecimal insuredAmount;
     protected BigDecimal maturityRefund;
+    protected BigDecimal premium;
     protected String productCode;
 
     // 만기 환급금 계산

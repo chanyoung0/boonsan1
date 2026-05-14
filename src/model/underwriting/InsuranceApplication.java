@@ -1,7 +1,6 @@
 package model.underwriting;
 
 import enums.ApplicationStatus;
-import enums.AppliedCondition;
 import enums.SpecialContractType;
 
 import java.math.BigDecimal;
@@ -12,14 +11,14 @@ public class InsuranceApplication {
     private String applicationId;
     private ApplicationStatus applicationStatus;
     private LocalDateTime appliedAt;
-    private AppliedCondition appliedCondition;
+    private String appliedCondition;
     private BigDecimal insuredAmount;
     private String insuredPersonInfo;
     private String paymentCycle;
     private BigDecimal premium;
     private String productCode;
     private SpecialContractType specialContractList;
-    private String termVersion;
+    private String termsVersion;
 
     public void changeApplicationStatus() {}
 

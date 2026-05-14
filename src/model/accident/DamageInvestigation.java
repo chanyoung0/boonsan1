@@ -8,9 +8,11 @@ public class DamageInvestigation {
 
     private String adjusterId;
     private float faultRatio;
-    private LocalDateTime investigatedAt;
-    private BigDecimal lossincome;
+    private LocalDateTime investigationAt;
+    private String investigationId;
+    private BigDecimal lostIncome;
     private BigDecimal medicalExpense;
+    private BigDecimal repairCost;
     private BigDecimal settlementAmount;
 
     // 손해액 산정

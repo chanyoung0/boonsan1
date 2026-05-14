@@ -7,7 +7,9 @@ public class Coinsurer {
 
     private BigDecimal allocatedPremium;
     private String companyName;
+    private boolean isApproved;
     private float maxAcceptableShareRate;
+    private String rejectionReason;
     private BigDecimal retainedAmount;
     private float shareRate;
 

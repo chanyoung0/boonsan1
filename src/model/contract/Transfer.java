@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class Transfer {
 
     private Manager assignee;
-    private LocalDateTime transfermedAt;
+    private LocalDateTime transferredAt;
     private TransferType transferType;
 
     public void changeAssignee() {}

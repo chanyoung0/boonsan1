@@ -1,5 +1,0 @@
-package enums;
-
-public enum PartnerType {
-    HOSPITAL, REPAIR_SHOP, LAW_FIRM, DAMAGE_ASSESSMENT, CREDIT_INFO, EMERGENCY_DISPATCH
-}

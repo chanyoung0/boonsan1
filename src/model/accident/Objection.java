@@ -1,19 +1,19 @@
 package model.accident;
 
 import enums.AcceptanceStatus;
-import enums.SurchargeCondition;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+// 이의 신청 도메인 모델 — 보험금 지급 결과에 대한 이의 신청 정보 관리
 public class Objection {
 
     private AcceptanceStatus acceptanceStatus;
     private BigDecimal adjustedAmount;
+    private String claimantInfo;
     private String objectionId;
-    private SurchargeCondition surchargeCond;
-    private LocalDateTime underwritingDate;
-    private String originalPaymentDetail;
+    private String objectionReason;
+    private String originalPaymentDetails;
+    private String transferReason;
 
     public void acceptObjection() {}
 

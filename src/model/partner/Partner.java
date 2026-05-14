@@ -1,7 +1,6 @@
 package model.partner;
 
 import enums.EvaluationGrade;
-import enums.PartnerType;
 
 public class Partner {
 
@@ -9,7 +8,7 @@ public class Partner {
     private EvaluationGrade evaluationGrade;
     private String id;
     private String partnerName;
-    private PartnerType partnerType;
+    private String partnerType;
     private String responsibility;
 
     public void register() {}

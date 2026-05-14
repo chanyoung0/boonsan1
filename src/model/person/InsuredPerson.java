@@ -5,7 +5,7 @@ public class InsuredPerson {
     private Account accountInfo;
     private String contact;
     private String name;
-    private String residentialRegistrationNumber;
+    private String residentRegistrationNumber;
 
     public void getInsuredPersonInfo() {}
 

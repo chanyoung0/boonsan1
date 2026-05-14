@@ -1,11 +1,12 @@
 package model.underwriting;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 // 공동보험 도메인 모델 — 위험 분담을 위한 공동인수 처리 정보 관리
 public class Coinsurance {
 
-    private float deductionRatio;
+    private LocalDateTime receivedAt;
     private BigDecimal retainedAmount;
     private float retainedShareRate;
 

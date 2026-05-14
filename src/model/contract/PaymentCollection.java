@@ -1,17 +1,18 @@
 package model.contract;
 
-import enums.PaymentMethod;
+import enums.ProcessingResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 // 분납/수금 도메인 모델 — 보험료 납입 및 수금 처리 정보 관리
 public class PaymentCollection {
 
     private BigDecimal collectedAmount;
-    private LocalDate collectedAt;
+    private LocalDateTime collectedAt;
     private LocalDate dueDate;
-    private PaymentMethod paymentMethod;
+    private ProcessingResult processingResult;
     private BigDecimal unpaidAmount;
     private int unpaidInstallmentCount;
 

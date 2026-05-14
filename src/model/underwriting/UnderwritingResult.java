@@ -1,5 +1,6 @@
 package model.underwriting;
 
+import enums.SurchargeCondition;
 import enums.UnderwritingResultType;
 
 import java.time.LocalDateTime;
@@ -8,7 +9,8 @@ import java.time.LocalDateTime;
 public class UnderwritingResult {
 
     private LocalDateTime confirmedAt;
-    private float rejectionReason;
+    private String rejectionReason;
+    private SurchargeCondition surchargeCondition;
     private UnderwritingResultType underwritingResult;
 
     // 심사 결과 조회
