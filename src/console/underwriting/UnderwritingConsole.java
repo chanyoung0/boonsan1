@@ -1,13 +1,28 @@
 package console.underwriting;
 
+import db.ContractDBO;
+import db.InsuranceApplicationDBO;
+import db.UnderwritingDBO;
+import db.UnderwritingResultDBO;
+import enums.ContractStatus;
+import enums.PaymentCycle;
+import enums.SurchargeCondition;
+import enums.UnderwritingResultType;
+import enums.UnderwritingStatus;
+import enums.UnderwritingType;
+import model.contract.Contract;
+import model.underwriting.InsuranceApplication;
+import model.underwriting.Underwriting;
+import model.underwriting.UnderwritingResult;
 import service.underwriting.UnderwritingService;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
 // 보험청약 심사 콘솔 I/O — 언더라이터 유스케이스 입출력 전담
 public class UnderwritingConsole {
-
-    private static final long REINSURANCE_THRESHOLD = 500_000_000L;
 
     public static void run() {
         line();
@@ -125,13 +140,30 @@ public class UnderwritingConsole {
         String finalChoice = sc.nextLine().trim();
         String finalResult = "2".equals(finalChoice) ? "할증" : "3".equals(finalChoice) ? "거절" : "승인";
 
-        System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
-        if (!simulateDbSave()) {
-            System.out.println("[오류] 저장 실패.");
-            enter();
-            if (!simulateDbSave()) { System.out.println("[시스템] 관리자에게 오류를 통보하고 시스템을 종료합니다."); return; }
+        // 심사 모델 객체 생성
+        Underwriting underwriting = new Underwriting();
+        underwriting.setUnderwriter(empName);
+        underwriting.setTotalScore(score);
+        underwriting.setUnderwritingType("거절".equals(finalResult) ? UnderwritingType.GENERAL : UnderwritingType.AUTO);
+        underwriting.setUnderwritingStatus(UnderwritingStatus.COMPLETED);
+        underwriting.setUnderwrittenAt(LocalDateTime.now());
+        underwriting.setCoinsuranceRecommended(coinsuranceRecommended);
+        if ("거절".equals(finalResult)) {
+            underwriting.setDeductionReason("위험도 기준 초과 (총점 " + score + "점)");
         }
 
+        UnderwritingResult uwResult = new UnderwritingResult();
+        uwResult.setUnderwritingResult(
+            "거절".equals(finalResult) ? UnderwritingResultType.REJECTED :
+            "할증".equals(finalResult) ? UnderwritingResultType.SURCHARGE : UnderwritingResultType.APPROVED);
+        uwResult.setConfirmedAt(LocalDateTime.now());
+        if ("할증".equals(finalResult)) uwResult.setSurchargeCondition(SurchargeCondition.POOR_HEALTH);
+        if ("거절".equals(finalResult)) uwResult.setRejectionReason("위험도 기준 초과 (총점 " + score + "점)");
+        underwriting.setUnderwritingResult(uwResult);
+
+        System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
+        new UnderwritingResultDBO().save(uwResult);
+        new UnderwritingDBO().save(underwriting);
         System.out.println("[시스템] 사원번호: " + empNo + " | 이름: " + empName + " | 부서: " + empDept);
         System.out.println("[시스템] 최종 심사결과: " + finalResult);
 
@@ -210,8 +242,19 @@ public class UnderwritingConsole {
 
     private static void policyIssuance(String name, String finalResult, long insuranceAmount) {
         System.out.println("\n  [청약서 및 증권발행]");
-        String appNo = "APP-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
         String appliedCondition = "할증".equals(finalResult) ? "할증체 (보험료 15% 인상)" : "표준체 (조건 없음)";
+        String appNo = "APP-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
+
+        InsuranceApplication application = new InsuranceApplication();
+        application.setProductCode("AUTO-001");
+        application.setInsuredPersonInfo(name);
+        application.setInsuredAmount(BigDecimal.valueOf(insuranceAmount));
+        application.setPremium(BigDecimal.valueOf(insuranceAmount / 1000));
+        application.setPaymentCycle("월납");
+        application.setAppliedCondition(appliedCondition);
+        application.setTermsVersion("v2024.1");
+        String appId = application.receiveApplication();
+
         System.out.println("  [시스템] 청약번호: " + appNo + " | 피보험자: " + name + " | 적용조건: " + appliedCondition);
         System.out.print("  [언더라이터] 청약서 내용에 오류가 있습니까? (Y/N): ");
         if ("Y".equalsIgnoreCase(sc.nextLine().trim())) { input("  수정할 항목 및 내용"); }
@@ -219,11 +262,17 @@ public class UnderwritingConsole {
         String policyNo = "P2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
         System.out.println("  [시스템] 증권번호: " + policyNo);
         enter();
+
+        Contract contract = new Contract();
+        contract.setPolicyNumber(policyNo);
+        contract.setContractStatus(ContractStatus.ACTIVE);
+        contract.setPaymentCycle(PaymentCycle.MONTHLY);
+        contract.setHasUnpaidPremium(false);
+        contract.setInsuranceApplication(application);
+
         System.out.println("  [시스템] 계약 정보를 DB에 저장 중...");
-        if (!simulateDbSave()) {
-            enter();
-            if (!simulateDbSave()) { System.out.println("  [시스템] 관리자 통보 후 종료합니다."); return; }
-        }
+        new InsuranceApplicationDBO().save(application);
+        new ContractDBO().save(contract);
         System.out.println("  [시스템] 청약번호: " + appNo + " | 증권번호: " + policyNo + " | 계약 상태: 유효");
 
         if (UnderwritingService.needsReinsurance(insuranceAmount)) {

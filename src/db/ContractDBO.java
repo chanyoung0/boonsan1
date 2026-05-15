@@ -18,11 +18,15 @@ public class ContractDBO extends DBA {
     }
 
     public void save(Contract contract) {
-        executeInsert("INSERT INTO contract (policy_number, contract_status, ...) VALUES (...)");
+        executeInsert("INSERT INTO contract (policy_number, contract_status, payment_cycle, has_unpaid_premium, installment_count) " +
+            "VALUES ('" + contract.getPolicyNumber() + "', '" + contract.getContractStatus() + "', '" +
+            contract.getPaymentCycle() + "', " + contract.getHasUnpaidPremium() + ", " + contract.getInstallmentCount() + ")");
     }
 
     public void update(Contract contract) {
-        executeUpdate("UPDATE contract SET contract_status = ... WHERE policy_number = '" + contract.getPolicyNumber() + "'");
+        executeUpdate("UPDATE contract SET contract_status = '" + contract.getContractStatus() +
+            "', has_unpaid_premium = " + contract.getHasUnpaidPremium() +
+            " WHERE policy_number = '" + contract.getPolicyNumber() + "'");
     }
 
     public void delete(String policyNumber) {

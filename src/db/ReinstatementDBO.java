@@ -18,11 +18,16 @@ public class ReinstatementDBO extends DBA {
     }
 
     public void save(Reinstatement reinstatement) {
-        executeInsert("INSERT INTO reinstatement (...) VALUES (...)");
+        executeInsert("INSERT INTO reinstatement (reinstatement_reason, unpaid_premium, applied_at, desired_date, last_paid_date, has_health_changed) " +
+            "VALUES ('" + reinstatement.getReinstatementReason() + "', " + reinstatement.getUnpaidPremium() +
+            ", '" + reinstatement.getAppliedAt() + "', '" + reinstatement.getDesiredDate() + "', '" +
+            reinstatement.getLastPaidDate() + "', " + reinstatement.isHasHealthChanged() + ")");
     }
 
     public void update(Reinstatement reinstatement) {
-        executeUpdate("UPDATE reinstatement SET ... WHERE reinstatement_id = ...");
+        executeUpdate("UPDATE reinstatement SET reinstatement_reason = '" + reinstatement.getReinstatementReason() +
+            "', processed_at = '" + reinstatement.getProcessedAt() +
+            "' WHERE applied_at = '" + reinstatement.getAppliedAt() + "'");
     }
 
     public void delete(String reinstatementId) {

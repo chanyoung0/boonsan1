@@ -3,7 +3,7 @@ package db;
 // DB 접근 기반 클래스 — DB 연결 및 SQL 실행의 모든 공통 로직 담당
 public class DBA {
 
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/boonsan";
+    private static final String DB_URL  = "jdbc:postgresql://localhost:5432/boonsan";
     private static final String DB_USER = "admin";
     private static final String DB_PASS = "password";
 

@@ -18,11 +18,17 @@ public class UnderwritingDBO extends DBA {
     }
 
     public void save(Underwriting underwriting) {
-        executeInsert("INSERT INTO underwriting (...) VALUES (...)");
+        executeInsert("INSERT INTO underwriting (underwriter, total_score, underwriting_type, underwriting_status, is_coinsurance_recommended, deduction_reason, underwriting_opinion, underwritten_at) " +
+            "VALUES ('" + underwriting.getUnderwriter() + "', " + underwriting.getTotalScore() + ", '" +
+            underwriting.getUnderwritingType() + "', '" + underwriting.getUnderwritingStatus() + "', " +
+            underwriting.isCoinsuranceRecommended() + ", '" + underwriting.getDeductionReason() + "', '" +
+            underwriting.getUnderwritingOpinion() + "', '" + underwriting.getUnderwrittenAt() + "')");
     }
 
     public void update(Underwriting underwriting) {
-        executeUpdate("UPDATE underwriting SET underwriting_status = ... WHERE underwriting_id = ...");
+        executeUpdate("UPDATE underwriting SET underwriting_status = '" + underwriting.getUnderwritingStatus() +
+            "', total_score = " + underwriting.getTotalScore() +
+            " WHERE underwriter = '" + underwriting.getUnderwriter() + "'");
     }
 
     public void delete(String underwritingId) {

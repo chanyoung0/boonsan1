@@ -18,11 +18,14 @@ public class AccidentReportDBO extends DBA {
     }
 
     public void save(AccidentReport report) {
-        executeInsert("INSERT INTO accident_report (report_no, accident_status, ...) VALUES (...)");
+        executeInsert("INSERT INTO accident_report (report_no, accident_description, damage_details, accident_status, created_at) " +
+            "VALUES ('" + report.getReportNo() + "', '" + report.getAccidentDescription() + "', '" +
+            report.getDamageDetails() + "', '" + report.getAccidentStatus() + "', '" + report.getCreatedAt() + "')");
     }
 
     public void update(AccidentReport report) {
-        executeUpdate("UPDATE accident_report SET accident_status = ... WHERE report_no = '" + report.getReportNo() + "'");
+        executeUpdate("UPDATE accident_report SET accident_status = '" + report.getAccidentStatus() +
+            "' WHERE report_no = '" + report.getReportNo() + "'");
     }
 
     public void delete(String reportNo) {

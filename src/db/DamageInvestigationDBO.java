@@ -18,11 +18,17 @@ public class DamageInvestigationDBO extends DBA {
     }
 
     public void save(DamageInvestigation investigation) {
-        executeInsert("INSERT INTO damage_investigation (...) VALUES (...)");
+        executeInsert("INSERT INTO damage_investigation (investigation_id, adjuster_id, fault_ratio, repair_cost, medical_expense, lost_income, settlement_amount, investigation_at) " +
+            "VALUES ('" + investigation.getInvestigationId() + "', '" + investigation.getAdjusterId() + "', " +
+            investigation.getFaultRatio() + ", " + investigation.getRepairCost() + ", " +
+            investigation.getMedicalExpense() + ", " + investigation.getLostIncome() + ", " +
+            investigation.getSettlementAmount() + ", '" + investigation.getInvestigationAt() + "')");
     }
 
     public void update(DamageInvestigation investigation) {
-        executeUpdate("UPDATE damage_investigation SET ... WHERE investigation_id = ...");
+        executeUpdate("UPDATE damage_investigation SET settlement_amount = " + investigation.getSettlementAmount() +
+            ", fault_ratio = " + investigation.getFaultRatio() +
+            " WHERE investigation_id = '" + investigation.getInvestigationId() + "'");
     }
 
     public void delete(String investigationId) {

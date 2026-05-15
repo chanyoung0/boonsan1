@@ -18,11 +18,15 @@ public class MaturityNoticeDBO extends DBA {
     }
 
     public void save(MaturityNotice notice) {
-        executeInsert("INSERT INTO maturity_notice (...) VALUES (...)");
+        executeInsert("INSERT INTO maturity_notice (delivery_method, sent_at, checked_at, renewal_intention) " +
+            "VALUES ('" + notice.getDeliveryMethod() + "', '" + notice.getSentAt() + "', '" +
+            notice.getCheckedAt() + "', " + notice.getRenewalIntention() + ")");
     }
 
     public void update(MaturityNotice notice) {
-        executeUpdate("UPDATE maturity_notice SET ... WHERE notice_id = ...");
+        executeUpdate("UPDATE maturity_notice SET renewal_intention = " + notice.getRenewalIntention() +
+            ", checked_at = '" + notice.getCheckedAt() +
+            "' WHERE sent_at = '" + notice.getSentAt() + "'");
     }
 
     public void delete(String noticeId) {

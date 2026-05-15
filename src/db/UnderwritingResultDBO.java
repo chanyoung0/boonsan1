@@ -18,11 +18,14 @@ public class UnderwritingResultDBO extends DBA {
     }
 
     public void save(UnderwritingResult result) {
-        executeInsert("INSERT INTO underwriting_result (...) VALUES (...)");
+        executeInsert("INSERT INTO underwriting_result (underwriting_result, rejection_reason, surcharge_condition, confirmed_at) " +
+            "VALUES ('" + result.getUnderwritingResult() + "', '" + result.getRejectionReason() + "', '" +
+            result.getSurchargeCondition() + "', '" + result.getConfirmedAt() + "')");
     }
 
     public void update(UnderwritingResult result) {
-        executeUpdate("UPDATE underwriting_result SET ... WHERE result_id = ...");
+        executeUpdate("UPDATE underwriting_result SET underwriting_result = '" + result.getUnderwritingResult() +
+            "', confirmed_at = '" + result.getConfirmedAt() + "'");
     }
 
     public void delete(String resultId) {
