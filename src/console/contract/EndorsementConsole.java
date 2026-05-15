@@ -1,12 +1,6 @@
 package console.contract;
 
-import db.EndorsementDBO;
-import enums.ChangeReason;
-import enums.EndorsementType;
-import model.contract.Endorsement;
 import service.contract.EndorsementService;
-
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -41,19 +35,14 @@ public class EndorsementConsole {
         System.out.println("\n[계약관리담당자] 변경할 배서항목을 입력합니다.");
         String previousContent = input("변경 전 내용");
         String newContent      = input("변경 내용");
-        String changeReasonStr = input("변경 사유");
+        input("변경 사유");
 
         boolean needsReview = EndorsementService.needsUnderwriting(endorsementTypeChoice);
         System.out.println("\n[시스템] 심사 필요 여부: " + (needsReview ? "필요 (위험 변동 배서)" : "불필요 (단순 조건 변경)"));
 
         if (!needsReview) {
             System.out.println("[시스템] 배서 신청 내용을 처리합니다 (심사 생략).");
-
-            EndorsementType type = resolveEndorsementType(endorsementTypeChoice);
-            Endorsement endorsement = new Endorsement(type, resolveChangeReason(endorsementTypeChoice),
-                previousContent, newContent, LocalDateTime.now());
-            new EndorsementDBO().save(endorsement);
-
+            EndorsementService.saveEndorsement(endorsementTypeChoice, previousContent, newContent);
             System.out.println("[시스템] 배서 처리 완료.");
             return;
         }
@@ -65,32 +54,8 @@ public class EndorsementConsole {
         System.out.println("\n[시스템] 심사 결과: " + uwResult);
         enter();
 
-        EndorsementType type = resolveEndorsementType(endorsementTypeChoice);
-        Endorsement endorsement = new Endorsement(type, ChangeReason.INSURED_AMOUNT_CHANGE,
-            previousContent, newContent, LocalDateTime.now());
-
         System.out.println("[시스템] 배서 내용을 DB에 저장 중...");
-        new EndorsementDBO().save(endorsement);
+        EndorsementService.saveEndorsement(endorsementTypeChoice, previousContent, newContent);
         System.out.println("[시스템] 배서 내용이 저장되고 계약정보가 갱신되었습니다. 증권번호: " + policyNo);
-    }
-
-    private static EndorsementType resolveEndorsementType(String choice) {
-        switch (choice) {
-            case "1": return EndorsementType.COVERAGE_CHANGE;
-            case "2": return EndorsementType.PREMIUM_CHANGE;
-            case "3":
-            case "4": return EndorsementType.SPECIAL_CONTRACT_CHANGE;
-            default:  return EndorsementType.COVERAGE_CHANGE;
-        }
-    }
-
-    private static ChangeReason resolveChangeReason(String endorsementTypeChoice) {
-        switch (endorsementTypeChoice) {
-            case "1": return ChangeReason.INSURED_AMOUNT_CHANGE;
-            case "2": return ChangeReason.PAYMENT_CYCLE_CHANGE;
-            case "3": return ChangeReason.SPECIAL_CONTRACT_ADD;
-            case "4": return ChangeReason.SPECIAL_CONTRACT_REMOVE;
-            default:  return ChangeReason.INSURED_AMOUNT_CHANGE;
-        }
     }
 }

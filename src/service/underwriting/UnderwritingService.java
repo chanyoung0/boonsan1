@@ -1,6 +1,24 @@
 package service.underwriting;
 
-// 보험청약 심사 서비스 — 심사 점수 계산 및 판정 순수 비즈니스 로직 담당
+import db.ContractDBO;
+import db.InsuranceApplicationDBO;
+import db.UnderwritingDBO;
+import db.UnderwritingResultDBO;
+import enums.ContractStatus;
+import enums.PaymentCycle;
+import enums.SurchargeCondition;
+import enums.UnderwritingResultType;
+import enums.UnderwritingStatus;
+import enums.UnderwritingType;
+import model.contract.Contract;
+import model.underwriting.InsuranceApplication;
+import model.underwriting.Underwriting;
+import model.underwriting.UnderwritingResult;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+// 보험청약 심사 서비스 — 심사 점수 계산, 판정, 객체 저장 유스케이스 흐름 담당
 public class UnderwritingService {
 
     private static final long REINSURANCE_THRESHOLD = 500_000_000L;
@@ -54,6 +72,58 @@ public class UnderwritingService {
     // 재보험 처리 필요 여부 판단 (자사 보유한도 초과)
     public static boolean needsReinsurance(long insuranceAmount) {
         return insuranceAmount > REINSURANCE_THRESHOLD;
+    }
+
+    // Underwriting + UnderwritingResult 객체 생성 및 저장
+    public static void saveUnderwritingResult(String empName, int score, String finalResult, boolean coinsuranceRecommended) {
+        Underwriting underwriting = new Underwriting();
+        underwriting.setUnderwriter(empName);
+        underwriting.setTotalScore(score);
+        underwriting.setUnderwritingType("거절".equals(finalResult) ? UnderwritingType.GENERAL : UnderwritingType.AUTO);
+        underwriting.setUnderwritingStatus(UnderwritingStatus.COMPLETED);
+        underwriting.setUnderwrittenAt(LocalDateTime.now());
+        underwriting.setCoinsuranceRecommended(coinsuranceRecommended);
+        if ("거절".equals(finalResult)) {
+            underwriting.setDeductionReason("위험도 기준 초과 (총점 " + score + "점)");
+        }
+
+        UnderwritingResult uwResult = new UnderwritingResult();
+        uwResult.setUnderwritingResult(
+            "거절".equals(finalResult) ? UnderwritingResultType.REJECTED :
+            "할증".equals(finalResult) ? UnderwritingResultType.SURCHARGE : UnderwritingResultType.APPROVED);
+        uwResult.setConfirmedAt(LocalDateTime.now());
+        if ("할증".equals(finalResult)) uwResult.setSurchargeCondition(SurchargeCondition.POOR_HEALTH);
+        if ("거절".equals(finalResult)) uwResult.setRejectionReason("위험도 기준 초과 (총점 " + score + "점)");
+        underwriting.setUnderwritingResult(uwResult);
+
+        new UnderwritingResultDBO().save(uwResult);
+        new UnderwritingDBO().save(underwriting);
+    }
+
+    // InsuranceApplication 생성 및 저장 — 이후 Contract 연결에 필요하므로 객체 반환
+    public static InsuranceApplication createAndSaveApplication(String name, long insuranceAmount, String appliedCondition) {
+        InsuranceApplication application = new InsuranceApplication();
+        application.setProductCode("AUTO-001");
+        application.setInsuredPersonInfo(name);
+        application.setInsuredAmount(BigDecimal.valueOf(insuranceAmount));
+        application.setPremium(BigDecimal.valueOf(insuranceAmount / 1000));
+        application.setPaymentCycle("월납");
+        application.setAppliedCondition(appliedCondition);
+        application.setTermsVersion("v2024.1");
+        application.receiveApplication();
+        new InsuranceApplicationDBO().save(application);
+        return application;
+    }
+
+    // Contract 생성 및 저장
+    public static void createAndSaveContract(String policyNo, InsuranceApplication application) {
+        Contract contract = new Contract();
+        contract.setPolicyNumber(policyNo);
+        contract.setContractStatus(ContractStatus.ACTIVE);
+        contract.setPaymentCycle(PaymentCycle.MONTHLY);
+        contract.setHasUnpaidPremium(false);
+        contract.setInsuranceApplication(application);
+        new ContractDBO().save(contract);
     }
 
     private static boolean isYes(String val) {

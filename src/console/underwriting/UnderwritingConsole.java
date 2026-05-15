@@ -1,23 +1,7 @@
 package console.underwriting;
 
-import db.ContractDBO;
-import db.InsuranceApplicationDBO;
-import db.UnderwritingDBO;
-import db.UnderwritingResultDBO;
-import enums.ContractStatus;
-import enums.PaymentCycle;
-import enums.SurchargeCondition;
-import enums.UnderwritingResultType;
-import enums.UnderwritingStatus;
-import enums.UnderwritingType;
-import model.contract.Contract;
 import model.underwriting.InsuranceApplication;
-import model.underwriting.Underwriting;
-import model.underwriting.UnderwritingResult;
 import service.underwriting.UnderwritingService;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -67,10 +51,7 @@ public class UnderwritingConsole {
             String existingPolicyNo = "P2023-004512";
 
             System.out.println("[시스템] 기존 U/W 이력 및 계약 정보:");
-            System.out.println("  ── 계약 기본정보 ───────────────────────────────────────");
-            System.out.println("  증권번호      : " + existingPolicyNo);
-            System.out.println("  계약상태      : 유효");
-            System.out.println("  피보험자      : " + name);
+            System.out.println("  증권번호: " + existingPolicyNo + " | 계약상태: 유효 | 피보험자: " + name);
             System.out.println("  나이: " + age + " | 성별: " + gender + " | 직업: " + job);
             System.out.println("  BMI: " + bmi + " | 투약여부: " + medication + " | 흡연여부: " + smoking);
             System.out.println("  차량기종: " + vehicleModel + " | 차량번호: " + vehicleNo);
@@ -103,8 +84,7 @@ public class UnderwritingConsole {
         System.out.println("\n[언더라이터] '신용정보 조회' 버튼을 누릅니다.");
         System.out.println("  >> <<include>> [신용정보를 조회한다] 시나리오 시작");
         int[] creditFlags = new int[2];
-        int creditDeduction = creditInfoInquiry(name, creditFlags);
-        if (creditDeduction == Integer.MIN_VALUE) return;
+        if (!creditInfoInquiry(name, creditFlags)) return;
 
         int score = UnderwritingService.calculateInputScore(pastDisease, medication, surgery,
                 familyHistory, smoking, drinking, bmi, age, creditFlags[0] == 1, creditFlags[1] == 1);
@@ -115,7 +95,7 @@ public class UnderwritingConsole {
         System.out.println("[시스템] 자동심사 가능 여부: " + (canAutoReview ? "가능" : "불가 — 수동심사 전환"));
 
         if (!canAutoReview) {
-            score = manualUnderwriting(score);
+            score = manualUnderwritingInput(score);
         }
 
         String recommended = UnderwritingService.determineResult(score);
@@ -128,7 +108,7 @@ public class UnderwritingConsole {
         if (coinsuranceRecommended) {
             System.out.println("\n[시스템] 공동인수 처리를 자동으로 시작합니다.");
             System.out.println("  >> <<extend>> [공동인수를 처리한다] 시나리오 자동 시작");
-            if (!coinsuranceProcess(insuranceAmount)) return;
+            if (!coinsuranceInput(insuranceAmount)) return;
         }
 
         System.out.println("\n[언더라이터] 최종 심사결과를 입력합니다.");
@@ -140,30 +120,8 @@ public class UnderwritingConsole {
         String finalChoice = sc.nextLine().trim();
         String finalResult = "2".equals(finalChoice) ? "할증" : "3".equals(finalChoice) ? "거절" : "승인";
 
-        // 심사 모델 객체 생성
-        Underwriting underwriting = new Underwriting();
-        underwriting.setUnderwriter(empName);
-        underwriting.setTotalScore(score);
-        underwriting.setUnderwritingType("거절".equals(finalResult) ? UnderwritingType.GENERAL : UnderwritingType.AUTO);
-        underwriting.setUnderwritingStatus(UnderwritingStatus.COMPLETED);
-        underwriting.setUnderwrittenAt(LocalDateTime.now());
-        underwriting.setCoinsuranceRecommended(coinsuranceRecommended);
-        if ("거절".equals(finalResult)) {
-            underwriting.setDeductionReason("위험도 기준 초과 (총점 " + score + "점)");
-        }
-
-        UnderwritingResult uwResult = new UnderwritingResult();
-        uwResult.setUnderwritingResult(
-            "거절".equals(finalResult) ? UnderwritingResultType.REJECTED :
-            "할증".equals(finalResult) ? UnderwritingResultType.SURCHARGE : UnderwritingResultType.APPROVED);
-        uwResult.setConfirmedAt(LocalDateTime.now());
-        if ("할증".equals(finalResult)) uwResult.setSurchargeCondition(SurchargeCondition.POOR_HEALTH);
-        if ("거절".equals(finalResult)) uwResult.setRejectionReason("위험도 기준 초과 (총점 " + score + "점)");
-        underwriting.setUnderwritingResult(uwResult);
-
         System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
-        new UnderwritingResultDBO().save(uwResult);
-        new UnderwritingDBO().save(underwriting);
+        UnderwritingService.saveUnderwritingResult(empName, score, finalResult, coinsuranceRecommended);
         System.out.println("[시스템] 사원번호: " + empNo + " | 이름: " + empName + " | 부서: " + empDept);
         System.out.println("[시스템] 최종 심사결과: " + finalResult);
 
@@ -176,29 +134,30 @@ public class UnderwritingConsole {
         }
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
-        policyIssuance(name, finalResult, insuranceAmount);
+        policyIssuanceFlow(name, finalResult, insuranceAmount);
     }
 
-    private static int creditInfoInquiry(String name, int[] creditFlags) {
+    // 신용정보 조회 I/O — ICIS API 호출 결과 표시, 실패 시 false 반환
+    private static boolean creditInfoInquiry(String name, int[] creditFlags) {
         System.out.println("\n  [신용정보 조회] ICIS API 호출 중... (피보험자: " + name + ")");
         if (rnd.nextInt(10) < 1) {
             System.out.println("  [오류] ICIS API가 응답하지 않습니다.");
             System.out.println("  [언더라이터] '임시저장' 버튼을 누릅니다.");
             enter();
             System.out.println("  [시스템] 임시저장 완료. (임시저장번호: TEMP-" + System.currentTimeMillis() + ")");
-            return Integer.MIN_VALUE;
+            return false;
         }
-        int deduction = 0;
         boolean hasAccident = rnd.nextInt(10) < 3;
         System.out.println("  [시스템] 사고 이력 조회 결과: " + (hasAccident ? "이력 있음 (-5점)" : "이력 없음"));
-        if (hasAccident) { creditFlags[0] = 1; deduction -= 5; }
+        if (hasAccident) creditFlags[0] = 1;
         boolean hasOtherContract = rnd.nextInt(10) < 4;
         System.out.println("  [시스템] 타사 계약 조회 결과: " + (hasOtherContract ? "계약 있음 (-3점)" : "계약 없음"));
-        if (hasOtherContract) { creditFlags[1] = 1; deduction -= 3; }
-        return deduction;
+        if (hasOtherContract) creditFlags[1] = 1;
+        return true;
     }
 
-    private static int manualUnderwriting(int baseScore) {
+    // 수동심사 I/O — 심사 유형 입력받아 조정된 점수 반환
+    private static int manualUnderwritingInput(int baseScore) {
         System.out.println("\n[시스템] 자동심사 불가. 추가 심사 유형을 선택하세요:");
         System.out.println("  1. 진단심사  2. 특인심사  3. 일반심사  4. 이미지심사  5. 적부심사");
         System.out.print(">> 선택: ");
@@ -208,7 +167,8 @@ public class UnderwritingConsole {
         return Math.max(0, baseScore + adj);
     }
 
-    private static boolean coinsuranceProcess(long insuranceAmount) {
+    // 공동인수 I/O — 공동인수사 선택 및 결과 표시, 실패 시 false 반환
+    private static boolean coinsuranceInput(long insuranceAmount) {
         System.out.println("\n  [공동인수 처리]");
         if (rnd.nextInt(10) < 1) {
             System.out.println("  [오류] 공동인수사 시스템 연결에 실패하였습니다.");
@@ -216,17 +176,18 @@ public class UnderwritingConsole {
             System.out.println("  [시스템] 임시저장 완료.");
             return false;
         }
-        String coinsurerName;
         while (true) {
             System.out.println("  [시스템] 공동인수 가능 보험사 목록:");
             System.out.println("    1. 삼성화재  2. DB손해보험  3. 현대해상  4. 직접 지정");
             System.out.print("  >> 공동인수사 선택: ");
             String choice = sc.nextLine().trim();
-            coinsurerName = "2".equals(choice) ? "DB손해보험" : "3".equals(choice) ? "현대해상" : "4".equals(choice) ? input("  보험사명 입력") : "삼성화재";
+            String coinsurerName = "2".equals(choice) ? "DB손해보험" : "3".equals(choice) ? "현대해상"
+                    : "4".equals(choice) ? input("  보험사명 입력") : "삼성화재";
             int myShare; int coinsurerShare;
             try { myShare = Integer.parseInt(input("  자사 보유 지분율 (%)").trim()); } catch (NumberFormatException e) { myShare = 80; }
             try { coinsurerShare = Integer.parseInt(input("  " + coinsurerName + " 지분율 (%)").trim()); } catch (NumberFormatException e) { coinsurerShare = 20; }
-            System.out.println("  [시스템] 자사 보유액: " + formatAmount(insuranceAmount * myShare / 100) + " | " + coinsurerName + " 보유액: " + formatAmount(insuranceAmount * coinsurerShare / 100));
+            System.out.println("  [시스템] 자사 보유액: " + formatAmount(insuranceAmount * myShare / 100)
+                    + " | " + coinsurerName + " 보유액: " + formatAmount(insuranceAmount * coinsurerShare / 100));
             enter();
             System.out.println("  [시스템] " + coinsurerName + "에 참여 요청 전송 중...");
             if (rnd.nextInt(100) < 20) {
@@ -240,44 +201,29 @@ public class UnderwritingConsole {
         return true;
     }
 
-    private static void policyIssuance(String name, String finalResult, long insuranceAmount) {
+    // 청약서 및 증권발행 I/O — 입력 수집 후 서비스에 위임
+    private static void policyIssuanceFlow(String name, String finalResult, long insuranceAmount) {
         System.out.println("\n  [청약서 및 증권발행]");
         String appliedCondition = "할증".equals(finalResult) ? "할증체 (보험료 15% 인상)" : "표준체 (조건 없음)";
         String appNo = "APP-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
-
-        InsuranceApplication application = new InsuranceApplication();
-        application.setProductCode("AUTO-001");
-        application.setInsuredPersonInfo(name);
-        application.setInsuredAmount(BigDecimal.valueOf(insuranceAmount));
-        application.setPremium(BigDecimal.valueOf(insuranceAmount / 1000));
-        application.setPaymentCycle("월납");
-        application.setAppliedCondition(appliedCondition);
-        application.setTermsVersion("v2024.1");
-        String appId = application.receiveApplication();
 
         System.out.println("  [시스템] 청약번호: " + appNo + " | 피보험자: " + name + " | 적용조건: " + appliedCondition);
         System.out.print("  [언더라이터] 청약서 내용에 오류가 있습니까? (Y/N): ");
         if ("Y".equalsIgnoreCase(sc.nextLine().trim())) { input("  수정할 항목 및 내용"); }
         enter();
+
         String policyNo = "P2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
         System.out.println("  [시스템] 증권번호: " + policyNo);
         enter();
 
-        Contract contract = new Contract();
-        contract.setPolicyNumber(policyNo);
-        contract.setContractStatus(ContractStatus.ACTIVE);
-        contract.setPaymentCycle(PaymentCycle.MONTHLY);
-        contract.setHasUnpaidPremium(false);
-        contract.setInsuranceApplication(application);
-
         System.out.println("  [시스템] 계약 정보를 DB에 저장 중...");
-        new InsuranceApplicationDBO().save(application);
-        new ContractDBO().save(contract);
+        InsuranceApplication application = UnderwritingService.createAndSaveApplication(name, insuranceAmount, appliedCondition);
+        UnderwritingService.createAndSaveContract(policyNo, application);
         System.out.println("  [시스템] 청약번호: " + appNo + " | 증권번호: " + policyNo + " | 계약 상태: 유효");
 
         if (UnderwritingService.needsReinsurance(insuranceAmount)) {
             System.out.println("\n  >> <<extend>> [재보험 처리를 한다] 시나리오 자동 시작");
-            reinsuranceProcess(policyNo, insuranceAmount);
+            reinsuranceInput(policyNo, insuranceAmount);
         } else {
             System.out.println("  [시스템] 재보험 적용 대상이 아님 (보험가입금액 자사 보유한도 이하)");
         }
@@ -285,7 +231,8 @@ public class UnderwritingConsole {
         System.out.println("  [시스템] 청약번호 상태: '심사 완료'");
     }
 
-    private static boolean reinsuranceProcess(String policyNo, long insuranceAmount) {
+    // 재보험 처리 I/O
+    private static void reinsuranceInput(String policyNo, long insuranceAmount) {
         System.out.println("\n  [재보험 처리]");
         System.out.println("  [시스템] 계약번호: " + policyNo + " | 위험등급: 고위험");
         input("  재보험 방식");
@@ -294,7 +241,7 @@ public class UnderwritingConsole {
         System.out.println("  [시스템] 재보험사에 요청 정보를 전송 중...");
         if (rnd.nextInt(10) < 1) {
             System.out.println("  [오류] " + reinsurerName + " 응답 없음. 임시저장 후 종료합니다.");
-            return false;
+            return;
         }
         int ratio; try { ratio = Integer.parseInt(ratioStr.replace("%", "").trim()); } catch (NumberFormatException e) { ratio = 30; }
         long premium = insuranceAmount * ratio / 100 / 10;
@@ -304,6 +251,5 @@ public class UnderwritingConsole {
         enter();
         String clearingDate = input("  청산 예정일 (YYYY-MM-DD)");
         System.out.println("  [시스템] 재보험 처리 완료: " + reinsurerName + " | 청산예정일: " + clearingDate);
-        return true;
     }
 }

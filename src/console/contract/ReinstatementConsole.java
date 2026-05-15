@@ -1,12 +1,8 @@
 package console.contract;
 
-import db.ReinstatementDBO;
-import enums.ReinstatementReason;
-import model.contract.Reinstatement;
+import service.contract.ReinstatementService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -36,11 +32,11 @@ public class ReinstatementConsole {
         System.out.println("[시스템] 증권번호: " + policyNo + " | 계약상태: 실효 | 미납보험료: 450,000원");
 
         System.out.println("\n[계약관리담당자] 부활 신청 정보를 입력합니다.");
-        String reinstatementReasonStr = input("부활 사유");
+        input("부활 사유");
         input("미납보험료 납입확인 (완료/미완료)");
         String healthChanged = input("건강상태 변동여부 (있음/없음)");
-        String lastPaidDateStr = input("최종납입일 (YYYY-MM-DD)");
-        String desiredDateStr  = input("부활희망일 (YYYY-MM-DD)");
+        input("최종납입일 (YYYY-MM-DD)");
+        input("부활희망일 (YYYY-MM-DD)");
 
         System.out.println("\n[시스템] 부활 신청 내용 — 피보험자: " + name + " | 증권번호: " + policyNo);
 
@@ -51,17 +47,8 @@ public class ReinstatementConsole {
         System.out.println("\n[시스템] 심사 결과: " + uwResult);
         enter();
 
-        Reinstatement reinstatement = new Reinstatement(
-            ReinstatementReason.OTHER,
-            new BigDecimal("450000"),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(7),
-            LocalDate.now(),
-            "있음".equals(healthChanged)
-        );
-
         System.out.println("[시스템] 부활 처리 결과를 DB에 저장 중...");
-        new ReinstatementDBO().save(reinstatement);
+        ReinstatementService.saveReinstatement(healthChanged, new BigDecimal("450000"));
 
         if (uwResult.contains("승인")) {
             System.out.println("[시스템] 부활 처리 완료. 계약상태: '유효'로 갱신");

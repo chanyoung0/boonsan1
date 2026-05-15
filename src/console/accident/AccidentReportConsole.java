@@ -1,11 +1,6 @@
 package console.accident;
 
-import db.AccidentReportDBO;
-import enums.AccidentDetailsType;
-import model.accident.AccidentReport;
 import service.accident.AccidentReportService;
-
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -44,18 +39,8 @@ public class AccidentReportConsole {
             enter();
         }
 
-        String reportNo = AccidentReportService.generateReportNo();
-
-        AccidentReport report = new AccidentReport(
-            reportNo,
-            accidentDescription,
-            damageDetails,
-            AccidentDetailsType.VEHICLE,
-            LocalDateTime.now()
-        );
-
         System.out.println("[시스템] 접수 내용을 DB에 저장 중...");
-        new AccidentReportDBO().save(report);
+        String reportNo = AccidentReportService.createAndSave(accidentDescription, damageDetails);
 
         System.out.println("[시스템] 사고 접수 번호: " + reportNo);
         System.out.println("[시스템] \"정상적으로 접수되었습니다.\" | 사고 상태: '현장 조사 필요'");

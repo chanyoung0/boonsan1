@@ -1,14 +1,8 @@
 package console.accident;
 
-import db.DamageInvestigationDBO;
-import db.InsurancePaymentDBO;
-import enums.PaymentStatus;
 import model.accident.DamageInvestigation;
 import model.accident.InsurancePayment;
 import service.accident.DamageInvestigationService;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -71,12 +65,6 @@ public class DamageInvestigationConsole {
         String repairCostStr     = input("수리비 (원)");
         String faultRatioStr     = input("과실 비율 (%)");
 
-        BigDecimal medicalExpense  = parseMoney(medicalExpenseStr);
-        BigDecimal lostIncome      = parseMoney(lostIncomeStr);
-        BigDecimal repairCost      = parseMoney(repairCostStr);
-        BigDecimal settlementAmount = medicalExpense.add(lostIncome).add(parseMoney(compensationStr)).add(repairCost);
-        float faultRatio           = parseRatio(faultRatioStr);
-
         System.out.println("\n[시스템] 지급품의서 초안: 사고번호: " + reportNo + " | 예상 지급액: 980,000원");
         input("손해액 적정성 판단");
         input("과실비율 의견");
@@ -85,15 +73,10 @@ public class DamageInvestigationConsole {
 
         String adjusterNo = input("사원번호");
 
-        String investigationId = "INV-" + System.currentTimeMillis();
-        DamageInvestigation investigation = new DamageInvestigation(
-            investigationId, adjusterNo, faultRatio,
-            repairCost, medicalExpense, lostIncome, settlementAmount,
-            LocalDateTime.now()
-        );
-
         System.out.println("[시스템] 지급품의서를 DB에 저장 중...");
-        new DamageInvestigationDBO().save(investigation);
+        DamageInvestigation investigation = DamageInvestigationService.saveInvestigation(
+            adjusterNo, medicalExpenseStr, lostIncomeStr, compensationStr, repairCostStr, faultRatioStr
+        );
         System.out.println("[시스템] 지급품의서 저장 완료 | 사고 접수 상태: '결재 필요'");
 
         System.out.println("\n  >> <<extend>> [보험금을 지급한다] 시나리오 시작");
@@ -121,22 +104,9 @@ public class DamageInvestigationConsole {
         enter();
         System.out.println("  [시스템] 이체 완료: 980,000원 → 신한은행 110-123-456789 (홍길동)");
 
-        String paymentId = "PAY-" + System.currentTimeMillis();
-        InsurancePayment payment = new InsurancePayment(
-            paymentId,
-            "신한은행 110-123-456789",
-            processorEmpNo,
-            investigation.getSettlementAmount(),
-            investigation.getRepairCost(),
-            investigation.getMedicalExpense(),
-            investigation.getLostIncome(),
-            BigDecimal.ZERO,
-            PaymentStatus.PAID
-        );
-        payment.transfer();
+        InsurancePayment payment = DamageInvestigationService.processPayment(processorEmpNo, investigation);
 
         enter();
-        new InsurancePaymentDBO().save(payment);
         System.out.println("  [시스템] 보험금 지급 결과 DB 저장 완료 | 사건 상태: '지급 완료'");
 
         boolean objected = rnd.nextInt(10) < 2;
@@ -148,7 +118,8 @@ public class DamageInvestigationConsole {
         }
 
         System.out.print("\n  제3자 과실로 구상 처리가 필요합니까? (Y/N): ");
-        if (DamageInvestigationService.needsSubrogation(sc.nextLine().trim())) {
+        String subrogationAnswer = sc.nextLine().trim();
+        if (DamageInvestigationService.needsSubrogation(subrogationAnswer)) {
             System.out.println("  [시스템] 사건 상태: '지급 완료/구상 처리 필요'");
         } else {
             System.out.println("  [시스템] 사건 상태: '종결'");
@@ -163,15 +134,5 @@ public class DamageInvestigationConsole {
         String objResult = sc.nextLine().trim();
         String message = DamageInvestigationService.processObjection(objResult);
         System.out.println("    [시스템] " + message);
-    }
-
-    private static BigDecimal parseMoney(String s) {
-        try { return new BigDecimal(s.replaceAll("[^0-9.]", "")); }
-        catch (Exception e) { return BigDecimal.ZERO; }
-    }
-
-    private static float parseRatio(String s) {
-        try { return Float.parseFloat(s.replaceAll("[^0-9.]", "")); }
-        catch (Exception e) { return 0f; }
     }
 }

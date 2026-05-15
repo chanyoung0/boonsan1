@@ -1,13 +1,6 @@
 package console.contract;
 
-import db.PaymentCollectionDBO;
-import enums.ProcessingResult;
-import model.contract.PaymentCollection;
 import service.contract.PaymentCollectionService;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -36,29 +29,10 @@ public class PaymentCollectionConsole {
         boolean allSuccess = rnd.nextInt(10) < 7;
         System.out.println("[시스템] 처리 결과: " + (allSuccess ? "전체 성공" : "일부 실패 발생"));
 
-        PaymentCollectionDBO dbo = new PaymentCollectionDBO();
+        PaymentCollectionService.saveCollectionResult(allSuccess);
 
         if (!allSuccess) {
             System.out.println("[시스템] 성공 2건 / 실패 1건 | 미납 계약: P2024-009012 (이철수, 220,000원)");
-
-            PaymentCollection success = new PaymentCollection(
-                LocalDate.of(2024, 1, 15),
-                new BigDecimal("248000"),
-                BigDecimal.ZERO, 0,
-                ProcessingResult.PARTIAL,
-                LocalDateTime.now()
-            );
-            dbo.save(success);
-
-            PaymentCollection unpaid = new PaymentCollection(
-                LocalDate.of(2024, 1, 15),
-                BigDecimal.ZERO,
-                new BigDecimal("220000"), 1,
-                ProcessingResult.FAILED,
-                LocalDateTime.now()
-            );
-            dbo.save(unpaid);
-
             System.out.println("[시스템] 미납 안내장 발송 완료 (납입기한: 2024-01-31)");
             System.out.println("[시스템] P2024-009012 계약상태: '미납'");
 
@@ -71,14 +45,6 @@ public class PaymentCollectionConsole {
                 System.out.println("[시스템] 이관 처리 완료: " + label);
             }
         } else {
-            PaymentCollection success = new PaymentCollection(
-                LocalDate.of(2024, 1, 15),
-                new BigDecimal("468000"),
-                BigDecimal.ZERO, 0,
-                ProcessingResult.SUCCESS,
-                LocalDateTime.now()
-            );
-            dbo.save(success);
             System.out.println("[시스템] 성공 3건 / 총 수금액: 468,000원");
         }
 

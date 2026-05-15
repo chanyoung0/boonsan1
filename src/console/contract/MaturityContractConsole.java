@@ -1,11 +1,6 @@
 package console.contract;
 
-import db.MaturityNoticeDBO;
-import enums.DeliveryMethod;
-import model.contract.MaturityNotice;
 import service.contract.MaturityContractService;
-
-import java.time.LocalDateTime;
 
 import static common.ConsoleUtil.*;
 
@@ -22,8 +17,6 @@ public class MaturityContractConsole {
         System.out.println("[시스템] 만기대상 계약 목록:");
         System.out.println("  1 | P2019-000123 | 박민준 | 2024-01-31 | 3,500,000원");
         System.out.println("  2 | P2019-000456 | 최수진 | 2024-01-31 | 5,200,000원");
-
-        MaturityNotice notice = new MaturityNotice(DeliveryMethod.SMS, LocalDateTime.now());
         System.out.println("[시스템] 만기 안내장 자동 발송 완료 (SMS, 이메일)");
 
         System.out.println("\n[계약관리담당자] 재계약 의사 확인 결과를 입력합니다.");
@@ -31,13 +24,10 @@ public class MaturityContractConsole {
         System.out.print(">> 선택: ");
         String intention = sc.nextLine().trim();
 
-        notice.setRenewalIntention("1".equals(intention) ? Boolean.TRUE : "2".equals(intention) ? Boolean.FALSE : null);
-        notice.setCheckedAt(LocalDateTime.now());
-
         String result = MaturityContractService.processRenewalIntention(intention);
         System.out.println("[시스템] " + result);
 
-        new MaturityNoticeDBO().save(notice);
+        MaturityContractService.saveMaturityNotice(intention);
         System.out.println("[시스템] 만기 처리 결과가 DB에 저장되었습니다.");
     }
 }
