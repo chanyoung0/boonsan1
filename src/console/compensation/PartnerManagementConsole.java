@@ -8,6 +8,8 @@ import static common.ConsoleUtil.*;
 public class PartnerManagementConsole {
 
     public static void run() {
+        PartnerManagementService service = new PartnerManagementService();
+
         line();
         System.out.println("[유스케이스] 협력업체를 관리한다");
         System.out.println("액터: 보상담당자");
@@ -62,7 +64,7 @@ public class PartnerManagementConsole {
         enter();
 
         System.out.println("[시스템] 협력업체 정보를 DB에 저장 중...");
-        PartnerManagementService.savePartner(partnerName, partnerType, contact, responsibility, gradeChoice);
+        service.savePartner(partnerName, partnerType, contact, responsibility, gradeChoice);
         System.out.println("[시스템] \"저장을 완료했습니다\" | 변경 이력이 DB에 저장되었습니다.");
     }
 }

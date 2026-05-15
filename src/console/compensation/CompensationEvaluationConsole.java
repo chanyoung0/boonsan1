@@ -8,6 +8,8 @@ import static common.ConsoleUtil.*;
 public class CompensationEvaluationConsole {
 
     public static void run() {
+        CompensationEvaluationService service = new CompensationEvaluationService();
+
         line();
         System.out.println("[유스케이스] 보상 평가를 관리한다");
         System.out.println("액터: 보상담당자");
@@ -49,7 +51,7 @@ public class CompensationEvaluationConsole {
         enter();
 
         System.out.println("[시스템] 보상평가자료 생성 완료 | 결과를 DB에 저장 중...");
-        CompensationEvaluationService.saveEvaluation(period, insuranceType);
+        service.saveEvaluation(period, insuranceType);
         System.out.println("[시스템] DB 저장 완료.");
     }
 }

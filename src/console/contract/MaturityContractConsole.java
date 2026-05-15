@@ -8,6 +8,8 @@ import static common.ConsoleUtil.*;
 public class MaturityContractConsole {
 
     public static void run() {
+        MaturityContractService service = new MaturityContractService();
+
         line();
         System.out.println("[유스케이스] 만기계약을 관리한다");
         System.out.println("액터: 계약관리담당자");
@@ -24,10 +26,10 @@ public class MaturityContractConsole {
         System.out.print(">> 선택: ");
         String intention = sc.nextLine().trim();
 
-        String result = MaturityContractService.processRenewalIntention(intention);
+        String result = service.processRenewalIntention(intention);
         System.out.println("[시스템] " + result);
 
-        MaturityContractService.saveMaturityNotice(intention);
+        service.saveMaturityNotice(intention);
         System.out.println("[시스템] 만기 처리 결과가 DB에 저장되었습니다.");
     }
 }

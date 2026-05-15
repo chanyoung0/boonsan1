@@ -10,6 +10,8 @@ import static common.ConsoleUtil.*;
 public class ReinstatementConsole {
 
     public static void run() {
+        ReinstatementService service = new ReinstatementService();
+
         line();
         System.out.println("[유스케이스] 부활을 관리한다");
         System.out.println("액터: 계약관리담당자");
@@ -48,7 +50,7 @@ public class ReinstatementConsole {
         enter();
 
         System.out.println("[시스템] 부활 처리 결과를 DB에 저장 중...");
-        ReinstatementService.saveReinstatement(healthChanged, new BigDecimal("450000"));
+        service.saveReinstatement(healthChanged, new BigDecimal("450000"));
 
         if (uwResult.contains("승인")) {
             System.out.println("[시스템] 부활 처리 완료. 계약상태: '유효'로 갱신");

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class MaturityContractService {
 
     // 재계약 의사 결과 처리
-    public static String processRenewalIntention(String intention) {
+    public String processRenewalIntention(String intention) {
         switch (intention) {
             case "1": return "재계약 의사 있음 — 재계약 절차를 안내합니다.";
             case "2": return "만기 처리 완료 — 계약상태: '만기종료'";
@@ -20,7 +20,7 @@ public class MaturityContractService {
     }
 
     // MaturityNotice 객체 생성 및 저장
-    public static void saveMaturityNotice(String intention) {
+    public void saveMaturityNotice(String intention) {
         MaturityNotice notice = new MaturityNotice(DeliveryMethod.SMS, LocalDateTime.now());
         notice.setRenewalIntention(
             "1".equals(intention) ? Boolean.TRUE :

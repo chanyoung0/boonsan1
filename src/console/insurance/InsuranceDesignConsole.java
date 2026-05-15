@@ -11,6 +11,8 @@ import static common.ConsoleUtil.*;
 public class InsuranceDesignConsole {
 
     public static void run() {
+        InsuranceDesignService service = new InsuranceDesignService();
+
         line();
         System.out.println("[유스케이스] 상품을 설계한다");
         System.out.println("액터: 상품개발자, 금융감독원");
@@ -75,7 +77,7 @@ public class InsuranceDesignConsole {
         enter();
 
         System.out.println("[시스템] 상품 설계 정보를 DB에 저장 중...");
-        Insurance insurance = InsuranceDesignService.saveInsurance(typeChoice, productCode, insurancePeriod, insuredAmountStr, premiumStr);
+        Insurance insurance = service.saveInsurance(typeChoice, productCode, insurancePeriod, insuredAmountStr, premiumStr);
         System.out.println("[시스템] 상품 상태: '설계완료' | 설계완료일시: " + LocalDate.now() + " | 상품코드: " + insurance.getProductCode());
 
         System.out.println("\n상품 인가를 요청하시겠습니까?  1. 예  2. 아니오 (인가 불필요)");
@@ -86,10 +88,10 @@ public class InsuranceDesignConsole {
             return;
         }
 
-        authorizationRequestSub(productName, productCode);
+        authorizationRequestSub(productName, productCode, service);
     }
 
-    private static void authorizationRequestSub(String productName, String productCode) {
+    private static void authorizationRequestSub(String productName, String productCode, InsuranceDesignService service) {
         System.out.println("\n  >> <<extend>> [상품 인가를 요청한다] 시나리오 시작");
         System.out.println("  [시스템] 인가 요청 화면: " + productName + " (" + productCode + ")");
         enter();
@@ -105,12 +107,12 @@ public class InsuranceDesignConsole {
         System.out.println("  [시스템] 인가 요청 데이터 생성 완료 | 제출 상태: '인가요청'");
         System.out.println("  [시스템] 금융감독원에 인가 요청 정보를 전송 중...");
 
-        InsuranceDesignService.requestAuthorization(requestReason, submissionAgencyName);
+        service.requestAuthorization(requestReason, submissionAgencyName);
         System.out.println("  [시스템] 금융감독원 전송 완료 | 인가 요청 DB 저장 완료");
 
         System.out.println("\n  [시스템] 금융감독원 인가 결과 대기 중...");
         enter();
-        String authResult = InsuranceDesignService.simulateAuthorizationResult();
+        String authResult = service.simulateAuthorizationResult();
         System.out.println("  [시스템] 인가 결과: " + authResult);
 
         if ("보완 요청".equals(authResult)) {

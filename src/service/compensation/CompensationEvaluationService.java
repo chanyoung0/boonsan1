@@ -12,9 +12,9 @@ import java.time.LocalDate;
 public class CompensationEvaluationService {
 
     // CompensationEvaluation 객체 생성 및 저장
-    public static void saveEvaluation(String period, String insuranceType) {
-        String evalId  = "EVAL-" + System.currentTimeMillis();
-        int    month   = LocalDate.now().getMonthValue();
+    public void saveEvaluation(String period, String insuranceType) {
+        String evalId = "EVAL-" + System.currentTimeMillis();
+        int    month  = LocalDate.now().getMonthValue();
         CompensationEvaluation evaluation = new CompensationEvaluation(
             evalId, month, CompensationStatus.COMPLETED, EvaluationResult.GOOD, "자사"
         );

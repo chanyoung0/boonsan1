@@ -10,6 +10,8 @@ import static common.ConsoleUtil.*;
 public class DamageInvestigationConsole {
 
     public static void run() {
+        DamageInvestigationService service = new DamageInvestigationService();
+
         line();
         System.out.println("[유스케이스] 손해조사를 한다");
         System.out.println("액터: 손해사정인, SIU(보험사고조사팀)");
@@ -74,13 +76,13 @@ public class DamageInvestigationConsole {
         String adjusterNo = input("사원번호");
 
         System.out.println("[시스템] 지급품의서를 DB에 저장 중...");
-        DamageInvestigation investigation = DamageInvestigationService.saveInvestigation(
+        DamageInvestigation investigation = service.saveInvestigation(
             adjusterNo, medicalExpenseStr, lostIncomeStr, compensationStr, repairCostStr, faultRatioStr
         );
         System.out.println("[시스템] 지급품의서 저장 완료 | 사고 접수 상태: '결재 필요'");
 
         System.out.println("\n  >> <<extend>> [보험금을 지급한다] 시나리오 시작");
-        insurancePaymentSub(reportNo, investigation);
+        insurancePaymentSub(reportNo, investigation, service);
     }
 
     private static void outsourceInvestigation() {
@@ -95,7 +97,7 @@ public class DamageInvestigationConsole {
         System.out.println("  [시스템] 위탁 조사 결과가 시스템에 반영되었습니다.");
     }
 
-    private static void insurancePaymentSub(String reportNo, DamageInvestigation investigation) {
+    private static void insurancePaymentSub(String reportNo, DamageInvestigation investigation, DamageInvestigationService service) {
         System.out.println("\n  [보험금을 지급한다]");
         System.out.println("  [시스템] 사고번호: " + reportNo + " | 최종 결정보험금: 980,000원");
         enter();
@@ -104,7 +106,7 @@ public class DamageInvestigationConsole {
         enter();
         System.out.println("  [시스템] 이체 완료: 980,000원 → 신한은행 110-123-456789 (홍길동)");
 
-        InsurancePayment payment = DamageInvestigationService.processPayment(processorEmpNo, investigation);
+        InsurancePayment payment = service.processPayment(processorEmpNo, investigation);
 
         enter();
         System.out.println("  [시스템] 보험금 지급 결과 DB 저장 완료 | 사건 상태: '지급 완료'");
@@ -114,25 +116,25 @@ public class DamageInvestigationConsole {
 
         if (objected) {
             System.out.println("  >> <<extend>> [이의 제기를 처리한다] 시나리오 시작");
-            objectionSub();
+            objectionSub(service);
         }
 
         System.out.print("\n  제3자 과실로 구상 처리가 필요합니까? (Y/N): ");
         String subrogationAnswer = sc.nextLine().trim();
-        if (DamageInvestigationService.needsSubrogation(subrogationAnswer)) {
+        if (service.needsSubrogation(subrogationAnswer)) {
             System.out.println("  [시스템] 사건 상태: '지급 완료/구상 처리 필요'");
         } else {
             System.out.println("  [시스템] 사건 상태: '종결'");
         }
     }
 
-    private static void objectionSub() {
+    private static void objectionSub(DamageInvestigationService service) {
         System.out.println("\n    [이의 제기를 처리한다]");
         System.out.println("    [시스템] 이의 사유: 치료비 산정 오류 | 원 지급액: 980,000원");
         System.out.println("    1. 기각  2. 수용 (재조사)  3. 법률과 이관");
         System.out.print("    >> 선택: ");
         String objResult = sc.nextLine().trim();
-        String message = DamageInvestigationService.processObjection(objResult);
+        String message = service.processObjection(objResult);
         System.out.println("    [시스템] " + message);
     }
 }

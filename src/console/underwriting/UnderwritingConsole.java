@@ -9,13 +9,15 @@ import static common.ConsoleUtil.*;
 public class UnderwritingConsole {
 
     public static void run() {
+        UnderwritingService service = new UnderwritingService();
+
         line();
         System.out.println("[유스케이스] 보험청약을 심사한다");
         System.out.println("액터: 언더라이터");
         line();
 
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
-        String name = input("이름");
+        String name     = input("이름");
         input("생년월일 (YYYYMMDD)");
         input("주민등록번호");
         String vehicleNo = input("차량번호");
@@ -86,7 +88,7 @@ public class UnderwritingConsole {
         int[] creditFlags = new int[2];
         if (!creditInfoInquiry(name, creditFlags)) return;
 
-        int score = UnderwritingService.calculateInputScore(pastDisease, medication, surgery,
+        int score = service.calculateInputScore(pastDisease, medication, surgery,
                 familyHistory, smoking, drinking, bmi, age, creditFlags[0] == 1, creditFlags[1] == 1);
 
         System.out.println("\n[언더라이터] '심사점수 계산 및 보고서 출력' 버튼을 누릅니다.");
@@ -95,11 +97,11 @@ public class UnderwritingConsole {
         System.out.println("[시스템] 자동심사 가능 여부: " + (canAutoReview ? "가능" : "불가 — 수동심사 전환"));
 
         if (!canAutoReview) {
-            score = manualUnderwritingInput(score);
+            score = manualUnderwritingInput(score, service);
         }
 
-        String recommended = UnderwritingService.determineResult(score);
-        boolean coinsuranceRecommended = UnderwritingService.needsCoinsurance(score);
+        String  recommended          = service.determineResult(score);
+        boolean coinsuranceRecommended = service.needsCoinsurance(score);
 
         System.out.println("\n[시스템] 자동심사 보고서:");
         System.out.println("  총점: " + score + "점  |  추천 등급: " + recommended);
@@ -112,16 +114,16 @@ public class UnderwritingConsole {
         }
 
         System.out.println("\n[언더라이터] 최종 심사결과를 입력합니다.");
-        String empNo   = input("사원번호");
-        String empName = input("심사자 이름");
-        String empDept = input("부서");
+        String empNo     = input("사원번호");
+        String empName   = input("심사자 이름");
+        String empDept   = input("부서");
         System.out.println("  1. 승인  2. 할증  3. 거절");
         System.out.print(">> 선택: ");
         String finalChoice = sc.nextLine().trim();
         String finalResult = "2".equals(finalChoice) ? "할증" : "3".equals(finalChoice) ? "거절" : "승인";
 
         System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
-        UnderwritingService.saveUnderwritingResult(empName, score, finalResult, coinsuranceRecommended);
+        service.saveUnderwritingResult(empName, score, finalResult, coinsuranceRecommended);
         System.out.println("[시스템] 사원번호: " + empNo + " | 이름: " + empName + " | 부서: " + empDept);
         System.out.println("[시스템] 최종 심사결과: " + finalResult);
 
@@ -134,7 +136,7 @@ public class UnderwritingConsole {
         }
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
-        policyIssuanceFlow(name, finalResult, insuranceAmount);
+        policyIssuanceFlow(name, finalResult, insuranceAmount, service);
     }
 
     // 신용정보 조회 I/O — ICIS API 호출 결과 표시, 실패 시 false 반환
@@ -157,12 +159,12 @@ public class UnderwritingConsole {
     }
 
     // 수동심사 I/O — 심사 유형 입력받아 조정된 점수 반환
-    private static int manualUnderwritingInput(int baseScore) {
+    private static int manualUnderwritingInput(int baseScore, UnderwritingService service) {
         System.out.println("\n[시스템] 자동심사 불가. 추가 심사 유형을 선택하세요:");
         System.out.println("  1. 진단심사  2. 특인심사  3. 일반심사  4. 이미지심사  5. 적부심사");
         System.out.print(">> 선택: ");
         String type = sc.nextLine().trim();
-        int adj = UnderwritingService.getManualUnderwritingAdjustment(type);
+        int adj = service.getManualUnderwritingAdjustment(type);
         System.out.println("[시스템] 심사 결과를 점수에 반영합니다. (" + adj + "점)");
         return Math.max(0, baseScore + adj);
     }
@@ -202,7 +204,7 @@ public class UnderwritingConsole {
     }
 
     // 청약서 및 증권발행 I/O — 입력 수집 후 서비스에 위임
-    private static void policyIssuanceFlow(String name, String finalResult, long insuranceAmount) {
+    private static void policyIssuanceFlow(String name, String finalResult, long insuranceAmount, UnderwritingService service) {
         System.out.println("\n  [청약서 및 증권발행]");
         String appliedCondition = "할증".equals(finalResult) ? "할증체 (보험료 15% 인상)" : "표준체 (조건 없음)";
         String appNo = "APP-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
@@ -217,11 +219,11 @@ public class UnderwritingConsole {
         enter();
 
         System.out.println("  [시스템] 계약 정보를 DB에 저장 중...");
-        InsuranceApplication application = UnderwritingService.createAndSaveApplication(name, insuranceAmount, appliedCondition);
-        UnderwritingService.createAndSaveContract(policyNo, application);
+        InsuranceApplication application = service.createAndSaveApplication(name, insuranceAmount, appliedCondition);
+        service.createAndSaveContract(policyNo, application);
         System.out.println("  [시스템] 청약번호: " + appNo + " | 증권번호: " + policyNo + " | 계약 상태: 유효");
 
-        if (UnderwritingService.needsReinsurance(insuranceAmount)) {
+        if (service.needsReinsurance(insuranceAmount)) {
             System.out.println("\n  >> <<extend>> [재보험 처리를 한다] 시나리오 자동 시작");
             reinsuranceInput(policyNo, insuranceAmount);
         } else {
@@ -236,7 +238,7 @@ public class UnderwritingConsole {
         System.out.println("\n  [재보험 처리]");
         System.out.println("  [시스템] 계약번호: " + policyNo + " | 위험등급: 고위험");
         input("  재보험 방식");
-        String ratioStr = input("  재보험 비율 (%)");
+        String ratioStr      = input("  재보험 비율 (%)");
         String reinsurerName = input("  재보험사명");
         System.out.println("  [시스템] 재보험사에 요청 정보를 전송 중...");
         if (rnd.nextInt(10) < 1) {

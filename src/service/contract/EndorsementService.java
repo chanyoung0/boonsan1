@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 public class EndorsementService {
 
     // 배서유형별 심사 필요 여부 판단 (가입금액 변경/특약 추가 → 위험 변동 → 심사 필요)
-    public static boolean needsUnderwriting(String endorsementType) {
+    public boolean needsUnderwriting(String endorsementType) {
         return "1".equals(endorsementType) || "3".equals(endorsementType);
     }
 
     // Endorsement 객체 생성 및 저장
-    public static void saveEndorsement(String typeChoice, String previousContent, String newContent) {
+    public void saveEndorsement(String typeChoice, String previousContent, String newContent) {
         Endorsement endorsement = new Endorsement(
             resolveEndorsementType(typeChoice),
             resolveChangeReason(typeChoice),
@@ -27,7 +27,7 @@ public class EndorsementService {
         new EndorsementDBO().save(endorsement);
     }
 
-    private static EndorsementType resolveEndorsementType(String choice) {
+    private EndorsementType resolveEndorsementType(String choice) {
         switch (choice) {
             case "1": return EndorsementType.COVERAGE_CHANGE;
             case "2": return EndorsementType.PREMIUM_CHANGE;
@@ -37,7 +37,7 @@ public class EndorsementService {
         }
     }
 
-    private static ChangeReason resolveChangeReason(String choice) {
+    private ChangeReason resolveChangeReason(String choice) {
         switch (choice) {
             case "1": return ChangeReason.INSURED_AMOUNT_CHANGE;
             case "2": return ChangeReason.PAYMENT_CYCLE_CHANGE;

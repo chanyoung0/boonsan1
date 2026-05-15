@@ -9,6 +9,8 @@ import static common.ConsoleUtil.*;
 public class PayoutConsole {
 
     public static void run() {
+        PayoutService service = new PayoutService();
+
         line();
         System.out.println("[유스케이스] 제지급금을 관리한다");
         System.out.println("액터: 계약관리담당자");
@@ -21,10 +23,10 @@ public class PayoutConsole {
         System.out.println("  지급유형: 1. 만기환급금  2. 중도인출금  3. 해지환급금  4. 배당금");
         System.out.print("  >> 선택: ");
         String paymentTypeChoice = sc.nextLine().trim();
-        String paymentTypeLabel  = PayoutService.resolvePaymentTypeLabel(paymentTypeChoice);
+        String paymentTypeLabel  = service.resolvePaymentTypeLabel(paymentTypeChoice);
 
         System.out.println("\n[시스템] 계약정보 조회 중 (증권번호: " + policyNo + ")...");
-        boolean payable = PayoutService.isPayable();
+        boolean payable = service.isPayable();
         if (!payable) {
             System.out.println("[시스템] \"지급이 불가능한 계약입니다\" | 계약상태: 실효");
             System.out.println("[계약관리담당자] 확인 버튼을 누릅니다.");
@@ -37,7 +39,7 @@ public class PayoutConsole {
         System.out.println("\n[계약관리담당자] '지급요청 확인' 버튼을 누릅니다.");
         enter();
 
-        java.math.BigDecimal amount = PayoutService.calculateAmount(paymentTypeChoice);
+        java.math.BigDecimal amount = service.calculateAmount(paymentTypeChoice);
         System.out.println("[시스템] 지급금 자동 산출 결과:");
         System.out.println("  지급유형: " + paymentTypeLabel + " | 산출금액: " + String.format("%,d", amount.longValue()) + "원");
         System.out.println("  산출기준: 계약별 약관 적용 | 공제항목: 없음 | 최종지급금액: " + String.format("%,d", amount.longValue()) + "원");
@@ -63,7 +65,7 @@ public class PayoutConsole {
         enter();
 
         System.out.println("[시스템] 지급 처리 결과를 DB에 저장 중...");
-        Payout payout = PayoutService.savePayout(processor, paymentTypeChoice, amount);
+        Payout payout = service.savePayout(processor, paymentTypeChoice, amount);
         System.out.println("[시스템] 지급 처리 결과 저장 완료 | 계약정보 갱신 완료");
     }
 }

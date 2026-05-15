@@ -8,6 +8,8 @@ import static common.ConsoleUtil.*;
 public class EndorsementConsole {
 
     public static void run() {
+        EndorsementService service = new EndorsementService();
+
         line();
         System.out.println("[유스케이스] 배서를 관리한다");
         System.out.println("액터: 계약관리담당자");
@@ -37,12 +39,12 @@ public class EndorsementConsole {
         String newContent      = input("변경 내용");
         input("변경 사유");
 
-        boolean needsReview = EndorsementService.needsUnderwriting(endorsementTypeChoice);
+        boolean needsReview = service.needsUnderwriting(endorsementTypeChoice);
         System.out.println("\n[시스템] 심사 필요 여부: " + (needsReview ? "필요 (위험 변동 배서)" : "불필요 (단순 조건 변경)"));
 
         if (!needsReview) {
             System.out.println("[시스템] 배서 신청 내용을 처리합니다 (심사 생략).");
-            EndorsementService.saveEndorsement(endorsementTypeChoice, previousContent, newContent);
+            service.saveEndorsement(endorsementTypeChoice, previousContent, newContent);
             System.out.println("[시스템] 배서 처리 완료.");
             return;
         }
@@ -55,7 +57,7 @@ public class EndorsementConsole {
         enter();
 
         System.out.println("[시스템] 배서 내용을 DB에 저장 중...");
-        EndorsementService.saveEndorsement(endorsementTypeChoice, previousContent, newContent);
+        service.saveEndorsement(endorsementTypeChoice, previousContent, newContent);
         System.out.println("[시스템] 배서 내용이 저장되고 계약정보가 갱신되었습니다. 증권번호: " + policyNo);
     }
 }

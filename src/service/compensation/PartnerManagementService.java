@@ -8,7 +8,7 @@ import model.partner.Partner;
 public class PartnerManagementService {
 
     // 입력값을 EvaluationGrade 매핑
-    public static EvaluationGrade resolveGrade(String choice) {
+    public EvaluationGrade resolveGrade(String choice) {
         switch (choice) {
             case "1": return EvaluationGrade.EXCELLENT;
             case "2": return EvaluationGrade.GOOD;
@@ -19,8 +19,8 @@ public class PartnerManagementService {
     }
 
     // Partner 객체 생성 및 저장
-    public static void savePartner(String partnerName, String partnerType, String contact,
-                                    String responsibility, String gradeChoice) {
+    public void savePartner(String partnerName, String partnerType, String contact,
+                             String responsibility, String gradeChoice) {
         String id = "PARTNER-" + System.currentTimeMillis();
         EvaluationGrade grade = resolveGrade(gradeChoice);
         Partner partner = new Partner(id, partnerName, partnerType, contact, responsibility, grade);

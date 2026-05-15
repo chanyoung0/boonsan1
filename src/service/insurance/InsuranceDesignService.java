@@ -11,13 +11,13 @@ import java.util.Random;
 // 상품 설계 서비스 — 보험 상품 설계 저장 및 금융감독원 인가 요청 유스케이스 흐름 담당
 public class InsuranceDesignService {
 
-    private static final Random rnd = new Random();
+    private final Random rnd = new Random();
 
     // 상품 유형에 맞는 Insurance 객체 생성 및 저장
-    public static Insurance saveInsurance(String typeChoice, String productCode, String insurancePeriod,
-                                          String insuredAmountStr, String premiumStr) {
-        BigDecimal insuredAmount = parseSafe(insuredAmountStr, 100_000_000L);
-        BigDecimal premium       = parseSafe(premiumStr, 150_000L);
+    public Insurance saveInsurance(String typeChoice, String productCode, String insurancePeriod,
+                                   String insuredAmountStr, String premiumStr) {
+        BigDecimal insuredAmount  = parseSafe(insuredAmountStr, 100_000_000L);
+        BigDecimal premium        = parseSafe(premiumStr, 150_000L);
         BigDecimal maturityRefund = premium.multiply(new BigDecimal("0.1"));
 
         Insurance insurance;
@@ -36,7 +36,7 @@ public class InsuranceDesignService {
     }
 
     // Authorization 객체 생성 및 금융감독원에 요청 전송
-    public static Authorization requestAuthorization(String requestReason, String submissionAgencyName) {
+    public Authorization requestAuthorization(String requestReason, String submissionAgencyName) {
         FinancialSupervisoryService fss = new FinancialSupervisoryService("FSS-001", "금융감독원");
         Authorization auth = new Authorization(
             "AUTH-" + System.currentTimeMillis(),
@@ -48,14 +48,14 @@ public class InsuranceDesignService {
     }
 
     // 금융감독원 인가 결과 시뮬레이션 — 70% 승인, 20% 보완 요청, 10% 불허
-    public static String simulateAuthorizationResult() {
+    public String simulateAuthorizationResult() {
         int r = rnd.nextInt(10);
         if (r < 7) return "승인";
         if (r < 9) return "보완 요청";
         return "불허";
     }
 
-    private static BigDecimal parseSafe(String s, long defaultVal) {
+    private BigDecimal parseSafe(String s, long defaultVal) {
         try { return new BigDecimal(s.replaceAll("[^0-9]", "")); }
         catch (Exception e) { return BigDecimal.valueOf(defaultVal); }
     }

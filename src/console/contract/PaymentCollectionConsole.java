@@ -8,6 +8,8 @@ import static common.ConsoleUtil.*;
 public class PaymentCollectionConsole {
 
     public static void run() {
+        PaymentCollectionService service = new PaymentCollectionService();
+
         line();
         System.out.println("[유스케이스] 분납/수금을 관리한다");
         System.out.println("액터: 계약관리담당자");
@@ -29,7 +31,7 @@ public class PaymentCollectionConsole {
         boolean allSuccess = rnd.nextInt(10) < 7;
         System.out.println("[시스템] 처리 결과: " + (allSuccess ? "전체 성공" : "일부 실패 발생"));
 
-        PaymentCollectionService.saveCollectionResult(allSuccess);
+        service.saveCollectionResult(allSuccess);
 
         if (!allSuccess) {
             System.out.println("[시스템] 성공 2건 / 실패 1건 | 미납 계약: P2024-009012 (이철수, 220,000원)");
@@ -41,7 +43,7 @@ public class PaymentCollectionConsole {
                 System.out.println("  1. 방문수금  2. 해지처리");
                 System.out.print(">> 선택: ");
                 String tType = sc.nextLine().trim();
-                String label = PaymentCollectionService.determineTransferType(tType);
+                String label = service.determineTransferType(tType);
                 System.out.println("[시스템] 이관 처리 완료: " + label);
             }
         } else {

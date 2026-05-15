@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 public class PaymentCollectionService {
 
     // 이관 유형 판정
-    public static String determineTransferType(String choice) {
+    public String determineTransferType(String choice) {
         return "2".equals(choice) ? "해지처리" : "방문수금";
     }
 
     // 수금 결과 PaymentCollection 객체 생성 및 저장
-    public static void saveCollectionResult(boolean allSuccess) {
+    public void saveCollectionResult(boolean allSuccess) {
         PaymentCollectionDBO dbo = new PaymentCollectionDBO();
         LocalDate dueDate = LocalDate.of(2024, 1, 15);
 

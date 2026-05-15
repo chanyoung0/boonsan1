@@ -8,6 +8,8 @@ import static common.ConsoleUtil.*;
 public class AccidentReportConsole {
 
     public static void run() {
+        AccidentReportService service = new AccidentReportService();
+
         line();
         System.out.println("[유스케이스] 사고를 접수한다");
         System.out.println("액터: 보험가입자, 보험사 직원");
@@ -30,7 +32,7 @@ public class AccidentReportConsole {
         System.out.print(">> 선택: ");
         String docChoice = sc.nextLine().trim();
 
-        if (AccidentReportService.isDocumentDeferred(docChoice)) {
+        if (service.isDocumentDeferred(docChoice)) {
             System.out.println("[시스템] '서류 미제출' 상태로 접수 처리합니다.");
         } else {
             input("  사고경위서 파일명");
@@ -40,7 +42,7 @@ public class AccidentReportConsole {
         }
 
         System.out.println("[시스템] 접수 내용을 DB에 저장 중...");
-        String reportNo = AccidentReportService.createAndSave(accidentDescription, damageDetails);
+        String reportNo = service.createAndSave(accidentDescription, damageDetails);
 
         System.out.println("[시스템] 사고 접수 번호: " + reportNo);
         System.out.println("[시스템] \"정상적으로 접수되었습니다.\" | 사고 상태: '현장 조사 필요'");

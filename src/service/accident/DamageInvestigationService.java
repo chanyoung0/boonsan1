@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class DamageInvestigationService {
 
     // 이의제기 처리 결과 메시지 반환
-    public static String processObjection(String choice) {
+    public String processObjection(String choice) {
         switch (choice) {
             case "1": return "기각 사유서가 DB에 저장되었습니다.";
             case "2": return "이의 제기 수용 — 사건 상태: '재조사 필요'";
@@ -23,17 +23,17 @@ public class DamageInvestigationService {
     }
 
     // 구상 처리 필요 여부 판단
-    public static boolean needsSubrogation(String answer) {
+    public boolean needsSubrogation(String answer) {
         return "Y".equalsIgnoreCase(answer);
     }
 
     // DamageInvestigation 객체 생성 및 저장 — 이후 보험금 지급에 필요하므로 객체 반환
-    public static DamageInvestigation saveInvestigation(String adjusterNo,
+    public DamageInvestigation saveInvestigation(String adjusterNo,
             String medicalExpenseStr, String lostIncomeStr,
             String compensationStr, String repairCostStr, String faultRatioStr) {
-        BigDecimal medicalExpense  = parseMoney(medicalExpenseStr);
-        BigDecimal lostIncome      = parseMoney(lostIncomeStr);
-        BigDecimal repairCost      = parseMoney(repairCostStr);
+        BigDecimal medicalExpense   = parseMoney(medicalExpenseStr);
+        BigDecimal lostIncome       = parseMoney(lostIncomeStr);
+        BigDecimal repairCost       = parseMoney(repairCostStr);
         BigDecimal settlementAmount = medicalExpense.add(lostIncome)
                                                     .add(parseMoney(compensationStr))
                                                     .add(repairCost);
@@ -50,7 +50,7 @@ public class DamageInvestigationService {
     }
 
     // InsurancePayment 객체 생성, 이체 처리 및 저장
-    public static InsurancePayment processPayment(String processorEmpNo, DamageInvestigation investigation) {
+    public InsurancePayment processPayment(String processorEmpNo, DamageInvestigation investigation) {
         String paymentId = "PAY-" + System.currentTimeMillis();
         InsurancePayment payment = new InsurancePayment(
             paymentId,
@@ -68,12 +68,12 @@ public class DamageInvestigationService {
         return payment;
     }
 
-    private static BigDecimal parseMoney(String s) {
+    private BigDecimal parseMoney(String s) {
         try { return new BigDecimal(s.replaceAll("[^0-9.]", "")); }
         catch (Exception e) { return BigDecimal.ZERO; }
     }
 
-    private static float parseRatio(String s) {
+    private float parseRatio(String s) {
         try { return Float.parseFloat(s.replaceAll("[^0-9.]", "")); }
         catch (Exception e) { return 0f; }
     }
