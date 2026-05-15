@@ -19,8 +19,20 @@ public abstract class Document {
         this.createdAt = createdAt;
     }
 
-    public void save()     {}
-    public void tempSave() {}
+    // 문서 저장
+    public void save() {
+        if (documentId == null || documentId.isEmpty())
+            throw new IllegalStateException("문서 ID가 없습니다.");
+        this.status = DocumentStatus.SUBMITTED;
+    }
+
+    // 임시 저장
+    public void tempSave() {
+        if (documentId == null || documentId.isEmpty())
+            this.documentId = "DOC-" + System.currentTimeMillis();
+        this.status = DocumentStatus.DRAFT;
+        if (this.createdAt == null) this.createdAt = java.time.LocalDateTime.now();
+    }
 
     public String         getDocumentId()              { return documentId; }
     public void           setDocumentId(String v)      { this.documentId = v; }

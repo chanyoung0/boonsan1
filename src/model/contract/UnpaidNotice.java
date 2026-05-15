@@ -23,8 +23,20 @@ public class UnpaidNotice {
         this.sentAt = sentAt;
     }
 
-    public void calculateUnpaidAmount() {}
-    public void sendNotice()            {}
+    // 미납액 계산
+    public void calculateUnpaidAmount() {
+        if (unpaidAmount == null)
+            throw new IllegalStateException("미납액이 설정되지 않았습니다.");
+    }
+
+    // 미납 안내 발송
+    public void sendNotice() {
+        if (unpaidAmount == null || unpaidAmount.compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("미납액이 유효하지 않습니다.");
+        if (paymentMethod == null)
+            throw new IllegalStateException("납부 방법이 설정되지 않았습니다.");
+        if (this.sentAt == null) this.sentAt = java.time.LocalDateTime.now();
+    }
 
     public LocalDateTime  getDueDate()                    { return dueDate; }
     public void           setDueDate(LocalDateTime v)     { this.dueDate = v; }

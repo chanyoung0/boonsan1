@@ -26,9 +26,27 @@ public class Endorsement {
         this.appliedAt = appliedAt;
     }
 
-    public void applyEndorsement()  {}
-    public void processEndorsement(){}
-    public void verifyChanges()     {}
+    // 배서 적용
+    public void applyEndorsement() {
+        if (endorsementType == null)
+            throw new IllegalStateException("배서 유형이 설정되지 않았습니다.");
+        if (this.appliedAt == null) this.appliedAt = LocalDateTime.now();
+    }
+
+    // 배서 처리
+    public void processEndorsement() {
+        if (appliedAt == null)
+            throw new IllegalStateException("배서 적용일이 없습니다.");
+        this.processedAt = LocalDateTime.now();
+    }
+
+    // 변경 사항 검증
+    public void verifyChanges() {
+        if (previousContent == null || newContent == null)
+            throw new IllegalStateException("변경 전/후 내용이 모두 필요합니다.");
+        if (previousContent.equals(newContent))
+            throw new IllegalStateException("변경 전과 변경 후 내용이 동일합니다.");
+    }
 
     public LocalDateTime  getAppliedAt()                    { return appliedAt; }
     public void           setAppliedAt(LocalDateTime v)     { this.appliedAt = v; }

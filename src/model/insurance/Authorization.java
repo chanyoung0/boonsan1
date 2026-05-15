@@ -33,10 +33,20 @@ public class Authorization {
     public boolean cancelAuthorizationRequest() { return true; }
 
     // 인가 요청 전송
-    public void sendAuthorizationRequest() {}
+    public void sendAuthorizationRequest() {
+        if (requestId == null || requestId.isEmpty())
+            throw new IllegalStateException("요청번호가 없습니다.");
+        if (requestReason == null || requestReason.isEmpty())
+            throw new IllegalStateException("요청 사유가 없습니다.");
+        if (financialSupervisoryService != null)
+            financialSupervisoryService.receiveAuthorizationRequest();
+    }
 
     // 상품 상태 갱신
-    public void updateProductStatus() {}
+    public void updateProductStatus() {
+        if (isApproved && approvedAt == null)
+            this.approvedAt = java.time.LocalDateTime.now();
+    }
 
     public LocalDateTime                getApprovedAt()                          { return approvedAt; }
     public void                         setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }

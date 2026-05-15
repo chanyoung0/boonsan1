@@ -32,7 +32,12 @@ public class Coinsurer {
     }
 
     // 참여 결과 등록
-    public void registerResult() {}
+    public void registerResult() {
+        if (companyName == null || companyName.isEmpty())
+            throw new IllegalStateException("공동인수사명이 없습니다.");
+        if (rejectionReason != null && !rejectionReason.isEmpty())
+            this.isApproved = false;
+    }
 
     public BigDecimal getAllocatedPremium()              { return allocatedPremium; }
     public void       setAllocatedPremium(BigDecimal v) { this.allocatedPremium = v; }

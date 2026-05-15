@@ -37,10 +37,31 @@ public class Payout {
         this.approvedAt = approvedAt;
     }
 
-    public void approvePayment()  {}
-    public void calculatePayment(){}
-    public void cancelPayment()   {}
-    public void processPayment()  {}
+    // 지급 승인
+    public void approvePayment() {
+        if (calculatedAmount == null)
+            throw new IllegalStateException("산정 금액이 없습니다.");
+        this.approvedAt = LocalDateTime.now();
+    }
+
+    // 지급액 산정
+    public void calculatePayment() {
+        if (calculatedAmount == null)
+            throw new IllegalStateException("산정 기준 금액이 없습니다.");
+        this.finalPaymentAmount = calculatedAmount;
+    }
+
+    // 지급 취소
+    public void cancelPayment() {
+        this.finalPaymentAmount = BigDecimal.ZERO;
+    }
+
+    // 지급 처리
+    public void processPayment() {
+        if (finalPaymentAmount == null || finalPaymentAmount.compareTo(BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("지급 금액이 유효하지 않습니다.");
+        this.paidAt = LocalDateTime.now();
+    }
 
     public LocalDateTime       getApprovedAt()                          { return approvedAt; }
     public void                setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }

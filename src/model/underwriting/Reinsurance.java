@@ -43,14 +43,25 @@ public class Reinsurance {
         this.accountingDate = accountingDate;
     }
 
-    // 보험료 계산
-    public void calculatePremium() {}
+    // 보험료 계산 — 출재율 기반 재보험료 산정
+    public void calculatePremium() {
+        if (cessionRate <= 0)
+            throw new IllegalStateException("출재율이 유효하지 않습니다.");
+        if (settlementAmount != null)
+            this.reinsurancePremium = settlementAmount.multiply(java.math.BigDecimal.valueOf(cessionRate));
+    }
 
     // 회계 인식 — 회계 상태 반환
     public AccountingStatus recognizeAccounting() { return AccountingStatus.RECOGNIZED; }
 
     // 청산 일정 등록
-    public void registerSettlementSchedule() {}
+    public void registerSettlementSchedule() {
+        if (expectedSettlementDate == null)
+            throw new IllegalStateException("예정 청산일이 설정되지 않았습니다.");
+        if (settlementMethod == null)
+            throw new IllegalStateException("청산 방법이 설정되지 않았습니다.");
+        if (this.accountingDate == null) this.accountingDate = java.time.LocalDateTime.now();
+    }
 
     // 재보험 조건 설정 — 성공 여부 반환
     public boolean setConditions() { return true; }

@@ -34,16 +34,26 @@ public class AccidentReport {
     }
 
     // 사고 접수 상태 변경
-    public void changeStatus() {}
+    public void changeStatus() {
+        if (accidentStatus == null)
+            throw new IllegalStateException("사고 상태가 설정되지 않았습니다.");
+    }
 
     // 사고 접수 연기 — 성공 여부 반환
     public boolean deferSubmission() { return true; }
 
     // 사고 접수 등록
-    public void register() {}
+    public void register() {
+        if (reportNo == null || reportNo.isEmpty())
+            this.reportNo = "ACC-" + System.currentTimeMillis();
+        if (this.createdAt == null) this.createdAt = LocalDateTime.now();
+    }
 
     // 계약 정보 조회
-    public void retrieveContractInfo() {}
+    public void retrieveContractInfo() {
+        if (reportNo == null || reportNo.isEmpty())
+            throw new IllegalStateException("접수번호가 없습니다.");
+    }
 
     // 서류 미비 상태로 저장 — 성공 여부 반환
     public boolean saveAsDocumentPending() { return true; }

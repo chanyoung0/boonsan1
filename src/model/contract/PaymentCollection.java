@@ -29,17 +29,34 @@ public class PaymentCollection {
         this.collectedAt = collectedAt;
     }
 
-    // 연체료 계산
-    public void calculateLateFee() {}
+    // 연체료 계산 — 미납액의 3% 가산
+    public void calculateLateFee() {
+        if (unpaidAmount == null || unpaidAmount.compareTo(BigDecimal.ZERO) <= 0) return;
+        BigDecimal lateFee = unpaidAmount.multiply(new BigDecimal("0.03"));
+        this.unpaidAmount = unpaidAmount.add(lateFee);
+    }
 
     // 납기 도래 여부 확인
-    public void checkDueDate() {}
+    public void checkDueDate() {
+        if (dueDate == null)
+            throw new IllegalStateException("납기일이 설정되지 않았습니다.");
+    }
 
     // 미납 상태 확인
-    public void checkUnpaidStatus() {}
+    public void checkUnpaidStatus() {
+        if (unpaidAmount != null && unpaidAmount.compareTo(BigDecimal.ZERO) > 0)
+            this.processingResult = ProcessingResult.PENDING;
+        else
+            this.processingResult = ProcessingResult.SUCCESS;
+    }
 
     // 수금 처리
-    public void processCollection() {}
+    public void processCollection() {
+        if (collectedAmount == null || collectedAmount.compareTo(BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("수금액이 유효하지 않습니다.");
+        this.collectedAt = LocalDateTime.now();
+        this.processingResult = ProcessingResult.SUCCESS;
+    }
 
     public BigDecimal      getCollectedAmount()                     { return collectedAmount; }
     public void            setCollectedAmount(BigDecimal v)         { this.collectedAmount = v; }

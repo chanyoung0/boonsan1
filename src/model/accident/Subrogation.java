@@ -34,16 +34,31 @@ public class Subrogation {
     }
 
     // 입금 확인
-    public void confirmDeposit() {}
+    public void confirmDeposit() {
+        if (depositAccount == null || depositAccount.isEmpty())
+            throw new IllegalStateException("입금 계좌가 설정되지 않았습니다.");
+        this.subrogationStatus = SubrogationStatus.COMPLETED;
+    }
 
     // 구상 문서 생성
-    public void generateSubrogationDocument() {}
+    public void generateSubrogationDocument() {
+        if (subrogationId == null || subrogationId.isEmpty())
+            this.subrogationId = "SUB-" + System.currentTimeMillis();
+        if (offenderName == null || offenderName.isEmpty())
+            throw new IllegalStateException("가해자 정보가 없습니다.");
+    }
 
     // 지급 상세 조회 — 관련 InsurancePayment 반환
     public InsurancePayment retrievePaymentDetails() { return null; }
 
     // 구상 청구 발송
-    public void sendClaim() {}
+    public void sendClaim() {
+        if (offenderContact == null || offenderContact.isEmpty())
+            throw new IllegalStateException("가해자 연락처가 없습니다.");
+        if (paymentAmount == null || paymentAmount.compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("구상 금액이 유효하지 않습니다.");
+        this.subrogationStatus = SubrogationStatus.IN_PROGRESS;
+    }
 
     public String           getDepositAccount()                     { return depositAccount; }
     public void             setDepositAccount(String v)             { this.depositAccount = v; }

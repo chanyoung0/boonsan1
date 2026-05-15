@@ -42,19 +42,32 @@ public class InsurancePayment {
     }
 
     // 사건 종결
-    public void closeCase() {}
+    public void closeCase() {
+        this.paymentStatus = PaymentStatus.CLOSED;
+    }
 
     // 수령 확인
-    public void confirmReceipt() {}
+    public void confirmReceipt() {
+        if (paymentAccount == null || paymentAccount.isEmpty())
+            throw new IllegalStateException("지급 계좌가 설정되지 않았습니다.");
+        this.paymentStatus = PaymentStatus.PAID;
+        if (this.paidAt == null) this.paidAt = LocalDateTime.now();
+    }
 
     // 지급 기록 생성 — PaymentApprovalDocument 반환
     public PaymentApprovalDocument generatePaymentRecord() { return paymentApprovalDocument; }
 
     // 구상권 등록
-    public void registerSubrogation() {}
+    public void registerSubrogation() {
+        if (subrogation == null)
+            throw new IllegalStateException("구상권 정보가 없습니다.");
+    }
 
     // 지급 알림 발송
-    public void sendNotification() {}
+    public void sendNotification() {
+        if (paymentAccount == null || paymentAccount.isEmpty())
+            throw new IllegalStateException("수신 계좌가 설정되지 않았습니다.");
+    }
 
     // 보험금 이체 — 이체 처리 결과 상태 반환
     public PaymentStatus transfer() {

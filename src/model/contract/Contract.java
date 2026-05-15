@@ -66,25 +66,50 @@ public class Contract {
     }
 
     // 계약 상태 변경
-    public void changeContractStatus() {}
+    public void changeContractStatus() {
+        if (contractStatus == null)
+            throw new IllegalStateException("계약 상태가 설정되지 않았습니다.");
+    }
 
     // 납입 상태 확인 — 미납 여부 반환
     public boolean checkPaymentStatus() { return hasUnpaidPremium != null && hasUnpaidPremium; }
 
     // 계약 실행
-    public void executeContract() {}
+    public void executeContract() {
+        if (policyNumber == null || policyNumber.isEmpty())
+            throw new IllegalStateException("증권번호가 없습니다.");
+        this.contractStatus = ContractStatus.ACTIVE;
+        this.hasUnpaidPremium = false;
+    }
 
     // 계약 정보 조회
-    public void getContractInfo() {}
+    public void getContractInfo() {
+        if (policyNumber == null || policyNumber.isEmpty())
+            throw new IllegalStateException("증권번호가 없습니다.");
+        if (contractStatus == null)
+            throw new IllegalStateException("계약 상태가 설정되지 않았습니다.");
+    }
 
     // 증권번호 발행
-    public void issuePolicyNumber() {}
+    public void issuePolicyNumber() {
+        if (insuranceApplication == null)
+            throw new IllegalStateException("청약 정보가 없습니다.");
+        if (policyNumber == null || policyNumber.isEmpty())
+            this.policyNumber = "POL-" + System.currentTimeMillis();
+    }
 
     // 계약 갱신
-    public void renewContract() {}
+    public void renewContract() {
+        if (contractStatus == null)
+            throw new IllegalStateException("계약 상태가 설정되지 않았습니다.");
+        this.contractStatus = ContractStatus.ACTIVE;
+        this.hasUnpaidPremium = false;
+    }
 
     // 계약 종료
-    public void terminateContract() {}
+    public void terminateContract() {
+        this.contractStatus = ContractStatus.TERMINATED;
+    }
 
     public Account                    getAutoTransferAmount()                         { return autoTransferAmount; }
     public void                       setAutoTransferAmount(Account v)                { this.autoTransferAmount = v; }

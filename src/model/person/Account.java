@@ -26,10 +26,18 @@ public class Account {
     }
 
     // 자동이체 해지
-    public void cancelAutoTransfer() {}
+    public void cancelAutoTransfer() {
+        if (accountNumber == null || accountNumber.isEmpty())
+            throw new IllegalStateException("해지할 계좌번호가 없습니다.");
+    }
 
     // 계좌 변경
-    public void changeAccount() {}
+    public void changeAccount() {
+        if (accountNumber == null || accountNumber.isEmpty())
+            throw new IllegalStateException("변경할 계좌번호가 없습니다.");
+        if (bankName == null)
+            throw new IllegalStateException("은행 정보가 없습니다.");
+    }
 
     // 잔액 확인 — 이체 가능 여부 반환
     public boolean checkBalance() { return balance != null && balance.compareTo(BigDecimal.ZERO) > 0; }

@@ -39,16 +39,31 @@ public class Underwriting {
     public float calculateScore() { return totalScore; }
 
     // 자동 심사 실행
-    public void executeAutoUnderwriting() {}
+    public void executeAutoUnderwriting() {
+        this.underwritingType = UnderwritingType.AUTO;
+        this.underwritingStatus = UnderwritingStatus.COMPLETED;
+        if (this.underwrittenAt == null) this.underwrittenAt = LocalDateTime.now();
+    }
 
     // 심사 보고서 출력
-    public void printReport() {}
+    public void printReport() {
+        if (underwriter == null || underwriter.isEmpty())
+            throw new IllegalStateException("심사자 정보가 없습니다.");
+        if (underwritingResult == null)
+            throw new IllegalStateException("심사 결과가 등록되지 않았습니다.");
+    }
 
     // 수동 심사 등록
-    public void registerManualUnderwriting() {}
+    public void registerManualUnderwriting() {
+        this.underwritingType = UnderwritingType.GENERAL;
+        this.underwritingStatus = UnderwritingStatus.IN_PROGRESS;
+        if (this.underwrittenAt == null) this.underwrittenAt = LocalDateTime.now();
+    }
 
     // 임시 저장
-    public void tempSave() {}
+    public void tempSave() {
+        this.underwritingStatus = UnderwritingStatus.IN_PROGRESS;
+    }
 
     public String             getDeductionReason()                      { return deductionReason; }
     public void               setDeductionReason(String v)              { this.deductionReason = v; }

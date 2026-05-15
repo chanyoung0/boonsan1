@@ -19,13 +19,30 @@ public class MarineInsurance extends Insurance {
     }
 
     @Override
-    public void calculateMaturityRefund() {}
+    public void calculateMaturityRefund() {
+        if (premium == null) return;
+        this.maturityRefund = premium.multiply(new BigDecimal("0.1"));
+    }
 
     @Override
-    public void calculatePremium()        {}
+    public void calculatePremium() {
+        if (insuredAmount == null) return;
+        // 화물선 할증 요율, 그 외 기본 요율
+        double rate = "화물선".equals(vesselType) ? 0.0040 : 0.0030;
+        this.premium = insuredAmount.multiply(BigDecimal.valueOf(rate));
+    }
 
-    public void evaluateRiskLevel()       {}
-    public void manageShippingInfo()      {}
+    public void evaluateRiskLevel() {
+        if (vesselType == null || vesselType.isEmpty())
+            throw new IllegalStateException("선박 유형이 설정되지 않았습니다.");
+        if (shippingRoute == null || shippingRoute.isEmpty())
+            throw new IllegalStateException("항로가 설정되지 않았습니다.");
+    }
+
+    public void manageShippingInfo() {
+        if (shippingRoute == null || shippingRoute.isEmpty())
+            throw new IllegalStateException("항로 정보가 없습니다.");
+    }
 
     public String getShippingRoute()            { return shippingRoute; }
     public void   setShippingRoute(String v)    { this.shippingRoute = v; }

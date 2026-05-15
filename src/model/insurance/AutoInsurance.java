@@ -23,10 +23,18 @@ public class AutoInsurance extends Insurance {
     }
 
     @Override
-    public void calculatePremium()        {}
+    public void calculatePremium() {
+        if (insuredAmount == null) return;
+        // 기본 요율 0.15%, 고령 운전자(만 60세 초과) 할증
+        double rate = driverAge > 60 ? 0.0020 : 0.0015;
+        this.premium = insuredAmount.multiply(BigDecimal.valueOf(rate));
+    }
 
     @Override
-    public void calculateMaturityRefund() {}
+    public void calculateMaturityRefund() {
+        if (premium == null) return;
+        this.maturityRefund = premium.multiply(new BigDecimal("0.1"));
+    }
 
     // 사고 이력 목록 조회
     public List<AccidentHistory> getAccidentHistory() { return new ArrayList<>(); }

@@ -27,7 +27,13 @@ public class AccidentDocument extends Document {
         this.checkDueDate = checkDueDate;
     }
 
-    public void uploadDocument() {}
+    // 서류 업로드
+    public void uploadDocument() {
+        if (documentName == null)
+            throw new IllegalStateException("문서명이 설정되지 않았습니다.");
+        this.submissionStatus = SubmissionStatus.SUBMITTED;
+        this.status = DocumentStatus.SUBMITTED;
+    }
 
     public LocalDateTime   getCheckDueDate()                    { return checkDueDate; }
     public void            setCheckDueDate(LocalDateTime v)     { this.checkDueDate = v; }

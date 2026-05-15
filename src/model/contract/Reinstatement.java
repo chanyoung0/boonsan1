@@ -30,9 +30,26 @@ public class Reinstatement {
         this.hasHealthChanged = hasHealthChanged;
     }
 
-    public void applyReinstatement()       {}
-    public void calculateUnpaidPremium()   {}
-    public void processReinstatement()     {}
+    // 부활 신청
+    public void applyReinstatement() {
+        if (reinstatementReason == null)
+            throw new IllegalStateException("부활 사유가 설정되지 않았습니다.");
+        if (this.appliedAt == null) this.appliedAt = LocalDateTime.now();
+    }
+
+    // 미납 보험료 계산
+    public void calculateUnpaidPremium() {
+        if (lastPaidDate == null)
+            throw new IllegalStateException("최종 납입일이 설정되지 않았습니다.");
+        if (unpaidPremium == null) this.unpaidPremium = BigDecimal.ZERO;
+    }
+
+    // 부활 처리
+    public void processReinstatement() {
+        if (unpaidPremium == null)
+            throw new IllegalStateException("미납 보험료가 계산되지 않았습니다.");
+        this.processedAt = LocalDateTime.now();
+    }
 
     public LocalDateTime       getAppliedAt()                         { return appliedAt; }
     public void                setAppliedAt(LocalDateTime v)          { this.appliedAt = v; }

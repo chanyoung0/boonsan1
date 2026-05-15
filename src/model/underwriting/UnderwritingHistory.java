@@ -53,10 +53,15 @@ public class UnderwritingHistory {
     public List<UnderwritingHistory> getHistory() { return new ArrayList<>(); }
 
     // 심사 이력 등록
-    public void registerHistory() {}
+    public void registerHistory() {
+        if (this.inquiredAt == null) this.inquiredAt = LocalDateTime.now();
+    }
 
     // 심사 이력 수정
-    public void updateHistory() {}
+    public void updateHistory() {
+        if (name == null || name.isEmpty())
+            throw new IllegalStateException("수정할 피보험자 이름이 없습니다.");
+    }
 
     public int                    getAge()                              { return age; }
     public void                   setAge(int v)                        { this.age = v; }

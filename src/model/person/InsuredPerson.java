@@ -17,10 +17,35 @@ public class InsuredPerson {
         this.accountInfo = accountInfo;
     }
 
-    public void getInsuredPersonInfo()  {}
-    public void registerInsuredPerson() {}
-    public void updateInsuredPerson()   {}
-    public void verifyAccountInfo()     {}
+    // 피보험자 정보 조회
+    public void getInsuredPersonInfo() {
+        if (name == null || name.isEmpty())
+            throw new IllegalStateException("피보험자 이름이 없습니다.");
+        if (residentRegistrationNumber == null || residentRegistrationNumber.isEmpty())
+            throw new IllegalStateException("주민등록번호가 없습니다.");
+    }
+
+    // 피보험자 등록
+    public void registerInsuredPerson() {
+        if (name == null || name.isEmpty())
+            throw new IllegalArgumentException("피보험자 이름이 필요합니다.");
+        if (residentRegistrationNumber == null || residentRegistrationNumber.isEmpty())
+            throw new IllegalArgumentException("주민등록번호가 필요합니다.");
+        if (contact == null || contact.isEmpty())
+            throw new IllegalArgumentException("연락처가 필요합니다.");
+    }
+
+    // 피보험자 정보 수정
+    public void updateInsuredPerson() {
+        if (name == null || name.isEmpty())
+            throw new IllegalStateException("수정할 피보험자 이름이 없습니다.");
+    }
+
+    // 계좌 정보 검증
+    public void verifyAccountInfo() {
+        if (accountInfo == null)
+            throw new IllegalStateException("계좌 정보가 등록되지 않았습니다.");
+    }
 
     public Account getAccountInfo()                         { return accountInfo; }
     public void    setAccountInfo(Account v)                { this.accountInfo = v; }

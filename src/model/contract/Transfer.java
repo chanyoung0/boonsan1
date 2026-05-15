@@ -20,8 +20,18 @@ public class Transfer {
         this.transferredAt = transferredAt;
     }
 
-    public void changeAssignee() {}
-    public void processTransfer(){}
+    // 담당자 변경
+    public void changeAssignee() {
+        if (assignee == null)
+            throw new IllegalStateException("새 담당자 정보가 없습니다.");
+    }
+
+    // 이관 처리
+    public void processTransfer() {
+        if (transferType == null)
+            throw new IllegalStateException("이관 유형이 설정되지 않았습니다.");
+        if (this.transferredAt == null) this.transferredAt = java.time.LocalDateTime.now();
+    }
 
     public Manager      getAssignee()                   { return assignee; }
     public void         setAssignee(Manager v)          { this.assignee = v; }

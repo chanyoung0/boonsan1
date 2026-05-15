@@ -28,16 +28,33 @@ public class OutsourceRequest {
     }
 
     // 위탁 결과 수신
-    public void receiveResult()        {}
+    public void receiveResult() {
+        if (requestId == null || requestId.isEmpty())
+            throw new IllegalStateException("요청 ID가 없습니다.");
+        this.requestStatus = RequestStatus.COMPLETED;
+    }
 
     // 전송 데이터 선택
-    public void selectDataToTransfer() {}
+    public void selectDataToTransfer() {
+        if (transferredDataList == null || transferredDataList.isEmpty())
+            throw new IllegalStateException("전송할 데이터가 선택되지 않았습니다.");
+    }
 
     // 협력업체 선택
-    public void selectPartner()        {}
+    public void selectPartner() {
+        if (partner == null)
+            throw new IllegalStateException("협력업체가 선택되지 않았습니다.");
+    }
 
     // 위탁 요청 전송
-    public void send()                 {}
+    public void send() {
+        if (partner == null)
+            throw new IllegalStateException("협력업체가 선택되지 않았습니다.");
+        if (requestId == null || requestId.isEmpty())
+            this.requestId = "OUT-" + System.currentTimeMillis();
+        this.requestStatus = RequestStatus.IN_PROGRESS;
+        if (this.requestDateTime == null) this.requestDateTime = java.time.LocalDateTime.now();
+    }
 
     public LocalDateTime  getRequestDateTime()                  { return requestDateTime; }
     public void           setRequestDateTime(LocalDateTime v)   { this.requestDateTime = v; }

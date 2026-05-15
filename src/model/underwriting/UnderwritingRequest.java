@@ -32,13 +32,25 @@ public class UnderwritingRequest {
     }
 
     // U/W 요청 상태 변경
-    public void changeUWStatus() {}
+    public void changeUWStatus() {
+        if (requestStatus == null)
+            throw new IllegalStateException("심사 요청 상태가 설정되지 않았습니다.");
+    }
 
     // U/W 결과 등록
-    public void registerUWResult() {}
+    public void registerUWResult() {
+        if (underwritingResult == null)
+            throw new IllegalArgumentException("심사 결과 유형이 필요합니다.");
+        this.requestStatus = RequestStatus.COMPLETED;
+    }
 
     // 언더라이팅 요청
-    public void requestUnderwriting() {}
+    public void requestUnderwriting() {
+        if (requestReason == null)
+            throw new IllegalArgumentException("요청 사유가 필요합니다.");
+        this.requestStatus = RequestStatus.PENDING;
+        if (this.appliedAt == null) this.appliedAt = java.time.LocalDateTime.now();
+    }
 
     public LocalDateTime        getAppliedAt()                          { return appliedAt; }
     public void                 setAppliedAt(LocalDateTime v)           { this.appliedAt = v; }

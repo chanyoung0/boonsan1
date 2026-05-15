@@ -37,13 +37,24 @@ public class DamageInvestigation {
     }
 
     // 손해액 산정
-    public void assessDamageCost() {}
+    public void assessDamageCost() {
+        BigDecimal repair  = repairCost      != null ? repairCost      : BigDecimal.ZERO;
+        BigDecimal medical = medicalExpense  != null ? medicalExpense  : BigDecimal.ZERO;
+        BigDecimal income  = lostIncome      != null ? lostIncome      : BigDecimal.ZERO;
+        this.settlementAmount = repair.add(medical).add(income);
+    }
 
     // 외부 조사 위탁
-    public void delegateInvestigation() {}
+    public void delegateInvestigation() {
+        if (investigationId == null || investigationId.isEmpty())
+            this.investigationId = "INV-" + System.currentTimeMillis();
+        if (this.investigationAt == null) this.investigationAt = LocalDateTime.now();
+    }
 
     // 사고 청구 반려
-    public void rejectClaim() {}
+    public void rejectClaim() {
+        this.settlementAmount = BigDecimal.ZERO;
+    }
 
     // 보험사기 조사 요청 — 요청 결과 상태 반환
     public RequestStatus requestFraudInvestigation() { return RequestStatus.PENDING; }

@@ -19,8 +19,17 @@ public class MaturityNotice {
         this.sentAt = sentAt;
     }
 
-    public void checkRenewalIntention() {}
-    public void sendNotice()            {}
+    // 재계약 의사 확인
+    public void checkRenewalIntention() {
+        this.checkedAt = LocalDateTime.now();
+    }
+
+    // 만기 안내 발송
+    public void sendNotice() {
+        if (deliveryMethod == null)
+            throw new IllegalStateException("발송 방법이 설정되지 않았습니다.");
+        if (this.sentAt == null) this.sentAt = LocalDateTime.now();
+    }
 
     public LocalDateTime  getCheckedAt()                    { return checkedAt; }
     public void           setCheckedAt(LocalDateTime v)     { this.checkedAt = v; }

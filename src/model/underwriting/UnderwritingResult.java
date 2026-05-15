@@ -24,10 +24,17 @@ public class UnderwritingResult {
     }
 
     // 심사 결과 조회
-    public void getResult() {}
+    public void getResult() {
+        if (underwritingResult == null)
+            throw new IllegalStateException("심사 결과가 등록되지 않았습니다.");
+    }
 
     // 심사 결과 등록
-    public void registerResult() {}
+    public void registerResult() {
+        if (underwritingResult == null)
+            throw new IllegalArgumentException("심사 결과 유형이 필요합니다.");
+        if (this.confirmedAt == null) this.confirmedAt = LocalDateTime.now();
+    }
 
     public LocalDateTime        getConfirmedAt()                    { return confirmedAt; }
     public void                 setConfirmedAt(LocalDateTime v)     { this.confirmedAt = v; }

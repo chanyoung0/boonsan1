@@ -36,10 +36,22 @@ public class CompensationEvaluation {
     public String analyzeDamageAmount() { return damageAnalysisResult; }
 
     // 보상 통계 계산
-    public void calculateCompensationStatistics() {}
+    public void calculateCompensationStatistics() {
+        if (damageAmount == null)
+            throw new IllegalStateException("손해액이 설정되지 않았습니다.");
+        this.compensationStatistics = "평가월: " + evaluationMonth
+                + ", 손해액: " + damageAmount
+                + ", 상태: " + evaluationStatus;
+    }
 
     // 평가 결과 저장
-    public void saveEvaluationResult() {}
+    public void saveEvaluationResult() {
+        if (evaluationId == null || evaluationId.isEmpty())
+            throw new IllegalStateException("평가 ID가 없습니다.");
+        if (evaluationResult == null)
+            throw new IllegalStateException("평가 결과가 설정되지 않았습니다.");
+        this.evaluationStatus = enums.CompensationStatus.COMPLETED;
+    }
 
     public String             getCompensationStatistics()                    { return compensationStatistics; }
     public void               setCompensationStatistics(String v)           { this.compensationStatistics = v; }

@@ -38,13 +38,23 @@ public class InsuranceApplication {
     }
 
     // 청약 상태 변경
-    public void changeApplicationStatus() {}
+    public void changeApplicationStatus() {
+        if (applicationStatus == null)
+            throw new IllegalStateException("청약 상태가 설정되지 않았습니다.");
+    }
 
     // 청약 확정
-    public void confirmApplication() {}
+    public void confirmApplication() {
+        if (applicationId == null || applicationId.isEmpty())
+            throw new IllegalStateException("청약번호가 없습니다.");
+        this.applicationStatus = ApplicationStatus.APPROVED;
+    }
 
     // 증권번호 발행
-    public void issuePolicyNumber() {}
+    public void issuePolicyNumber() {
+        if (applicationStatus != ApplicationStatus.APPROVED)
+            throw new IllegalStateException("승인된 청약만 증권번호를 발행할 수 있습니다.");
+    }
 
     // 청약 접수 — 생성된 청약번호 반환
     public String receiveApplication() {

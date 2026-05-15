@@ -48,7 +48,12 @@ public class AccidentHistory {
     }
 
     // 심사에 사고이력 반영
-    public void applyToUnderwriting() {}
+    public void applyToUnderwriting() {
+        if (accidentType == null)
+            throw new IllegalStateException("사고 유형이 설정되지 않았습니다.");
+        if (occurredAt == null)
+            throw new IllegalStateException("사고 발생일이 설정되지 않았습니다.");
+    }
 
     // 사고 이력 목록 조회
     public List<AccidentHistory> getAccidentHistory() { return new ArrayList<>(); }

@@ -37,13 +37,36 @@ public class PaymentApprovalDocument extends Document {
         this.remarks = remarks;
     }
 
-    public void addOpinion()        {}
-    public void createDraft()       {}
+    // 의견 추가
+    public void addOpinion() {
+        if (damageAdequacyOpinion == null || damageAdequacyOpinion.isEmpty())
+            throw new IllegalStateException("손해 적정 의견이 없습니다.");
+    }
+
+    // 초안 작성
+    public void createDraft() {
+        if (documentId == null || documentId.isEmpty())
+            this.documentId = "PAD-" + System.currentTimeMillis();
+        this.approvalStatus = ApprovalStatus.DRAFT;
+        this.status = DocumentStatus.DRAFT;
+        if (this.createdAt == null) this.createdAt = java.time.LocalDateTime.now();
+    }
 
     @Override
-    public void save()              {}
+    public void save() {
+        if (documentId == null || documentId.isEmpty())
+            throw new IllegalStateException("문서 ID가 없습니다.");
+        this.status = DocumentStatus.SUBMITTED;
+    }
 
-    public void submitForApproval() {}
+    // 승인 요청 제출
+    public void submitForApproval() {
+        if (settlementAmount == null)
+            throw new IllegalStateException("지급금액이 설정되지 않았습니다.");
+        if (approverEmployeeNo == null || approverEmployeeNo.isEmpty())
+            throw new IllegalStateException("승인자 사번이 없습니다.");
+        this.approvalStatus = ApprovalStatus.PENDING_APPROVAL;
+    }
 
     public ApprovalStatus getApprovalStatus()                    { return approvalStatus; }
     public void           setApprovalStatus(ApprovalStatus v)    { this.approvalStatus = v; }

@@ -22,20 +22,34 @@ public abstract class Insurance {
         this.maturityRefund = maturityRefund;
     }
 
-    // 만기 환급금 계산
+    // 만기 환급금 계산 — 납입 보험료 기반으로 maturityRefund 갱신
     public abstract void calculateMaturityRefund();
 
-    // 보험료 계산
+    // 보험료 계산 — 보험가입금액과 요율로 premium 갱신
     public abstract void calculatePremium();
 
-    // 상품 상태 변경
-    public void changeProductStatus() {}
+    // 상품 유효성 검증 — 필수 필드 미설정 시 예외
+    public void changeProductStatus() {
+        if (productCode == null || productCode.isEmpty())
+            throw new IllegalStateException("상품코드가 설정되지 않았습니다.");
+        if (insuredAmount == null || insuredAmount.compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("보험가입금액이 유효하지 않습니다.");
+    }
 
-    // 보험 종류 조회
-    public void getInsuranceType() {}
+    // 보험 종류 반환 — 하위 클래스명 기반
+    public String getInsuranceType() {
+        return this.getClass().getSimpleName();
+    }
 
-    // 상품 정보 저장
-    public void saveProductInfo() {}
+    // 상품 정보 필수값 검증
+    public void saveProductInfo() {
+        if (productCode == null || productCode.isEmpty())
+            throw new IllegalArgumentException("상품코드는 필수입니다.");
+        if (premium == null || premium.compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new IllegalArgumentException("보험료는 0보다 커야 합니다.");
+        if (insuredAmount == null || insuredAmount.compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new IllegalArgumentException("보험가입금액은 0보다 커야 합니다.");
+    }
 
     public String     getProductCode()               { return productCode; }
     public void       setProductCode(String v)       { this.productCode = v; }

@@ -24,10 +24,33 @@ public class Partner {
         this.evaluationGrade = evaluationGrade;
     }
 
-    public void register()       {}
-    public void save()           {}
-    public void searchPartner()  {}
-    public void update()         {}
+    // 협력업체 등록
+    public void register() {
+        if (id == null || id.isEmpty())
+            throw new IllegalArgumentException("협력업체 ID가 필요합니다.");
+        if (partnerName == null || partnerName.isEmpty())
+            throw new IllegalArgumentException("협력업체명이 필요합니다.");
+    }
+
+    // 협력업체 저장
+    public void save() {
+        if (id == null || id.isEmpty())
+            throw new IllegalArgumentException("협력업체 ID가 필요합니다.");
+        if (partnerType == null || partnerType.isEmpty())
+            throw new IllegalArgumentException("협력업체 유형이 필요합니다.");
+    }
+
+    // 협력업체 조회
+    public void searchPartner() {
+        if (id == null || id.isEmpty())
+            throw new IllegalStateException("협력업체 ID가 없습니다.");
+    }
+
+    // 협력업체 정보 수정
+    public void update() {
+        if (id == null || id.isEmpty())
+            throw new IllegalStateException("수정할 협력업체 ID가 없습니다.");
+    }
 
     public String          getId()                     { return id; }
     public void            setId(String v)             { this.id = v; }
