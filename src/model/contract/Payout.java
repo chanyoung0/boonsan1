@@ -37,10 +37,23 @@ public class Payout {
         this.approvedAt = approvedAt;
     }
 
-    public void approvePayment()  {}
-    public void calculatePayment(){}
-    public void cancelPayment()   {}
-    public void processPayment()  {}
+    public void approvePayment()  {
+        this.approvedAt = LocalDateTime.now();
+    }
+
+    public void calculatePayment(){
+        if (this.finalPaymentAmount == null) {
+            this.finalPaymentAmount = this.calculatedAmount;
+        }
+    }
+
+    public void cancelPayment()   {
+        // 취소 상태 필드가 없어 취소 여부는 service 목록에서 관리한다.
+    }
+
+    public void processPayment()  {
+        this.paidAt = LocalDateTime.now();
+    }
 
     public LocalDateTime       getApprovedAt()                          { return approvedAt; }
     public void                setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }
