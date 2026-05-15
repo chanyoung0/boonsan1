@@ -21,6 +21,16 @@ public class UnderwritingRequest {
     private UnderwritingResultType underwritingResult;
     private UnderwritingType underwritingType;
 
+    public UnderwritingRequest() {}
+
+    public UnderwritingRequest(LocalDateTime appliedAt, RequestReason requestReason,
+                               UnderwritingType underwritingType, RequestStatus requestStatus) {
+        this.appliedAt = appliedAt;
+        this.requestReason = requestReason;
+        this.underwritingType = underwritingType;
+        this.requestStatus = requestStatus;
+    }
+
     // U/W 요청 상태 변경
     public void changeUWStatus() {}
 
@@ -29,4 +39,26 @@ public class UnderwritingRequest {
 
     // 언더라이팅 요청
     public void requestUnderwriting() {}
+
+    public LocalDateTime        getAppliedAt()                          { return appliedAt; }
+    public void                 setAppliedAt(LocalDateTime v)           { this.appliedAt = v; }
+    public LocalDateTime        getAppliedId()                          { return appliedId; }
+    public void                 setAppliedId(LocalDateTime v)           { this.appliedId = v; }
+    public RejectionReason      getRejectionReason()                    { return rejectionReason; }
+    public void                 setRejectionReason(RejectionReason v)   { this.rejectionReason = v; }
+    public RequestReason        getRequestReason()                      { return requestReason; }
+    public void                 setRequestReason(RequestReason v)       { this.requestReason = v; }
+    public RequestStatus        getRequestStatus()                      { return requestStatus; }
+    public void                 setRequestStatus(RequestStatus v)       { this.requestStatus = v; }
+    public SurchargeCondition   getSurchargeCondition()                 { return surchargeCondition; }
+    public void                 setSurchargeCondition(SurchargeCondition v){ this.surchargeCondition = v; }
+    public UnderwritingResultType getUnderwritingResult()               { return underwritingResult; }
+    public void                 setUnderwritingResult(UnderwritingResultType v){ this.underwritingResult = v; }
+    public UnderwritingType     getUnderwritingType()                   { return underwritingType; }
+    public void                 setUnderwritingType(UnderwritingType v) { this.underwritingType = v; }
+
+    @Override
+    public String toString() {
+        return "UnderwritingRequest{requestStatus=" + requestStatus + ", underwritingType=" + underwritingType + "}";
+    }
 }

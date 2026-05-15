@@ -20,8 +20,23 @@ public class Underwriting {
     private UnderwritingType underwritingType;
     private LocalDateTime underwrittenAt;
 
-    // 심사 점수 계산
-    public void calculateScore() {}
+    private Coinsurance coinsurance;
+    private UnderwritingResult underwritingResult;
+
+    public Underwriting() {}
+
+    public Underwriting(String underwriter, UnderwritingType underwritingType,
+                        UnderwritingStatus underwritingStatus, UnderwritingTerm underwritingItem,
+                        LocalDateTime underwrittenAt) {
+        this.underwriter = underwriter;
+        this.underwritingType = underwritingType;
+        this.underwritingStatus = underwritingStatus;
+        this.underwritingItem = underwritingItem;
+        this.underwrittenAt = underwrittenAt;
+    }
+
+    // 심사 점수 계산 — 총점 반환
+    public float calculateScore() { return totalScore; }
 
     // 자동 심사 실행
     public void executeAutoUnderwriting() {}
@@ -34,4 +49,34 @@ public class Underwriting {
 
     // 임시 저장
     public void tempSave() {}
+
+    public String             getDeductionReason()                      { return deductionReason; }
+    public void               setDeductionReason(String v)              { this.deductionReason = v; }
+    public boolean            isCoinsuranceRecommended()                { return isCoinsuranceRecommended; }
+    public void               setCoinsuranceRecommended(boolean v)      { this.isCoinsuranceRecommended = v; }
+    public String             getItemizedScores()                       { return itemizedScores; }
+    public void               setItemizedScores(String v)               { this.itemizedScores = v; }
+    public float              getTotalScore()                           { return totalScore; }
+    public void               setTotalScore(float v)                    { this.totalScore = v; }
+    public String             getUnderwriter()                          { return underwriter; }
+    public void               setUnderwriter(String v)                  { this.underwriter = v; }
+    public UnderwritingTerm   getUnderwritingItem()                     { return underwritingItem; }
+    public void               setUnderwritingItem(UnderwritingTerm v)   { this.underwritingItem = v; }
+    public String             getUnderwritingOpinion()                  { return underwritingOpinion; }
+    public void               setUnderwritingOpinion(String v)          { this.underwritingOpinion = v; }
+    public UnderwritingStatus getUnderwritingStatus()                   { return underwritingStatus; }
+    public void               setUnderwritingStatus(UnderwritingStatus v){ this.underwritingStatus = v; }
+    public UnderwritingType   getUnderwritingType()                     { return underwritingType; }
+    public void               setUnderwritingType(UnderwritingType v)   { this.underwritingType = v; }
+    public LocalDateTime      getUnderwrittenAt()                       { return underwrittenAt; }
+    public void               setUnderwrittenAt(LocalDateTime v)        { this.underwrittenAt = v; }
+    public Coinsurance        getCoinsurance()                          { return coinsurance; }
+    public void               setCoinsurance(Coinsurance v)             { this.coinsurance = v; }
+    public UnderwritingResult getUnderwritingResult()                   { return underwritingResult; }
+    public void               setUnderwritingResult(UnderwritingResult v){ this.underwritingResult = v; }
+
+    @Override
+    public String toString() {
+        return "Underwriting{underwriter='" + underwriter + "', totalScore=" + totalScore + ", underwritingStatus=" + underwritingStatus + "}";
+    }
 }

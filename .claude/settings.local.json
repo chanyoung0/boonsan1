@@ -8,7 +8,13 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java src/insurance/UnderwritingService.java src/common/ConsoleUtil.java src/contract/EndorsementService.java src/contract/ReinstatementService.java)",
-      "Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java)"
+      "Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java)",
+      "Bash(Get-ChildItem -Path \"C:\\\\workspace\\\\springWorkspace\\\\boonsan1\\\\src\" -Recurse -Filter \"*.java\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(python -c \"import pdfplumber; pdf = pdfplumber.open\\('C:/workspace/springWorkspace/boonsan1/report.pdf'\\); print\\(pdf.pages[0].extract_text\\(\\)\\)\")",
+      "Bash(python *)",
+      "Bash(pip install *)"
     ]
   }
 }

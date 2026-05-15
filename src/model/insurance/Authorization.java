@@ -12,11 +12,48 @@ public class Authorization {
     private String requestReason;
     private String submissionAgencyName;
 
-    public void applyAuthorizationResult() {}
+    private FinancialSupervisoryService financialSupervisoryService;
 
-    public void cancelAuthorizationRequest() {}
+    public Authorization() {}
 
+    public Authorization(String requestId, String requestReason, String submissionAgencyName,
+                         LocalDateTime requestedAt, FinancialSupervisoryService financialSupervisoryService) {
+        this.requestId = requestId;
+        this.requestReason = requestReason;
+        this.submissionAgencyName = submissionAgencyName;
+        this.requestedAt = requestedAt;
+        this.financialSupervisoryService = financialSupervisoryService;
+    }
+
+    // 인가 결과 반영 — 성공 여부 반환
+    public boolean applyAuthorizationResult() { return isApproved; }
+
+    // 인가 요청 취소 — 성공 여부 반환
+    public boolean cancelAuthorizationRequest() { return true; }
+
+    // 인가 요청 전송
     public void sendAuthorizationRequest() {}
 
+    // 상품 상태 갱신
     public void updateProductStatus() {}
+
+    public LocalDateTime                getApprovedAt()                          { return approvedAt; }
+    public void                         setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }
+    public boolean                      isApproved()                             { return isApproved; }
+    public void                         setApproved(boolean v)                   { this.isApproved = v; }
+    public LocalDateTime                getRequestedAt()                         { return requestedAt; }
+    public void                         setRequestedAt(LocalDateTime v)          { this.requestedAt = v; }
+    public String                       getRequestId()                           { return requestId; }
+    public void                         setRequestId(String v)                   { this.requestId = v; }
+    public String                       getRequestReason()                       { return requestReason; }
+    public void                         setRequestReason(String v)               { this.requestReason = v; }
+    public String                       getSubmissionAgencyName()                { return submissionAgencyName; }
+    public void                         setSubmissionAgencyName(String v)        { this.submissionAgencyName = v; }
+    public FinancialSupervisoryService  getFinancialSupervisoryService()         { return financialSupervisoryService; }
+    public void                         setFinancialSupervisoryService(FinancialSupervisoryService v) { this.financialSupervisoryService = v; }
+
+    @Override
+    public String toString() {
+        return "Authorization{requestId='" + requestId + "', isApproved=" + isApproved + "}";
+    }
 }

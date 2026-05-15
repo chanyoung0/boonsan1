@@ -1,6 +1,7 @@
 package model.accident;
 
 import enums.PaymentStatus;
+import model.document.PaymentApprovalDocument;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,14 +20,35 @@ public class InsurancePayment {
     private String processorEmployeeNo;
     private BigDecimal retentionEstimate;
 
+    private Objection objection;
+    private Subrogation subrogation;
+    private PaymentApprovalDocument paymentApprovalDocument;
+
+    public InsurancePayment() {}
+
+    public InsurancePayment(String paymentId, String paymentAccount, String processorEmployeeNo,
+                            BigDecimal finalSettlementAmount, BigDecimal finalRepairCost,
+                            BigDecimal finalMedicalExpense, BigDecimal finalLostIncome,
+                            BigDecimal retentionEstimate, PaymentStatus paymentStatus) {
+        this.paymentId = paymentId;
+        this.paymentAccount = paymentAccount;
+        this.processorEmployeeNo = processorEmployeeNo;
+        this.finalSettlementAmount = finalSettlementAmount;
+        this.finalRepairCost = finalRepairCost;
+        this.finalMedicalExpense = finalMedicalExpense;
+        this.finalLostIncome = finalLostIncome;
+        this.retentionEstimate = retentionEstimate;
+        this.paymentStatus = paymentStatus;
+    }
+
     // 사건 종결
     public void closeCase() {}
 
     // 수령 확인
     public void confirmReceipt() {}
 
-    // 지급 기록 생성
-    public void generatePaymentRecord() {}
+    // 지급 기록 생성 — PaymentApprovalDocument 반환
+    public PaymentApprovalDocument generatePaymentRecord() { return paymentApprovalDocument; }
 
     // 구상권 등록
     public void registerSubrogation() {}
@@ -34,6 +56,42 @@ public class InsurancePayment {
     // 지급 알림 발송
     public void sendNotification() {}
 
-    // 보험금 이체
-    public void transfer() {}
+    // 보험금 이체 — 이체 처리 결과 상태 반환
+    public PaymentStatus transfer() {
+        this.paidAt = LocalDateTime.now();
+        this.paymentStatus = PaymentStatus.PAID;
+        return paymentStatus;
+    }
+
+    public BigDecimal              getFinalLostIncome()                          { return finalLostIncome; }
+    public void                    setFinalLostIncome(BigDecimal v)              { this.finalLostIncome = v; }
+    public BigDecimal              getFinalMedicalExpense()                      { return finalMedicalExpense; }
+    public void                    setFinalMedicalExpense(BigDecimal v)          { this.finalMedicalExpense = v; }
+    public BigDecimal              getFinalRepairCost()                          { return finalRepairCost; }
+    public void                    setFinalRepairCost(BigDecimal v)              { this.finalRepairCost = v; }
+    public BigDecimal              getFinalSettlementAmount()                    { return finalSettlementAmount; }
+    public void                    setFinalSettlementAmount(BigDecimal v)        { this.finalSettlementAmount = v; }
+    public LocalDateTime           getPaidAt()                                   { return paidAt; }
+    public void                    setPaidAt(LocalDateTime v)                    { this.paidAt = v; }
+    public String                  getPaymentAccount()                           { return paymentAccount; }
+    public void                    setPaymentAccount(String v)                   { this.paymentAccount = v; }
+    public String                  getPaymentId()                                { return paymentId; }
+    public void                    setPaymentId(String v)                        { this.paymentId = v; }
+    public PaymentStatus           getPaymentStatus()                            { return paymentStatus; }
+    public void                    setPaymentStatus(PaymentStatus v)             { this.paymentStatus = v; }
+    public String                  getProcessorEmployeeNo()                      { return processorEmployeeNo; }
+    public void                    setProcessorEmployeeNo(String v)              { this.processorEmployeeNo = v; }
+    public BigDecimal              getRetentionEstimate()                        { return retentionEstimate; }
+    public void                    setRetentionEstimate(BigDecimal v)            { this.retentionEstimate = v; }
+    public Objection               getObjection()                                { return objection; }
+    public void                    setObjection(Objection v)                     { this.objection = v; }
+    public Subrogation             getSubrogation()                              { return subrogation; }
+    public void                    setSubrogation(Subrogation v)                 { this.subrogation = v; }
+    public PaymentApprovalDocument getPaymentApprovalDocument()                  { return paymentApprovalDocument; }
+    public void                    setPaymentApprovalDocument(PaymentApprovalDocument v){ this.paymentApprovalDocument = v; }
+
+    @Override
+    public String toString() {
+        return "InsurancePayment{paymentId='" + paymentId + "', paymentStatus=" + paymentStatus + ", finalSettlementAmount=" + finalSettlementAmount + "}";
+    }
 }

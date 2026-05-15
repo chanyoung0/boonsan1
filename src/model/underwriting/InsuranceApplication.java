@@ -6,6 +6,7 @@ import enums.SpecialContractType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// 보험 청약 도메인 모델 — 보험 가입 신청 정보 관리
 public class InsuranceApplication {
 
     private String applicationId;
@@ -20,13 +21,63 @@ public class InsuranceApplication {
     private SpecialContractType specialContractList;
     private String termsVersion;
 
+    public InsuranceApplication() {}
+
+    public InsuranceApplication(String productCode, String insuredPersonInfo, BigDecimal insuredAmount,
+                                BigDecimal premium, String paymentCycle, SpecialContractType specialContractList,
+                                String termsVersion, String appliedCondition) {
+        this.productCode = productCode;
+        this.insuredPersonInfo = insuredPersonInfo;
+        this.insuredAmount = insuredAmount;
+        this.premium = premium;
+        this.paymentCycle = paymentCycle;
+        this.specialContractList = specialContractList;
+        this.termsVersion = termsVersion;
+        this.appliedCondition = appliedCondition;
+    }
+
+    // 청약 상태 변경
     public void changeApplicationStatus() {}
 
+    // 청약 확정
     public void confirmApplication() {}
 
+    // 증권번호 발행
     public void issuePolicyNumber() {}
 
-    public void receiveApplication() {}
+    // 청약 접수 — 생성된 청약번호 반환
+    public String receiveApplication() {
+        this.applicationStatus = ApplicationStatus.PENDING;
+        this.appliedAt = LocalDateTime.now();
+        this.applicationId = "APP-" + System.currentTimeMillis();
+        return applicationId;
+    }
 
-    public String getApplicationId() { return applicationId; }
+    public String              getApplicationId()                       { return applicationId; }
+    public void                setApplicationId(String v)              { this.applicationId = v; }
+    public ApplicationStatus   getApplicationStatus()                  { return applicationStatus; }
+    public void                setApplicationStatus(ApplicationStatus v){ this.applicationStatus = v; }
+    public LocalDateTime       getAppliedAt()                          { return appliedAt; }
+    public void                setAppliedAt(LocalDateTime v)           { this.appliedAt = v; }
+    public String              getAppliedCondition()                   { return appliedCondition; }
+    public void                setAppliedCondition(String v)           { this.appliedCondition = v; }
+    public BigDecimal          getInsuredAmount()                      { return insuredAmount; }
+    public void                setInsuredAmount(BigDecimal v)          { this.insuredAmount = v; }
+    public String              getInsuredPersonInfo()                  { return insuredPersonInfo; }
+    public void                setInsuredPersonInfo(String v)          { this.insuredPersonInfo = v; }
+    public String              getPaymentCycle()                       { return paymentCycle; }
+    public void                setPaymentCycle(String v)               { this.paymentCycle = v; }
+    public BigDecimal          getPremium()                            { return premium; }
+    public void                setPremium(BigDecimal v)                { this.premium = v; }
+    public String              getProductCode()                        { return productCode; }
+    public void                setProductCode(String v)                { this.productCode = v; }
+    public SpecialContractType getSpecialContractList()                { return specialContractList; }
+    public void                setSpecialContractList(SpecialContractType v){ this.specialContractList = v; }
+    public String              getTermsVersion()                       { return termsVersion; }
+    public void                setTermsVersion(String v)               { this.termsVersion = v; }
+
+    @Override
+    public String toString() {
+        return "InsuranceApplication{applicationId='" + applicationId + "', applicationStatus=" + applicationStatus + "}";
+    }
 }

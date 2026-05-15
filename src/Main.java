@@ -1,10 +1,10 @@
-import service.underwriting.UnderwritingService;
-import service.contract.EndorsementService;
-import service.contract.ReinstatementService;
-import service.contract.PaymentCollectionService;
-import service.contract.MaturityContractService;
-import service.accident.AccidentReportService;
-import service.accident.DamageInvestigationService;
+import console.underwriting.UnderwritingConsole;
+import console.contract.EndorsementConsole;
+import console.contract.ReinstatementConsole;
+import console.contract.PaymentCollectionConsole;
+import console.contract.MaturityContractConsole;
+import console.accident.AccidentReportConsole;
+import console.accident.DamageInvestigationConsole;
 
 import static common.ConsoleUtil.*;
 
@@ -31,13 +31,13 @@ public class Main {
             String choice = sc.nextLine().trim();
 
             switch (choice) {
-                case "1": UnderwritingService.run();      break;
-                case "2": EndorsementService.run();       break;
-                case "3": ReinstatementService.run();     break;
-                case "4": PaymentCollectionService.run(); break;
-                case "5": MaturityContractService.run();  break;
-                case "6": AccidentReportService.run();    break;
-                case "7": DamageInvestigationService.run(); break;
+                case "1": UnderwritingConsole.run();      break;
+                case "2": EndorsementConsole.run();       break;
+                case "3": ReinstatementConsole.run();     break;
+                case "4": PaymentCollectionConsole.run(); break;
+                case "5": MaturityContractConsole.run();  break;
+                case "6": AccidentReportConsole.run();    break;
+                case "7": DamageInvestigationConsole.run(); break;
                 case "8":
                     System.out.println("\n시스템을 종료합니다.");
                     sc.close();

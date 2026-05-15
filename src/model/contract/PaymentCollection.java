@@ -16,6 +16,19 @@ public class PaymentCollection {
     private BigDecimal unpaidAmount;
     private int unpaidInstallmentCount;
 
+    public PaymentCollection() {}
+
+    public PaymentCollection(LocalDate dueDate, BigDecimal collectedAmount,
+                             BigDecimal unpaidAmount, int unpaidInstallmentCount,
+                             ProcessingResult processingResult, LocalDateTime collectedAt) {
+        this.dueDate = dueDate;
+        this.collectedAmount = collectedAmount;
+        this.unpaidAmount = unpaidAmount;
+        this.unpaidInstallmentCount = unpaidInstallmentCount;
+        this.processingResult = processingResult;
+        this.collectedAt = collectedAt;
+    }
+
     // 연체료 계산
     public void calculateLateFee() {}
 
@@ -27,4 +40,22 @@ public class PaymentCollection {
 
     // 수금 처리
     public void processCollection() {}
+
+    public BigDecimal      getCollectedAmount()                     { return collectedAmount; }
+    public void            setCollectedAmount(BigDecimal v)         { this.collectedAmount = v; }
+    public LocalDateTime   getCollectedAt()                         { return collectedAt; }
+    public void            setCollectedAt(LocalDateTime v)          { this.collectedAt = v; }
+    public LocalDate       getDueDate()                             { return dueDate; }
+    public void            setDueDate(LocalDate v)                  { this.dueDate = v; }
+    public ProcessingResult getProcessingResult()                   { return processingResult; }
+    public void            setProcessingResult(ProcessingResult v)  { this.processingResult = v; }
+    public BigDecimal      getUnpaidAmount()                        { return unpaidAmount; }
+    public void            setUnpaidAmount(BigDecimal v)            { this.unpaidAmount = v; }
+    public int             getUnpaidInstallmentCount()              { return unpaidInstallmentCount; }
+    public void            setUnpaidInstallmentCount(int v)         { this.unpaidInstallmentCount = v; }
+
+    @Override
+    public String toString() {
+        return "PaymentCollection{dueDate=" + dueDate + ", collectedAmount=" + collectedAmount + ", processingResult=" + processingResult + "}";
+    }
 }

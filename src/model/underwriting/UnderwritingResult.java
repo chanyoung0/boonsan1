@@ -13,9 +13,33 @@ public class UnderwritingResult {
     private SurchargeCondition surchargeCondition;
     private UnderwritingResultType underwritingResult;
 
+    public UnderwritingResult() {}
+
+    public UnderwritingResult(UnderwritingResultType underwritingResult, String rejectionReason,
+                              SurchargeCondition surchargeCondition, LocalDateTime confirmedAt) {
+        this.underwritingResult = underwritingResult;
+        this.rejectionReason = rejectionReason;
+        this.surchargeCondition = surchargeCondition;
+        this.confirmedAt = confirmedAt;
+    }
+
     // 심사 결과 조회
     public void getResult() {}
 
     // 심사 결과 등록
     public void registerResult() {}
+
+    public LocalDateTime        getConfirmedAt()                    { return confirmedAt; }
+    public void                 setConfirmedAt(LocalDateTime v)     { this.confirmedAt = v; }
+    public String               getRejectionReason()                { return rejectionReason; }
+    public void                 setRejectionReason(String v)        { this.rejectionReason = v; }
+    public SurchargeCondition   getSurchargeCondition()             { return surchargeCondition; }
+    public void                 setSurchargeCondition(SurchargeCondition v) { this.surchargeCondition = v; }
+    public UnderwritingResultType getUnderwritingResult()           { return underwritingResult; }
+    public void                 setUnderwritingResult(UnderwritingResultType v) { this.underwritingResult = v; }
+
+    @Override
+    public String toString() {
+        return "UnderwritingResult{underwritingResult=" + underwritingResult + ", confirmedAt=" + confirmedAt + "}";
+    }
 }
