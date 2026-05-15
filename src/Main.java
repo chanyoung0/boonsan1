@@ -3,8 +3,12 @@ import console.contract.EndorsementConsole;
 import console.contract.ReinstatementConsole;
 import console.contract.PaymentCollectionConsole;
 import console.contract.MaturityContractConsole;
+import console.contract.PayoutConsole;
 import console.accident.AccidentReportConsole;
 import console.accident.DamageInvestigationConsole;
+import console.insurance.InsuranceDesignConsole;
+import console.compensation.CompensationEvaluationConsole;
+import console.compensation.PartnerManagementConsole;
 
 import static common.ConsoleUtil.*;
 
@@ -25,7 +29,11 @@ public class Main {
             System.out.println("  5. 만기계약 관리");
             System.out.println("  6. 사고 접수");
             System.out.println("  7. 손해조사");
-            System.out.println("  8. 종료");
+            System.out.println("  8. 상품 설계");
+            System.out.println("  9. 제지급금 관리");
+            System.out.println(" 10. 보상 평가 관리");
+            System.out.println(" 11. 협력업체 관리");
+            System.out.println(" 12. 종료");
             System.out.println("=======================================");
             System.out.print(">> 선택: ");
             String choice = sc.nextLine().trim();
@@ -36,9 +44,13 @@ public class Main {
                 case "3": ReinstatementConsole.run();     break;
                 case "4": PaymentCollectionConsole.run(); break;
                 case "5": MaturityContractConsole.run();  break;
-                case "6": AccidentReportConsole.run();    break;
-                case "7": DamageInvestigationConsole.run(); break;
-                case "8":
+                case "6": AccidentReportConsole.run();           break;
+                case "7": DamageInvestigationConsole.run();      break;
+                case "8": InsuranceDesignConsole.run();          break;
+                case "9": PayoutConsole.run();                   break;
+                case "10": CompensationEvaluationConsole.run();  break;
+                case "11": PartnerManagementConsole.run();       break;
+                case "12":
                     System.out.println("\n시스템을 종료합니다.");
                     sc.close();
                     return;
