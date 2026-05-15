@@ -4,6 +4,7 @@ import console.contract.ReinstatementConsole;
 import console.contract.PaymentCollectionConsole;
 import console.contract.MaturityContractConsole;
 import console.contract.PayoutConsole;
+import console.contract.CompensationEvaluationConsole;
 import console.accident.AccidentReportConsole;
 import console.accident.DamageInvestigationConsole;
 import console.insurance.InsuranceProductConsole;
@@ -29,7 +30,8 @@ public class Main {
             System.out.println("  7. 손해조사");
             System.out.println("  8. 상품 개발");
             System.out.println("  9. 제지급금 관리");
-            System.out.println("  10. 종료");
+            System.out.println("  10. 보상평가 관리");
+            System.out.println("  11. 종료");
             System.out.println("=======================================");
             System.out.print(">> 선택: ");
             String choice = sc.nextLine().trim();
@@ -44,7 +46,8 @@ public class Main {
                 case "7": DamageInvestigationConsole.run(); break;
                 case "8": InsuranceProductConsole.run();  break;
                 case "9": PayoutConsole.run();            break;
-                case "10":
+                case "10": CompensationEvaluationConsole.run(); break;
+                case "11":
                     System.out.println("\n시스템을 종료합니다.");
                     sc.close();
                     return;

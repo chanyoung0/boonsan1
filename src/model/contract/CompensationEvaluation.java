@@ -36,10 +36,18 @@ public class CompensationEvaluation {
     public String analyzeDamageAmount() { return damageAnalysisResult; }
 
     // 보상 통계 계산
-    public void calculateCompensationStatistics() {}
+    public void calculateCompensationStatistics() {
+        if (this.compensationStatistics == null) {
+            this.compensationStatistics = "평가월: " + evaluationMonth + "월 | 손해액: " + damageAmount;
+        }
+    }
 
     // 평가 결과 저장
-    public void saveEvaluationResult() {}
+    public void saveEvaluationResult() {
+        if (this.evaluationStatus == null || this.evaluationStatus == CompensationStatus.IN_PROGRESS) {
+            this.evaluationStatus = CompensationStatus.COMPLETED;
+        }
+    }
 
     public String             getCompensationStatistics()                    { return compensationStatistics; }
     public void               setCompensationStatistics(String v)           { this.compensationStatistics = v; }
