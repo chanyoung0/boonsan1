@@ -1,8 +1,16 @@
 package console.accident;
 
+import enums.PaymentStatus;
+import enums.SubrogationStatus;
+import model.accident.InsurancePayment;
+import model.accident.Subrogation;
 import service.accident.DamageInvestigationService;
+import service.accident.SubrogationService;
 
 import static common.ConsoleUtil.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 // 손해조사 콘솔 I/O — 손해사정인/SIU 유스케이스 입출력 전담
 public class DamageInvestigationConsole {
@@ -95,14 +103,28 @@ public class DamageInvestigationConsole {
 
     private static void insurancePaymentSub(String reportNo) {
         System.out.println("\n  [보험금을 지급한다]");
+        BigDecimal paymentAmount = BigDecimal.valueOf(980_000L);
         System.out.println("  [시스템] 사고번호: " + reportNo + " | 최종 결정보험금: 980,000원");
         enter();
-        System.out.println("  [시스템] 수익자 정보: 신한은행 110-123-456789 (홍길동)");
-        input("  사원번호");
+        String paymentAccount = "신한은행 110-123-456789 (홍길동)";
+        System.out.println("  [시스템] 수익자 정보: " + paymentAccount);
+        String processorEmployeeNo = input("  사원번호");
+        InsurancePayment payment = new InsurancePayment(
+                "PAY-" + System.currentTimeMillis(),
+                paymentAccount,
+                processorEmployeeNo,
+                paymentAmount,
+                BigDecimal.valueOf(850_000L),
+                BigDecimal.valueOf(100_000L),
+                BigDecimal.valueOf(30_000L),
+                BigDecimal.ZERO,
+                PaymentStatus.PENDING
+        );
         enter();
-        System.out.println("  [시스템] 이체 완료: 980,000원 → 신한은행 110-123-456789 (홍길동)");
+        PaymentStatus paymentStatus = payment.transfer();
+        System.out.println("  [시스템] 이체 완료: 980,000원 → " + payment.getPaymentAccount());
         enter();
-        System.out.println("  [시스템] 보험금 지급 결과 DB 저장 완료 | 사건 상태: '지급 완료'");
+        System.out.println("  [시스템] 보험금 지급 결과 DB 저장 완료 | 지급상태: '" + paymentStatus + "' | 사건 상태: '지급 완료'");
 
         boolean objected = rnd.nextInt(10) < 2;
         System.out.println("\n  [시스템] 피보험자 응답: " + (objected ? "이의 제기" : "수령 확인"));
@@ -112,11 +134,47 @@ public class DamageInvestigationConsole {
             objectionSub();
         }
 
-        System.out.print("\n  제3자 과실로 구상 처리가 필요합니까? (Y/N): ");
-        if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
-            System.out.println("  [시스템] 사건 상태: '지급 완료/구상 처리 필요'");
+        String subrogationAnswer = input("  제3자 과실로 구상 처리가 필요합니까? (Y/N)");
+        if (DamageInvestigationService.needsSubrogation(subrogationAnswer)) {
+            System.out.println("  >> <<extend>> [구상을 처리한다] 시나리오 시작");
+            subrogationSub(payment);
         } else {
             System.out.println("  [시스템] 사건 상태: '종결'");
+        }
+    }
+
+    private static void subrogationSub(InsurancePayment payment) {
+        System.out.println("\n    [구상을 처리한다]");
+        String offenderName = input("  가해자명");
+        String offenderContact = input("  가해자 연락처");
+        String faultRatioInput = input("  제3자 과실비율 (%)");
+        String deadlineInput = input("  납부기한 (YYYY-MM-DD, Enter: 14일 후)");
+        String depositAccount = input("  구상금 입금계좌");
+
+        float faultRatio = SubrogationService.parseFaultRatio(faultRatioInput);
+        LocalDateTime paymentDeadline = SubrogationService.resolvePaymentDeadline(deadlineInput);
+        Subrogation subrogation = SubrogationService.createSubrogation(
+                payment,
+                offenderName,
+                offenderContact,
+                faultRatio,
+                payment.getFinalSettlementAmount(),
+                paymentDeadline,
+                depositAccount
+        );
+
+        System.out.println("    [시스템] 구상 접수 완료 | 구상번호: " + subrogation.getSubrogationId());
+        System.out.println("    [시스템] 구상금액: " + formatAmount(subrogation.getPaymentAmount().longValue()) + " | 상태: " + subrogation.getSubrogationStatus());
+
+        SubrogationStatus claimStatus = SubrogationService.sendClaim(subrogation);
+        System.out.println("    [시스템] 구상 청구 발송 완료 | 상태: " + claimStatus);
+
+        String depositAnswer = input("  가해자 구상금 입금이 확인되었습니까? (Y/N)");
+        SubrogationStatus depositStatus = SubrogationService.confirmDeposit(subrogation, depositAnswer);
+        if (depositStatus == SubrogationStatus.COMPLETED) {
+            System.out.println("    [시스템] 입금 확인 완료 | 구상 상태: '" + depositStatus + "' | 사건 상태: '구상 완료'");
+        } else {
+            System.out.println("    [시스템] 입금 미확인 | 구상 상태: '" + depositStatus + "' | 사건 상태: '구상 진행 중'");
         }
     }
 

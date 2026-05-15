@@ -34,16 +34,24 @@ public class Subrogation {
     }
 
     // 입금 확인
-    public void confirmDeposit() {}
+    public void confirmDeposit() {
+        this.subrogationStatus = SubrogationStatus.COMPLETED;
+    }
 
     // 구상 문서 생성
-    public void generateSubrogationDocument() {}
+    public void generateSubrogationDocument() {
+        if (this.subrogationStatus == null) {
+            this.subrogationStatus = SubrogationStatus.PENDING;
+        }
+    }
 
     // 지급 상세 조회 — 관련 InsurancePayment 반환
     public InsurancePayment retrievePaymentDetails() { return null; }
 
     // 구상 청구 발송
-    public void sendClaim() {}
+    public void sendClaim() {
+        this.subrogationStatus = SubrogationStatus.IN_PROGRESS;
+    }
 
     public String           getDepositAccount()                     { return depositAccount; }
     public void             setDepositAccount(String v)             { this.depositAccount = v; }
