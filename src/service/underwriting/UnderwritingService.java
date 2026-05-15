@@ -46,6 +46,11 @@ public class UnderwritingService {
         return "거절";
     }
 
+    // 자동심사 가능 여부 판단
+    public static boolean canAutoReview(int score) {
+        return score >= 85 || score < 65;
+    }
+
     // 공동인수 필요 여부 판단 (70점 미만)
     public static boolean needsCoinsurance(int score) {
         return score < 70;

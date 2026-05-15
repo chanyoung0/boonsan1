@@ -96,7 +96,7 @@ public class UnderwritingConsole {
 
         System.out.println("\n[언더라이터] '심사점수 계산 및 보고서 출력' 버튼을 누릅니다.");
         System.out.println("[시스템] Rule-Based 엔진으로 자동심사를 실행 중...");
-        boolean canAutoReview = false;
+        boolean canAutoReview = UnderwritingService.canAutoReview(score);
         System.out.println("[시스템] 자동심사 가능 여부: " + (canAutoReview ? "가능" : "불가 — 수동심사 전환"));
 
         if (!canAutoReview) {
@@ -111,9 +111,13 @@ public class UnderwritingConsole {
         System.out.println("  공동인수 추천: " + (coinsuranceRecommended ? "예 (심사점수 기준 미달)" : "아니오"));
 
         if (coinsuranceRecommended) {
-            System.out.println("\n[시스템] 공동인수 처리를 자동으로 시작합니다.");
-            System.out.println("  >> <<extend>> [공동인수를 처리한다] 시나리오 자동 시작");
-            if (!coinsuranceProcess(insuranceAmount)) return;
+            System.out.print("\n[언더라이터] 공동인수 처리를 진행하시겠습니까? (Y/N): ");
+            if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
+                System.out.println("  >> <<extend>> [공동인수를 처리한다] 시나리오 시작");
+                if (!coinsuranceProcess(insuranceAmount)) return;
+            } else {
+                System.out.println("[시스템] 공동인수 추천 내역만 보고서에 기록하고 심사를 계속합니다.");
+            }
         }
 
         System.out.println("\n[언더라이터] 최종 심사결과를 입력합니다.");

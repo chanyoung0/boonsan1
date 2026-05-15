@@ -36,18 +36,19 @@ public class EndorsementConsole {
         input("변경 내용");
         input("변경 사유");
 
-        boolean needsReview = EndorsementService.needsUnderwriting(endorsementType);
-        System.out.println("\n[시스템] 심사 필요 여부: " + (needsReview ? "필요 (위험 변동 배서)" : "불필요 (단순 조건 변경)"));
-
-        if (!needsReview) {
-            System.out.println("[시스템] 배서 신청 내용을 처리합니다 (심사 생략).");
-            System.out.println("[시스템] 배서 처리 완료.");
-            return;
-        }
+        boolean needsReview = EndorsementService.requiresFullUnderwriting(endorsementType);
+        System.out.println("\n[시스템] 심사 강도: " + (needsReview ? "정식 심사 필요 (위험 변동 배서)" : "간이 심사 (단순 조건 변경)"));
 
         System.out.println("\n[계약관리담당자] '심사요청' 버튼을 누릅니다.");
         System.out.println("  >> <<include>> [심사를 요청한다] 시나리오 시작");
-        String uwResult = underwritingRequestSub("배서");
+        String uwResult;
+        if (needsReview) {
+            uwResult = underwritingRequestSub("배서");
+        } else {
+            System.out.println("  [시스템] 단순 조건 변경으로 확인되어 간이 심사를 수행합니다.");
+            uwResult = "승인 (간이 심사)";
+            System.out.println("  [시스템] 요청상태: '심사완료' | 결과: " + uwResult);
+        }
 
         System.out.println("\n[시스템] 심사 결과: " + uwResult);
         enter();
