@@ -1,6 +1,7 @@
 package model.underwriting;
 
 import enums.ApplicationStatus;
+import enums.PaymentCycle;
 import enums.SpecialContractType;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ public class InsuranceApplication {
     private String appliedCondition;
     private BigDecimal insuredAmount;
     private String insuredPersonInfo;
-    private String paymentCycle;
+    private PaymentCycle paymentCycle;
     private BigDecimal premium;
     private String productCode;
     private SpecialContractType specialContractList;
@@ -24,7 +25,7 @@ public class InsuranceApplication {
     public InsuranceApplication() {}
 
     public InsuranceApplication(String productCode, String insuredPersonInfo, BigDecimal insuredAmount,
-                                BigDecimal premium, String paymentCycle, SpecialContractType specialContractList,
+                                BigDecimal premium, PaymentCycle paymentCycle, SpecialContractType specialContractList,
                                 String termsVersion, String appliedCondition) {
         this.productCode = productCode;
         this.insuredPersonInfo = insuredPersonInfo;
@@ -65,8 +66,8 @@ public class InsuranceApplication {
     public void                setInsuredAmount(BigDecimal v)          { this.insuredAmount = v; }
     public String              getInsuredPersonInfo()                  { return insuredPersonInfo; }
     public void                setInsuredPersonInfo(String v)          { this.insuredPersonInfo = v; }
-    public String              getPaymentCycle()                       { return paymentCycle; }
-    public void                setPaymentCycle(String v)               { this.paymentCycle = v; }
+    public PaymentCycle        getPaymentCycle()                       { return paymentCycle; }
+    public void                setPaymentCycle(PaymentCycle v)         { this.paymentCycle = v; }
     public BigDecimal          getPremium()                            { return premium; }
     public void                setPremium(BigDecimal v)                { this.premium = v; }
     public String              getProductCode()                        { return productCode; }

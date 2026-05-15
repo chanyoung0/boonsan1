@@ -2,6 +2,7 @@ package service.insurance;
 
 import db.AuthorizationDBO;
 import db.InsuranceDBO;
+import external.FinancialSupervisoryService;
 import model.insurance.*;
 
 import java.math.BigDecimal;

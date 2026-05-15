@@ -1,6 +1,6 @@
-package model.insurance;
+package external;
 
-// 금융감독원 도메인 모델 — 보험 상품 인가 요청 및 결과 수신 처리
+// 금융감독원 외부 시스템 Mock — 보험 상품 인가 요청 및 결과 수신 시뮬레이션
 public class FinancialSupervisoryService {
 
     private String institutionCode;

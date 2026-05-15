@@ -1,5 +1,6 @@
 package model.insurance;
 
+import external.FinancialSupervisoryService;
 import java.time.LocalDateTime;
 
 // 상품 인가 도메인 모델 — 금융감독원 인가 요청 및 결과 반영 정보 관리

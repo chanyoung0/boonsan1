@@ -8,7 +8,7 @@ import java.util.List;
 public class ContractDBO extends DBA {
 
     public Contract findByPolicyNumber(String policyNumber) {
-        executeSelect("SELECT * FROM contract WHERE policy_number = '" + policyNumber + "'");
+        executeSelect("SELECT * FROM contract WHERE policy_number = ?", policyNumber);
         return null;
     }
 
@@ -18,18 +18,22 @@ public class ContractDBO extends DBA {
     }
 
     public void save(Contract contract) {
-        executeInsert("INSERT INTO contract (policy_number, contract_status, payment_cycle, has_unpaid_premium, installment_count) " +
-            "VALUES ('" + contract.getPolicyNumber() + "', '" + contract.getContractStatus() + "', '" +
-            contract.getPaymentCycle() + "', " + contract.getHasUnpaidPremium() + ", " + contract.getInstallmentCount() + ")");
+        executeInsert(
+            "INSERT INTO contract (policy_number, contract_status, payment_cycle, has_unpaid_premium, installment_count) " +
+            "VALUES (?, ?, ?, ?, ?)",
+            contract.getPolicyNumber(), contract.getContractStatus(), contract.getPaymentCycle(),
+            contract.getHasUnpaidPremium(), contract.getInstallmentCount()
+        );
     }
 
     public void update(Contract contract) {
-        executeUpdate("UPDATE contract SET contract_status = '" + contract.getContractStatus() +
-            "', has_unpaid_premium = " + contract.getHasUnpaidPremium() +
-            " WHERE policy_number = '" + contract.getPolicyNumber() + "'");
+        executeUpdate(
+            "UPDATE contract SET contract_status = ?, has_unpaid_premium = ? WHERE policy_number = ?",
+            contract.getContractStatus(), contract.getHasUnpaidPremium(), contract.getPolicyNumber()
+        );
     }
 
     public void delete(String policyNumber) {
-        executeDelete("DELETE FROM contract WHERE policy_number = '" + policyNumber + "'");
+        executeDelete("DELETE FROM contract WHERE policy_number = ?", policyNumber);
     }
 }

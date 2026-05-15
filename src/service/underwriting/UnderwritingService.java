@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 // 보험청약 심사 서비스 — 심사 점수 계산, 판정, 객체 저장 유스케이스 흐름 담당
 public class UnderwritingService {
 
-    private final long REINSURANCE_THRESHOLD = 500_000_000L;
+    private static final long REINSURANCE_THRESHOLD = 500_000_000L;
 
     // 입력값 기반 심사점수 계산 (기본점수 100점에서 감점 합산)
     public int calculateInputScore(String pastDisease, String medication, String surgery,
@@ -107,7 +107,7 @@ public class UnderwritingService {
         application.setInsuredPersonInfo(name);
         application.setInsuredAmount(BigDecimal.valueOf(insuranceAmount));
         application.setPremium(BigDecimal.valueOf(insuranceAmount / 1000));
-        application.setPaymentCycle("월납");
+        application.setPaymentCycle(PaymentCycle.MONTHLY);
         application.setAppliedCondition(appliedCondition);
         application.setTermsVersion("v2024.1");
         application.receiveApplication();

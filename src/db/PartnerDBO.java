@@ -8,7 +8,7 @@ import java.util.List;
 public class PartnerDBO extends DBA {
 
     public Partner findById(String partnerId) {
-        executeSelect("SELECT * FROM partner WHERE id = '" + partnerId + "'");
+        executeSelect("SELECT * FROM partner WHERE id = ?", partnerId);
         return null;
     }
 
@@ -18,14 +18,23 @@ public class PartnerDBO extends DBA {
     }
 
     public void save(Partner partner) {
-        executeInsert("INSERT INTO partner (...) VALUES (...)");
+        executeInsert(
+            "INSERT INTO partner (id, partner_name, partner_type, contact, responsibility, evaluation_grade) " +
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            partner.getId(), partner.getPartnerName(), partner.getPartnerType(),
+            partner.getContact(), partner.getResponsibility(), partner.getEvaluationGrade()
+        );
     }
 
     public void update(Partner partner) {
-        executeUpdate("UPDATE partner SET ... WHERE id = ...");
+        executeUpdate(
+            "UPDATE partner SET partner_name = ?, partner_type = ?, contact = ?, responsibility = ?, evaluation_grade = ? WHERE id = ?",
+            partner.getPartnerName(), partner.getPartnerType(), partner.getContact(),
+            partner.getResponsibility(), partner.getEvaluationGrade(), partner.getId()
+        );
     }
 
     public void delete(String partnerId) {
-        executeDelete("DELETE FROM partner WHERE id = '" + partnerId + "'");
+        executeDelete("DELETE FROM partner WHERE id = ?", partnerId);
     }
 }
