@@ -24,10 +24,21 @@ public class Partner {
         this.evaluationGrade = evaluationGrade;
     }
 
-    public void register()       {}
-    public void save()           {}
+    public void register()       {
+        if (this.evaluationGrade == null) {
+            this.evaluationGrade = EvaluationGrade.AVERAGE;
+        }
+    }
+
+    public void save()           {
+        register();
+    }
+
     public void searchPartner()  {}
-    public void update()         {}
+
+    public void update()         {
+        register();
+    }
 
     public String          getId()                     { return id; }
     public void            setId(String v)             { this.id = v; }
