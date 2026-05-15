@@ -1,51 +1,55 @@
 package service.underwriting;
 
+import common.IdGenerator;
+import repository.AccidentHistoryRepository;
+import repository.CoinsurerRepository;
+import repository.InsuranceApplicationRepository;
+import repository.InsuredPersonRepository;
+
 import static common.ConsoleUtil.*;
 
+// 보험청약 심사 시나리오 — 인스턴스 메서드 + 의존성 주입
 public class UnderwritingService {
 
     private static final long REINSURANCE_THRESHOLD = 500_000_000L; // 자사 보유한도: 5억원
 
-    // ======================================================
-    // 자동심사 감점 기준표
-    // 기본점수: 100점
-    //   과거질병이력 있음  → -10점
-    //   투약여부 Y         → -8점
-    //   수술이력 있음      → -7점
-    //   가족력 있음        → -5점
-    //   흡연여부 Y         → -5점
-    //   사고이력 있음      → -5점 (신용정보)
-    //   음주량 있음        → -3점
-    //   BMI 25초과~30이하  → -3점 (과체중)
-    //   BMI 30초과         → -8점 (비만)
-    //   나이 50초과~60이하 → -5점
-    //   나이 60초과        → -10점
-    //   타사계약 있음      → -3점 (신용정보)
-    // 심사결과: 85점↑ 승인 / 65~84점 할증 / 64점↓ 거절
-    // 공동인수: 70점 미만
-    // ======================================================
+    private final InsuranceApplicationRepository applicationRepository;
+    private final InsuredPersonRepository insuredPersonRepository;
+    private final CoinsurerRepository coinsurerRepository;
+    private final AccidentHistoryRepository accidentHistoryRepository;
+    private final IdGenerator idGenerator;
+
+    // 의존성 주입으로 초기화
+    public UnderwritingService(InsuranceApplicationRepository applicationRepository,
+                               InsuredPersonRepository insuredPersonRepository,
+                               CoinsurerRepository coinsurerRepository,
+                               AccidentHistoryRepository accidentHistoryRepository,
+                               IdGenerator idGenerator) {
+        this.applicationRepository = applicationRepository;
+        this.insuredPersonRepository = insuredPersonRepository;
+        this.coinsurerRepository = coinsurerRepository;
+        this.accidentHistoryRepository = accidentHistoryRepository;
+        this.idGenerator = idGenerator;
+    }
 
     // ======================================================
     // 1. 보험청약 심사
     // 액터: 언더라이터
     // ======================================================
-    public static void run() {
+    public void run() {
         line();
         System.out.println("[유스케이스] 보험청약을 심사한다");
         System.out.println("액터: 언더라이터");
         line();
 
-        // Basic Path 1: 피보험자 기본 정보 입력
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
         String name = input("이름");
         input("생년월일 (YYYYMMDD)");
         input("주민등록번호");
         String vehicleNo = input("차량번호");
 
-        // 보험가입금액 미리 생성 (공동인수/재보험 보유액 계산에 사용)
         long insuranceAmount = (long)(rnd.nextInt(20) + 1) * 100_000_000L;
 
-        // Basic Path 2: 자사 DB 조회 — 시스템 자동 판단 (30% 신규 고객)
         System.out.println("\n[시스템] 자사 DB에서 피보험자 이력을 조회 중...");
         boolean isNewCustomer = rnd.nextInt(10) < 3;
         System.out.println("[시스템] 조회 결과: " + (isNewCustomer ? "신규 고객 (자사 U/W 이력 및 기존 계약 없음)" : "기존 고객 (이력 및 계약 존재)"));
@@ -53,7 +57,6 @@ public class UnderwritingService {
         String age, gender, job, income, pastDisease, medication, surgery, familyHistory, smoking, drinking, bmi, vehicleModel;
 
         if (isNewCustomer) {
-            // A1-1: 신규 고객 — 전체 정보 입력
             System.out.println("[언더라이터] 신규 고객 데이터를 입력합니다.");
             age           = input("나이");
             gender        = input("성별 (남/여)");
@@ -69,7 +72,6 @@ public class UnderwritingService {
             vehicleModel  = input("차량기종");
             System.out.println("[시스템] 신규 고객 정보가 자사 DB에 등록되었습니다.");
         } else {
-            // 기존 고객 — DB 조회값으로 초기화
             age = "35"; gender = "남"; job = "회사원"; income = "5,000만원";
             pastDisease = "없음"; medication = "N"; surgery = "없음";
             familyHistory = "없음"; smoking = "N"; drinking = "주 1회";
@@ -105,7 +107,6 @@ public class UnderwritingService {
             System.out.println("  수술이력: " + surgery + " | 가족력: " + familyHistory);
             System.out.println("  차량기종: " + vehicleModel + " | 차량번호: " + vehicleNo);
 
-            // A1-2: 갱신 필요 여부 — 언더라이터 판단
             System.out.print("\n[시스템] 갱신이 필요한 정보가 있습니까? (Y/N): ");
             if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
                 String[] fieldLabels = {"직업", "연소득", "투약여부", "수술이력", "흡연여부", "음주량", "BMI", "차량기종", "차량번호"};
@@ -136,7 +137,6 @@ public class UnderwritingService {
             }
         }
 
-        // ── 입력값 기반 감점 계산 ──
         int deductDisease      = hasValue(pastDisease) ? -10 : 0;
         int deductMedication   = isYes(medication)     ?  -8 : 0;
         int deductSurgery      = hasValue(surgery)     ?  -7 : 0;
@@ -151,27 +151,23 @@ public class UnderwritingService {
         int inputDeduction = deductDisease + deductMedication + deductSurgery
                 + deductFamilyHistory + deductSmoking + deductDrinking + deductBmi + deductAge;
 
-        // Basic Path 3: 신용정보 조회 <<include>>
         System.out.println("\n[언더라이터] '신용정보 조회' 버튼을 누릅니다.");
         System.out.println("  >> <<include>> [신용정보를 조회한다] 시나리오 시작");
-        int[] creditFlags = new int[2]; // [0]=사고이력여부, [1]=타사계약여부
+        int[] creditFlags = new int[2];
         int creditDeduction = creditInfoInquiry(name, creditFlags);
         if (creditDeduction == Integer.MIN_VALUE) {
-            return; // E1: ICIS API 응답 없음 → 임시저장 후 종료
+            return;
         }
         int deductAccident = creditFlags[0] == 1 ? -5 : 0;
         int deductContract = creditFlags[1] == 1 ? -3 : 0;
 
-        // 총점 계산
         int score = 100 + inputDeduction + creditDeduction;
 
-        // Basic Path 5: 자동심사 가능 여부 — 시스템 자동 판단 (100% 수동심사 전환)
         System.out.println("\n[언더라이터] '심사점수 계산 및 보고서 출력' 버튼을 누릅니다.");
         System.out.println("[시스템] Rule-Based 엔진으로 자동심사를 실행 중...");
         boolean canAutoReview = false;
         System.out.println("[시스템] 자동심사 가능 여부: " + (canAutoReview ? "가능" : "불가 — 수동심사 전환"));
 
-        // A3: 수동심사
         if (!canAutoReview) {
             score = manualUnderwriting(score);
         } else {
@@ -181,7 +177,6 @@ public class UnderwritingService {
         String recommended = score >= 85 ? "승인" : score >= 65 ? "할증" : "거절";
         boolean coinsuranceRecommended = score < 70;
 
-        // Basic Path 6: 자동심사 보고서 출력
         System.out.println("\n[시스템] 자동심사 보고서:");
         System.out.println("  ── 항목별 심사 결과 ─────────────────────────────────────────");
         printScoreRow("과거질병이력", hasValue(pastDisease) ? pastDisease : "없음", deductDisease);
@@ -205,16 +200,14 @@ public class UnderwritingService {
         System.out.println("  현재 심사점수    : " + score + "점");
         System.out.println("  공동인수 추천    : " + (coinsuranceRecommended ? "예 (심사점수 기준 미달)" : "아니오 (기준 충족)"));
 
-        // Basic Path 7: 공동인수 처리 — 심사점수 기준 미달 시 시스템이 자동 extend
         if (coinsuranceRecommended) {
             System.out.println("\n[시스템] 심사점수(" + score + "점) 기준 미달 — 공동인수 처리를 자동으로 시작합니다.");
             System.out.println("  >> <<extend>> [공동인수를 처리한다] 시나리오 자동 시작");
             if (!coinsuranceProcess(insuranceAmount)) {
-                return; // E1: 공동인수사 시스템 연결 실패 → 임시저장 후 종료
+                return;
             }
         }
 
-        // Basic Path 8: 최종 심사결과 — 언더라이터 판단
         System.out.println("\n[언더라이터] 최종 심사결과를 입력합니다.");
         String empNo   = input("사원번호");
         String empName = input("심사자 이름");
@@ -225,7 +218,6 @@ public class UnderwritingService {
         String finalChoice = sc.nextLine().trim();
         String finalResult = "2".equals(finalChoice) ? "할증" : "3".equals(finalChoice) ? "거절" : "승인";
 
-        // Basic Path 9: 심사결과 저장 (E1: 다시 시도 → 재시도 후 불가 시 관리자 통보)
         System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
         if (!simulateDbSave()) {
             System.out.println("[오류] 저장 실패.");
@@ -250,7 +242,6 @@ public class UnderwritingService {
         System.out.println("  ── 심사 결과 ──────────────────────────────────────");
         System.out.println("  최종 심사결과: " + finalResult);
 
-        // A4: 거절/할증 추가 출력
         if ("거절".equals(finalResult)) {
             System.out.println("  거절사유: 위험도 기준 초과 (총점 " + score + "점)");
             System.out.println("[시스템] 거절 처리로 청약이 종료됩니다.");
@@ -260,20 +251,16 @@ public class UnderwritingService {
             System.out.println("  할증조건: 보험료 15% 인상");
         }
 
-        // <<include>> 청약서 및 증권발행
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
         policyIssuance(name, finalResult, insuranceAmount);
     }
 
     // ======================================================
     // [신용정보를 조회한다] — <<include>>
-    // 반환값: Integer.MIN_VALUE = E1 실패 / 그 외 = 신용정보 감점 합산
-    // creditFlags[0]: 사고이력 있음=1 / creditFlags[1]: 타사계약 있음=1
     // ======================================================
-    private static int creditInfoInquiry(String name, int[] creditFlags) {
+    private int creditInfoInquiry(String name, int[] creditFlags) {
         System.out.println("\n  [신용정보 조회] ICIS API 호출 중... (피보험자: " + name + ")");
 
-        // E1: ICIS API 응답 실패 (10% 확률)
         if (rnd.nextInt(10) < 1) {
             System.out.println("  [오류] ICIS API가 응답하지 않아 정보를 가져오는 것을 실패했습니다.");
             System.out.println("  [언더라이터] '임시저장' 버튼을 누릅니다.");
@@ -285,7 +272,6 @@ public class UnderwritingService {
 
         int deduction = 0;
 
-        // 사고이력 조회 (30% 확률 이력 있음)
         boolean hasAccident = rnd.nextInt(10) < 3;
         System.out.println("  [시스템] 사고 이력 조회 결과: " + (hasAccident ? "이력 있음" : "이력 없음"));
         if (hasAccident) {
@@ -306,7 +292,6 @@ public class UnderwritingService {
             deduction -= 5;
         }
 
-        // 타사계약 조회 (40% 확률 계약 있음)
         System.out.println("\n  [언더라이터] '타사 계약 조회' 버튼을 누릅니다.");
         boolean hasOtherContract = rnd.nextInt(10) < 4;
         System.out.println("  [시스템] 타사 계약 조회 결과: " + (hasOtherContract ? "계약 있음" : "계약 없음"));
@@ -329,7 +314,7 @@ public class UnderwritingService {
     // ======================================================
     // A3: 수동심사
     // ======================================================
-    private static int manualUnderwriting(int baseScore) {
+    private int manualUnderwriting(int baseScore) {
         System.out.println("\n[시스템] 자동심사 불가 항목이 존재합니다. 추가 심사 유형을 선택하세요:");
         System.out.println("  1. 진단심사  2. 특인심사  3. 일반심사  4. 이미지심사  5. 적부심사");
         System.out.print(">> 선택: ");
@@ -387,10 +372,9 @@ public class UnderwritingService {
     // ======================================================
     // [공동인수를 처리한다] — <<extend>>
     // ======================================================
-    private static boolean coinsuranceProcess(long insuranceAmount) {
+    private boolean coinsuranceProcess(long insuranceAmount) {
         System.out.println("\n  [공동인수 처리]");
 
-        // E1: 공동인수사 시스템 연결 실패 (10% 확률)
         if (rnd.nextInt(10) < 1) {
             System.out.println("  [오류] 공동인수사 시스템 연결에 실패하였습니다. 잠시 후 다시 시도해 주세요.");
             System.out.println("  [언더라이터] '임시저장' 버튼을 누릅니다.");
@@ -401,7 +385,6 @@ public class UnderwritingService {
         }
 
         String coinsurerName;
-        // Basic Path 3: 공동인수사 선택 (A2 거절 시 Basic Path 2 복귀 → 루프)
         while (true) {
             System.out.println("  [시스템] 공동인수 가능 보험사 목록 (추천):");
             System.out.println("    1. 삼성화재   (최대 지분: 40%)");
@@ -411,7 +394,6 @@ public class UnderwritingService {
             System.out.print("  >> 공동인수사 선택: ");
             String choice = sc.nextLine().trim();
 
-            // A1: 직접 지정 — 전체 등록 보험사 목록 출력
             if ("4".equals(choice)) {
                 System.out.println("  [시스템] 전체 등록 보험사 목록:");
                 System.out.println("  ┌──────────────────┬────────────────┬──────────────────┐");
@@ -430,13 +412,11 @@ public class UnderwritingService {
                 coinsurerName = "2".equals(choice) ? "DB손해보험" : "3".equals(choice) ? "현대해상" : "삼성화재";
             }
 
-            // Basic Path 3: 지분율 입력 및 보유액 자동 계산
             int myShare;
             int coinsurerShare;
             try { myShare = Integer.parseInt(input("  자사 보유 지분율 (%)").trim()); } catch (NumberFormatException e) { myShare = 80; }
             try { coinsurerShare = Integer.parseInt(input("  " + coinsurerName + " 지분율 (%)").trim()); } catch (NumberFormatException e) { coinsurerShare = 20; }
 
-            // 보유액 자동 계산: 보험가입금액 × 지분율
             long myHolding = insuranceAmount * myShare / 100;
             long coinsurerHolding = insuranceAmount * coinsurerShare / 100;
             System.out.println("  [시스템] 보험가입금액    : " + formatAmount(insuranceAmount));
@@ -447,7 +427,6 @@ public class UnderwritingService {
             enter();
             System.out.println("  [시스템] 공동인수 참여 요청을 " + coinsurerName + "에 전송 중...");
 
-            // A2: 공동인수사 참여 거절 (20% 확률)
             if (rnd.nextInt(100) < 20) {
                 System.out.println("  [시스템] " + coinsurerName + " 참여 거절.");
                 System.out.println("  ── 거절 정보 ──────────────────────────────────────────");
@@ -456,7 +435,6 @@ public class UnderwritingService {
                 System.out.println("  [시스템] 언더라이터에게 거절 알림을 발송합니다.");
                 System.out.println("  [알림] " + coinsurerName + " 공동인수 거절. 대체 공동인수사를 선택하거나 지분 구조를 재조정하세요.");
                 System.out.println("  [언더라이터] 대체 공동인수사를 선택하거나 지분 구조를 재조정합니다.");
-                // Basic Path 2번으로 복귀 → 루프 처음으로
                 continue;
             }
 
@@ -473,14 +451,12 @@ public class UnderwritingService {
     // ======================================================
     // [청약서 및 증권발행을 한다] — <<include>>
     // ======================================================
-    private static void policyIssuance(String name, String finalResult, long insuranceAmount) {
+    private void policyIssuance(String name, String finalResult, long insuranceAmount) {
         System.out.println("\n  [청약서 및 증권발행]");
 
-        // 청약번호 및 적용조건 생성
         String appNo = "APP-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
         String appliedCondition = "할증".equals(finalResult) ? "할증체 (보험료 15% 인상)" : "표준체 (조건 없음)";
 
-        // Basic Path 7: 청약 확정 화면 (청약번호, 심사결과, 적용조건 포함)
         System.out.println("  [시스템] 청약 확정 화면:");
         System.out.println("    청약번호      : " + appNo);
         System.out.println("    피보험자      : " + name);
@@ -492,7 +468,6 @@ public class UnderwritingService {
 
         System.out.print("  [언더라이터] 청약서 내용에 오류가 있습니까? (Y/N): ");
         if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
-            // A1: 청약서 오류 수정
             System.out.println("  [언더라이터] '청약서 수정' 버튼을 누릅니다.");
             System.out.println("  [시스템] 수정 가능한 문서 형태로 전환합니다.");
             input("  수정할 항목 및 내용");
@@ -510,7 +485,6 @@ public class UnderwritingService {
         System.out.println("  [언더라이터] '발행 승인' 버튼을 누릅니다.");
         enter();
 
-        // E1: 저장 실패 → 다시 시도 버튼 → 성공 시 Basic Path 7 복귀 / 재시도 불가 시 관리자 통보
         System.out.println("  [시스템] 계약 정보를 DB에 저장 중...");
         if (!simulateDbSave()) {
             System.out.println("  [오류] 저장 실패.");
@@ -521,9 +495,7 @@ public class UnderwritingService {
                 return;
             }
         }
-        // Basic Path 7 복귀: 저장 성공 → 계속 진행
 
-        // DB 저장 완료 출력 (파라미터 보완)
         System.out.println("  [시스템] 청약서 확정 및 증권발행 완료.");
         System.out.println("  ── DB 저장 정보 ───────────────────────────────────────────");
         System.out.println("    청약번호      : " + appNo);
@@ -538,7 +510,6 @@ public class UnderwritingService {
         System.out.println("    적용 조건     : " + appliedCondition);
         System.out.println("    약관 버전     : 2024-표준약관 v3.2");
 
-        // <<extend>> 재보험 처리 — 보험가입금액 기준 시스템 자동 판단
         System.out.println("\n  [시스템] 재보험 처리 필요 여부 자동 판단 중...");
         System.out.println("  [시스템] 보험가입금액: " + formatAmount(insuranceAmount)
                 + " / 자사 보유한도: " + formatAmount(REINSURANCE_THRESHOLD));
@@ -548,10 +519,9 @@ public class UnderwritingService {
                     + ")를 초과 — 재보험 처리가 자동으로 시작됩니다.");
             System.out.println("  >> <<extend>> [재보험 처리를 한다] 시나리오 자동 시작");
             if (!reinsuranceProcess(policyNo, insuranceAmount)) {
-                return; // E1: 재보험사 응답 실패 → 임시저장 후 종료
+                return;
             }
         } else {
-            // A1: 재보험 불필요 안내 (보험가입금액 ≤ 자사 보유한도)
             System.out.println("  [시스템] \"재보험 적용 대상이 아님\"");
             System.out.println("  ── 판단 근거 ──────────────────────────────────────────────");
             System.out.println("    보험가입금액  : " + formatAmount(insuranceAmount));
@@ -576,7 +546,7 @@ public class UnderwritingService {
     // ======================================================
     // [재보험 처리를 한다] — <<extend>>
     // ======================================================
-    private static boolean reinsuranceProcess(String policyNo, long insuranceAmount) {
+    private boolean reinsuranceProcess(String policyNo, long insuranceAmount) {
         System.out.println("\n  [재보험 처리]");
         System.out.println("  [언더라이터] 재보험 처리 대상 계약을 선택합니다.");
         System.out.println("  [시스템] 계약 및 위험 정보:");
@@ -588,7 +558,6 @@ public class UnderwritingService {
         String reinsuranceRatioStr = input("  재보험 비율 (%)");
         String reinsurerName = input("  재보험사명");
 
-        // E1: 재보험사 응답 실패 (10% 확률)
         System.out.println("  [시스템] 재보험사에 요청 정보를 전송 중...");
         if (rnd.nextInt(10) < 1) {
             System.out.println("  ── 재보험사 응답 실패 ──────────────────────────────────────");
@@ -612,7 +581,6 @@ public class UnderwritingService {
         System.out.println("  [시스템] 재보험사 응답: 인수 가능 / 재보험비율 " + reinsuranceRatio
                 + "% / 재보험료 " + formatAmount(reinsurancePremium));
 
-        // A2: 조건 수정 — 언더라이터 판단
         System.out.print("  [언더라이터] 재보험 조건을 수정하시겠습니까? (Y/N): ");
         if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
             input("  수정할 비율 또는 조건");
@@ -622,7 +590,6 @@ public class UnderwritingService {
         System.out.println("  [언더라이터] '재보험 조건 검증 확인' 버튼을 누릅니다.");
         enter();
 
-        // 재보험 계상 결과 (보유비율, 계상금액, 계정과목 추가)
         int retentionRatio = 100 - reinsuranceRatio;
         long retentionAmount = insuranceAmount * retentionRatio / 100;
         System.out.println("  [시스템] 재보험료를 회계장부에 계상합니다.");
@@ -643,7 +610,6 @@ public class UnderwritingService {
         input("  청산 방식");
         System.out.println("  [시스템] 청산 정보가 저장되고 계약 상태: '재보험처리완료'");
 
-        // Basic Path 13 완료 후 처리 완료 화면
         System.out.println("  ── 재보험 처리 완료 ─────────────────────────────────────────");
         System.out.println("    계약번호      : " + policyNo);
         System.out.println("    재보험사      : " + reinsurerName);
@@ -654,31 +620,25 @@ public class UnderwritingService {
         return true;
     }
 
-    // ======================================================
-    // 보고서 출력 헬퍼
-    // ======================================================
-    private static void printScoreRow(String label, String value, int deduction) {
+    private void printScoreRow(String label, String value, int deduction) {
         String deductStr = deduction < 0 ? "(감점 " + deduction + "점)" : "(±0)";
         System.out.printf("  %-14s : %-28s %s%n", label, value, deductStr);
     }
 
-    // ======================================================
-    // 입력값 판단 헬퍼
-    // ======================================================
-    private static boolean isYes(String val) {
+    private boolean isYes(String val) {
         if (val == null || val.trim().isEmpty()) return false;
         String v = val.trim().toUpperCase();
         return v.equals("Y") || v.equals("예") || v.startsWith("Y");
     }
 
-    private static boolean hasValue(String val) {
+    private boolean hasValue(String val) {
         if (val == null || val.trim().isEmpty()) return false;
         String v = val.trim();
         return !v.equalsIgnoreCase("없음") && !v.equalsIgnoreCase("N")
                 && !v.equalsIgnoreCase("아니오") && !v.equalsIgnoreCase("none");
     }
 
-    private static boolean hasDrinking(String val) {
+    private boolean hasDrinking(String val) {
         if (val == null || val.trim().isEmpty()) return false;
         String v = val.trim();
         if (v.equalsIgnoreCase("없음") || v.equalsIgnoreCase("N") || v.equalsIgnoreCase("아니오")) return false;
@@ -686,12 +646,12 @@ public class UnderwritingService {
         return true;
     }
 
-    private static int parseAge(String ageStr) {
+    private int parseAge(String ageStr) {
         try { return Integer.parseInt(ageStr.replaceAll("[^0-9]", "")); }
         catch (NumberFormatException e) { return 0; }
     }
 
-    private static double parseBmi(String bmiStr) {
+    private double parseBmi(String bmiStr) {
         try { return Double.parseDouble(bmiStr.trim()); }
         catch (NumberFormatException e) { return 0.0; }
     }

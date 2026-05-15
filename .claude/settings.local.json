@@ -8,7 +8,8 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java src/insurance/UnderwritingService.java src/common/ConsoleUtil.java src/contract/EndorsementService.java src/contract/ReinstatementService.java)",
-      "Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java)"
+      "Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java)",
+      "Bash(javac -Xlint:all -d /tmp/boonsan-out -sourcepath src src/Main.java)"
     ]
   }
 }
