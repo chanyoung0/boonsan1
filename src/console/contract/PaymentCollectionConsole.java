@@ -1,5 +1,6 @@
 package console.contract;
 
+import model.contract.PaymentCollection;
 import service.contract.PaymentCollectionService;
 
 import static common.ConsoleUtil.*;
@@ -26,12 +27,17 @@ public class PaymentCollectionConsole {
         enter();
         System.out.println("[시스템] 자동이체 일괄 실행 중...");
 
-        boolean allSuccess = rnd.nextInt(10) < 7;
+        System.out.println("자동이체 처리 결과를 입력합니다: 1. 전체 성공  2. 일부 실패");
+        System.out.print(">> 선택: ");
+        String resultChoice = sc.nextLine().trim();
+        PaymentCollection paymentCollection = PaymentCollectionService.createCollectionResult(resultChoice);
+        boolean allSuccess = PaymentCollectionService.isCollectionFullySuccessful(paymentCollection);
         System.out.println("[시스템] 처리 결과: " + (allSuccess ? "전체 성공" : "일부 실패 발생"));
+        System.out.println(PaymentCollectionService.createCollectionResultSummary(paymentCollection));
 
         if (!allSuccess) {
             System.out.println("[시스템] 성공 2건 / 실패 1건 | 미납 계약: P2024-009012 (이철수, 220,000원)");
-            System.out.println("[시스템] 미납 안내장 발송 완료 (납입기한: 2024-01-31)");
+            System.out.println(PaymentCollectionService.createUnpaidNoticeSummary(paymentCollection));
             System.out.println("[시스템] P2024-009012 계약상태: '미납'");
 
             System.out.print("\n[시스템] 미납 지속 계약 이관 처리하시겠습니까? (Y/N): ");
@@ -39,8 +45,7 @@ public class PaymentCollectionConsole {
                 System.out.println("  1. 방문수금  2. 해지처리");
                 System.out.print(">> 선택: ");
                 String tType = sc.nextLine().trim();
-                String label = PaymentCollectionService.determineTransferType(tType);
-                System.out.println("[시스템] 이관 처리 완료: " + label);
+                System.out.println(PaymentCollectionService.createTransferSummary(tType));
             }
         } else {
             System.out.println("[시스템] 성공 3건 / 총 수금액: 468,000원");

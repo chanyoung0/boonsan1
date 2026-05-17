@@ -1,5 +1,6 @@
 package console.contract;
 
+import model.contract.Endorsement;
 import service.contract.EndorsementService;
 
 import static common.ConsoleUtil.*;
@@ -33,8 +34,12 @@ public class EndorsementConsole {
         System.out.println("[시스템] 계약정보 — 증권번호: " + policyNo + " | 계약상태: 유효");
 
         System.out.println("\n[계약관리담당자] 변경할 배서항목을 입력합니다.");
-        input("변경 내용");
-        input("변경 사유");
+        String previousContent = input("변경 전 내용");
+        String newContent = input("변경 내용");
+        String changeReason = input("변경 사유");
+        Endorsement endorsement = EndorsementService.createEndorsement(previousContent, newContent);
+        System.out.println(EndorsementService.createEndorsementRequestSummary(
+                policyNo, endorsementType, endorsement, changeReason));
 
         boolean needsReview = EndorsementService.requiresFullUnderwriting(endorsementType);
         System.out.println("\n[시스템] 심사 강도: " + (needsReview ? "정식 심사 필요 (위험 변동 배서)" : "간이 심사 (단순 조건 변경)"));
@@ -58,6 +63,8 @@ public class EndorsementConsole {
             System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
             return;
         }
+        System.out.println(EndorsementService.createEndorsementSaveSummary(
+                policyNo, endorsement, changeReason, uwResult));
         System.out.println("[시스템] 배서 내용이 저장되고 계약정보가 갱신되었습니다. 증권번호: " + policyNo);
     }
 }

@@ -1,5 +1,7 @@
 package console.contract;
 
+import enums.DeliveryMethod;
+import model.contract.MaturityNotice;
 import service.contract.MaturityContractService;
 
 import static common.ConsoleUtil.*;
@@ -18,14 +20,20 @@ public class MaturityContractConsole {
         System.out.println("  1 | P2019-000123 | 박민준 | 2024-01-31 | 3,500,000원");
         System.out.println("  2 | P2019-000456 | 최수진 | 2024-01-31 | 5,200,000원");
         System.out.println("[시스템] 만기 안내장 자동 발송 완료 (SMS, 이메일)");
+        MaturityNotice maturityNotice = MaturityContractService.createMaturityNotice(DeliveryMethod.SMS);
+        System.out.println(MaturityContractService.createNoticeDeliverySummary(maturityNotice));
+        System.out.println("[시스템] 재계약 의사 확인 대상 목록:");
+        System.out.println("  1 | P2019-000123 | 박민준 | 2024-01-31 | 안내발송일시: " + maturityNotice.getSentAt());
+        System.out.println("  2 | P2019-000456 | 최수진 | 2024-01-31 | 안내발송일시: " + maturityNotice.getSentAt());
 
         System.out.println("\n[계약관리담당자] 재계약 의사 확인 결과를 입력합니다.");
         System.out.println("  1. 재계약 의사 있음  2. 재계약 의사 없음  3. 회신 없음 (기한 초과)");
         System.out.print(">> 선택: ");
         String intention = sc.nextLine().trim();
 
-        String result = MaturityContractService.processRenewalIntention(intention);
+        String result = MaturityContractService.applyRenewalIntention(maturityNotice, intention);
         System.out.println("[시스템] " + result);
+        System.out.println(MaturityContractService.createRenewalCheckSummary(maturityNotice));
         System.out.println("[시스템] 만기 처리 결과가 DB에 저장되었습니다.");
     }
 }
