@@ -39,10 +39,16 @@ public class Subrogation {
     }
 
     // 구상 문서 생성
-    public void generateSubrogationDocument() {
+    public String generateSubrogationDocument() {
         if (this.subrogationStatus == null) {
             this.subrogationStatus = SubrogationStatus.PENDING;
         }
+        return "SubrogationDocument{subrogationId='" + subrogationId
+                + "', offenderName='" + offenderName
+                + "', paymentAmount=" + paymentAmount
+                + ", paymentDeadline=" + paymentDeadline
+                + ", depositAccount='" + depositAccount
+                + "', subrogationStatus=" + subrogationStatus + "}";
     }
 
     // 지급 상세 조회 — 관련 InsurancePayment 반환

@@ -36,10 +36,11 @@ public class CompensationEvaluation {
     public String analyzeDamageAmount() { return damageAnalysisResult; }
 
     // 보상 통계 계산
-    public void calculateCompensationStatistics() {
+    public String calculateCompensationStatistics() {
         if (this.compensationStatistics == null) {
             this.compensationStatistics = "평가월: " + evaluationMonth + "월 | 손해액: " + damageAmount;
         }
+        return this.compensationStatistics;
     }
 
     // 평가 결과 저장

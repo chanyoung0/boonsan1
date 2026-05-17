@@ -42,7 +42,15 @@ public class Underwriting {
     public void executeAutoUnderwriting() {}
 
     // 심사 보고서 출력
-    public void printReport() {}
+    public String printReport() {
+        return "UnderwritingReport{underwriter='" + underwriter
+                + "', totalScore=" + totalScore
+                + ", underwritingStatus=" + underwritingStatus
+                + ", underwritingType=" + underwritingType
+                + ", underwritingOpinion='" + underwritingOpinion
+                + "', coinsuranceRecommended=" + isCoinsuranceRecommended
+                + ", underwritingResult=" + underwritingResult + "}";
+    }
 
     // 수동 심사 등록
     public void registerManualUnderwriting() {}
