@@ -54,6 +54,51 @@ public class CompensationEvaluationService {
                 + " | 손해액: " + damageAmount;
     }
 
+    public static String createPeriodStatisticsReport(String period, String insuranceType,
+                                                      String compensationType) {
+        int receivedCount = evaluationMap.size();
+        int processedCount = 0;
+        for (CompensationEvaluation evaluation : evaluationMap.values()) {
+            if (evaluation.getEvaluationStatus() == CompensationStatus.COMPLETED
+                    || evaluation.getEvaluationStatus() == CompensationStatus.CLOSED) {
+                processedCount++;
+            }
+        }
+        int pendingCount = receivedCount - processedCount;
+
+        return "조회기간: " + period
+                + " | 보험종목: " + insuranceType
+                + " | 보상유형: " + compensationType
+                + "\n  접수건수: " + receivedCount
+                + "\n  처리건수: " + processedCount
+                + "\n  미결건수: " + pendingCount
+                + "\n  지급보험금 합계: 산출 기준 없음 (보험금 지급 데이터 미연동)"
+                + "\n  평균처리일수: 산출 기준 없음";
+    }
+
+    public static String createDamageAnalysisReport(String insuranceType) {
+        BigDecimal totalDamageAmount = calculateTotalDamageAmount();
+        return "보험종목: " + insuranceType
+                + "\n  손해액 합계: " + totalDamageAmount
+                + "\n  손해액 분석: " + analyzeDamageAmount(totalDamageAmount)
+                + "\n  손해율: 산출 기준 없음 (수입보험료 데이터 없음)"
+                + "\n  전월 대비 증감: 산출 기준 없음"
+                + "\n  손해액 추이: 현재 등록된 평가 목록 " + evaluationMap.size() + "건 기준";
+    }
+
+    public static String createClosingStatisticsReport(String period, String insuranceType,
+                                                       String compensationType) {
+        return "조회기간: " + period
+                + " | 보험종목: " + insuranceType
+                + " | 보상유형: " + compensationType
+                + "\n  월별 접수현황: 현재 등록된 평가 목록 " + evaluationMap.size() + "건 기준"
+                + "\n  처리현황: " + countByStatus(CompensationStatus.COMPLETED) + "건 완료, "
+                + countByStatus(CompensationStatus.CLOSED) + "건 종료"
+                + "\n  지급현황: 산출 기준 없음 (보험금 지급 데이터 미연동)"
+                + "\n  손해액 합계: " + calculateTotalDamageAmount()
+                + "\n  손해율: 산출 기준 없음 (수입보험료 데이터 없음)";
+    }
+
     public static CompensationEvaluation completeEvaluation(String evaluationId, EvaluationResult result) {
         CompensationEvaluation evaluation = findEvaluationById(evaluationId);
         if (evaluation == null || evaluation.getEvaluationStatus() == CompensationStatus.CLOSED) {
@@ -79,6 +124,26 @@ public class CompensationEvaluationService {
 
     public static CompensationEvaluation findEvaluationById(String evaluationId) {
         return evaluationMap.get(evaluationId);
+    }
+
+    private static BigDecimal calculateTotalDamageAmount() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (CompensationEvaluation evaluation : evaluationMap.values()) {
+            if (evaluation.getDamageAmount() != null) {
+                total = total.add(evaluation.getDamageAmount());
+            }
+        }
+        return total;
+    }
+
+    private static int countByStatus(CompensationStatus status) {
+        int count = 0;
+        for (CompensationEvaluation evaluation : evaluationMap.values()) {
+            if (evaluation.getEvaluationStatus() == status) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static String generateEvaluationId() {

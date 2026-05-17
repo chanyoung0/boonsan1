@@ -15,34 +15,61 @@ public class CompensationEvaluationConsole {
         while (true) {
             line();
             System.out.println("[보상평가 관리]");
-            System.out.println("1. 보상평가 등록");
-            System.out.println("2. 보상평가 완료");
-            System.out.println("3. 보상평가 종료");
-            System.out.println("4. 보상평가 목록 조회");
-            System.out.println("5. 이전 메뉴");
+            System.out.println("1. 보상평가자료 생성");
+            System.out.println("2. 보상평가 등록");
+            System.out.println("3. 보상평가 완료");
+            System.out.println("4. 보상평가 종료");
+            System.out.println("5. 보상평가 목록 조회");
+            System.out.println("6. 이전 메뉴");
             line();
             System.out.print(">> 선택: ");
             String choice = sc.nextLine().trim();
 
             switch (choice) {
                 case "1":
-                    registerEvaluation();
+                    createEvaluationMaterial();
                     break;
                 case "2":
-                    completeEvaluation();
+                    registerEvaluation();
                     break;
                 case "3":
-                    closeEvaluation();
+                    completeEvaluation();
                     break;
                 case "4":
-                    printEvaluationList();
+                    closeEvaluation();
                     break;
                 case "5":
+                    printEvaluationList();
+                    break;
+                case "6":
                     return;
                 default:
                     System.out.println("[오류] 올바른 번호를 입력하세요.");
             }
         }
+    }
+
+    private static void createEvaluationMaterial() {
+        System.out.println("\n[유스케이스] 보상평가를 관리한다 - 보상평가자료 생성");
+        String period = input("조회기간");
+        String insuranceType = input("보험종목");
+        String compensationType = input("보상유형");
+
+        System.out.println("\n[시스템] 기간별 보상통계 현황");
+        System.out.println(CompensationEvaluationService.createPeriodStatisticsReport(
+                period, insuranceType, compensationType));
+
+        enter();
+        System.out.println("\n[시스템] 손해액 분석 결과");
+        System.out.println(CompensationEvaluationService.createDamageAnalysisReport(insuranceType));
+
+        enter();
+        System.out.println("\n[시스템] 마감통계 산출 결과");
+        System.out.println(CompensationEvaluationService.createClosingStatisticsReport(
+                period, insuranceType, compensationType));
+
+        enter();
+        System.out.println("[시스템] 보상평가자료 생성 완료");
     }
 
     private static void registerEvaluation() {
