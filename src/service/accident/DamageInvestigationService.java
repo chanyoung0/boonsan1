@@ -1,5 +1,7 @@
 package service.accident;
 
+import java.math.BigDecimal;
+
 // 손해조사 서비스 — 이의제기 처리 판정 순수 비즈니스 로직 담당
 public class DamageInvestigationService {
 
@@ -16,5 +18,35 @@ public class DamageInvestigationService {
     // 구상 처리 필요 여부 판단
     public static boolean needsSubrogation(String answer) {
         return "Y".equalsIgnoreCase(answer);
+    }
+
+    public static boolean isYes(String answer) {
+        return "Y".equalsIgnoreCase(answer) || "1".equals(answer);
+    }
+
+    public static BigDecimal parseAmount(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        try {
+            return new BigDecimal(value.replace(",", "").replace("원", "").trim());
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public static BigDecimal sumAmounts(BigDecimal... amounts) {
+        BigDecimal total = BigDecimal.ZERO;
+        if (amounts == null) {
+            return total;
+        }
+
+        for (BigDecimal amount : amounts) {
+            if (amount != null) {
+                total = total.add(amount);
+            }
+        }
+        return total;
     }
 }
