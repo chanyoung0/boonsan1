@@ -28,7 +28,13 @@ public class Endorsement {
 
     public void applyEndorsement()  {}
     public void processEndorsement(){}
-    public void verifyChanges()     {}
+    public boolean verifyChanges() {
+        if (endorsementType == null) {
+            return false;
+        }
+        return endorsementType == EndorsementType.COVERAGE_CHANGE
+                || endorsementType == EndorsementType.SPECIAL_CONTRACT_CHANGE;
+    }
 
     public LocalDateTime  getAppliedAt()                    { return appliedAt; }
     public void           setAppliedAt(LocalDateTime v)     { this.appliedAt = v; }

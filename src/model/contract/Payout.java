@@ -41,10 +41,11 @@ public class Payout {
         this.approvedAt = LocalDateTime.now();
     }
 
-    public void calculatePayment(){
+    public BigDecimal calculatePayment(){
         if (this.finalPaymentAmount == null) {
             this.finalPaymentAmount = this.calculatedAmount;
         }
+        return this.finalPaymentAmount;
     }
 
     public void cancelPayment()   {
