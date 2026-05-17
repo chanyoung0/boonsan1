@@ -64,6 +64,28 @@ public class PartnerService {
         return new ArrayList<>(partnerMap.values());
     }
 
+    public static List<Partner> searchPartners(String partnerName, String partnerType,
+                                               EvaluationGrade evaluationGrade,
+                                               String availabilityStatus) {
+        List<Partner> result = new ArrayList<>();
+        for (Partner partner : partnerMap.values()) {
+            if (!containsText(partner.getPartnerName(), partnerName)) {
+                continue;
+            }
+            if (!containsText(partner.getPartnerType(), partnerType)) {
+                continue;
+            }
+            if (evaluationGrade != null && partner.getEvaluationGrade() != evaluationGrade) {
+                continue;
+            }
+            if (!matchesAvailability(partner, availabilityStatus)) {
+                continue;
+            }
+            result.add(partner);
+        }
+        return result;
+    }
+
     public static List<Partner> getAvailablePartnerList() {
         List<Partner> availablePartnerList = new ArrayList<>();
         for (Partner partner : partnerMap.values()) {
@@ -84,5 +106,28 @@ public class PartnerService {
 
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private static boolean containsText(String source, String condition) {
+        if (isBlank(condition)) {
+            return true;
+        }
+        if (source == null) {
+            return false;
+        }
+        return source.toLowerCase().contains(condition.trim().toLowerCase());
+    }
+
+    private static boolean matchesAvailability(Partner partner, String availabilityStatus) {
+        if (isBlank(availabilityStatus)) {
+            return true;
+        }
+        if ("AVAILABLE".equals(availabilityStatus)) {
+            return isAvailable(partner);
+        }
+        if ("SUSPENDED".equals(availabilityStatus)) {
+            return !isAvailable(partner);
+        }
+        return true;
     }
 }

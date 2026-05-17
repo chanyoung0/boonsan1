@@ -14,38 +14,54 @@ public class PartnerConsole {
         while (true) {
             line();
             System.out.println("[협력업체 관리]");
-            System.out.println("1. 협력업체 등록");
-            System.out.println("2. 협력업체 수정");
-            System.out.println("3. 협력업체 검색");
-            System.out.println("4. 협력업체 목록 조회");
-            System.out.println("5. 사용 가능 협력업체 조회");
-            System.out.println("6. 이전 메뉴");
+            System.out.println("1. 협력업체 조건 조회");
+            System.out.println("2. 협력업체 등록");
+            System.out.println("3. 협력업체 수정");
+            System.out.println("4. 협력업체 검색");
+            System.out.println("5. 협력업체 목록 조회");
+            System.out.println("6. 사용 가능 협력업체 조회");
+            System.out.println("7. 이전 메뉴");
             line();
             System.out.print(">> 선택: ");
             String choice = sc.nextLine().trim();
 
             switch (choice) {
                 case "1":
-                    registerPartner();
+                    searchPartnersByCondition();
                     break;
                 case "2":
-                    updatePartner();
+                    registerPartner();
                     break;
                 case "3":
-                    searchPartner();
+                    updatePartner();
                     break;
                 case "4":
-                    printPartnerList(PartnerService.getPartnerList(), true);
+                    searchPartner();
                     break;
                 case "5":
-                    printPartnerList(PartnerService.getAvailablePartnerList(), false);
+                    printPartnerList(PartnerService.getPartnerList(), true);
                     break;
                 case "6":
+                    printPartnerList(PartnerService.getAvailablePartnerList(), false);
+                    break;
+                case "7":
                     return;
                 default:
                     System.out.println("[오류] 올바른 번호를 입력하세요.");
             }
         }
+    }
+
+    private static void searchPartnersByCondition() {
+        System.out.println("\n[유스케이스] 협력업체를 관리한다 - 조건 조회");
+        String partnerName = input("업체명 (Enter: 전체)");
+        String partnerType = input("업체유형 (Enter: 전체)");
+        EvaluationGrade evaluationGrade = selectEvaluationGradeForSearch();
+        String availabilityStatus = selectAvailabilityStatus();
+
+        List<Partner> partnerList = PartnerService.searchPartners(
+                partnerName, partnerType, evaluationGrade, availabilityStatus);
+        printPartnerList("\n[협력업체 조건 조회 결과]", partnerList);
     }
 
     private static void registerPartner() {
@@ -98,7 +114,12 @@ public class PartnerConsole {
     }
 
     private static void printPartnerList(List<Partner> partnerList, boolean includeSuspended) {
-        System.out.println(includeSuspended ? "\n[협력업체 목록 조회]" : "\n[사용 가능 협력업체 조회]");
+        printPartnerList(includeSuspended ? "\n[협력업체 목록 조회]" : "\n[사용 가능 협력업체 조회]",
+                partnerList);
+    }
+
+    private static void printPartnerList(String title, List<Partner> partnerList) {
+        System.out.println(title);
         if (partnerList.isEmpty()) {
             System.out.println("[시스템] 조회 가능한 협력업체가 없습니다.");
             return;
@@ -135,6 +156,43 @@ public class PartnerConsole {
                 case "3": return EvaluationGrade.AVERAGE;
                 case "4": return EvaluationGrade.POOR;
                 case "5": return EvaluationGrade.SUSPENDED;
+                default:
+                    System.out.println("[오류] 올바른 번호를 입력하세요.");
+            }
+        }
+    }
+
+    private static EvaluationGrade selectEvaluationGradeForSearch() {
+        while (true) {
+            System.out.println("평가 등급: 1. EXCELLENT  2. GOOD  3. AVERAGE  4. POOR  5. SUSPENDED  Enter. 전체");
+            System.out.print(">> 선택: ");
+            String choice = sc.nextLine().trim();
+            if (choice.isEmpty()) {
+                return null;
+            }
+            switch (choice) {
+                case "1": return EvaluationGrade.EXCELLENT;
+                case "2": return EvaluationGrade.GOOD;
+                case "3": return EvaluationGrade.AVERAGE;
+                case "4": return EvaluationGrade.POOR;
+                case "5": return EvaluationGrade.SUSPENDED;
+                default:
+                    System.out.println("[오류] 올바른 번호를 입력하세요.");
+            }
+        }
+    }
+
+    private static String selectAvailabilityStatus() {
+        while (true) {
+            System.out.println("사용상태: 1. 전체  2. 사용 가능  3. 거래중지  Enter. 전체");
+            System.out.print(">> 선택: ");
+            String choice = sc.nextLine().trim();
+            if (choice.isEmpty() || "1".equals(choice)) {
+                return "";
+            }
+            switch (choice) {
+                case "2": return "AVAILABLE";
+                case "3": return "SUSPENDED";
                 default:
                     System.out.println("[오류] 올바른 번호를 입력하세요.");
             }
