@@ -1,5 +1,12 @@
 package common;
 
+import enums.RequestReason;
+import enums.RequestStatus;
+import enums.UnderwritingResultType;
+import enums.UnderwritingType;
+import model.underwriting.UnderwritingRequest;
+
+import java.time.LocalDateTime;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -42,6 +49,18 @@ public class ConsoleUtil {
         System.out.println("  액터: 계약관리담당자, 언더라이터");
         System.out.println("  [계약관리담당자] 심사 요청 정보를 입력합니다. (심사유형: " + type + ")");
 
+        UnderwritingRequest underwritingRequest = new UnderwritingRequest(
+                LocalDateTime.now(),
+                resolveRequestReason(type),
+                UnderwritingType.GENERAL,
+                RequestStatus.PENDING
+        );
+        underwritingRequest.requestUnderwriting();
+        System.out.println("  [시스템] UnderwritingRequest 생성 완료 | 상태: "
+                + underwritingRequest.getRequestStatus()
+                + " | 요청사유: " + underwritingRequest.getRequestReason()
+                + " | 심사유형: " + underwritingRequest.getUnderwritingType());
+
         // 시스템 자동: 추가 서류 필요 여부 판단 (30% 확률 서류 필요)
         boolean needsDocs = rnd.nextInt(10) < 3;
         System.out.println("  [시스템] 추가 서류 필요 여부 자동 확인 결과: " + (needsDocs ? "서류 필요" : "서류 불필요"));
@@ -62,8 +81,32 @@ public class ConsoleUtil {
         String r = sc.nextLine().trim();
         String result = "2".equals(r) ? "할증 (보험료 10% 인상)" : "3".equals(r) ? "거절" : "승인";
 
+        underwritingRequest.setUnderwritingResult(resolveUnderwritingResultType(r));
+        underwritingRequest.setRequestStatus(RequestStatus.COMPLETED);
+        underwritingRequest.registerUWResult();
+        underwritingRequest.changeUWStatus();
         System.out.println("  [시스템] 요청상태: '심사완료' | 결과: " + result);
+        System.out.println("  [시스템] UnderwritingRequest 상태: "
+                + underwritingRequest.getRequestStatus()
+                + " | 결과유형: " + underwritingRequest.getUnderwritingResult());
         System.out.println("  [시스템] 심사 요청 내역이 DB에 저장되었습니다.");
         return result;
+    }
+
+    private static RequestReason resolveRequestReason(String type) {
+        if ("부활".equals(type)) {
+            return RequestReason.REINSTATEMENT;
+        }
+        return RequestReason.ENDORSEMENT;
+    }
+
+    private static UnderwritingResultType resolveUnderwritingResultType(String choice) {
+        if ("2".equals(choice)) {
+            return UnderwritingResultType.SURCHARGE;
+        }
+        if ("3".equals(choice)) {
+            return UnderwritingResultType.REJECTED;
+        }
+        return UnderwritingResultType.APPROVED;
     }
 }

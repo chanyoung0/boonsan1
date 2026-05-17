@@ -1,5 +1,7 @@
 package console.contract;
 
+import service.contract.ReinstatementService;
+
 import static common.ConsoleUtil.*;
 
 // 부활 관리 콘솔 I/O — 계약관리담당자 유스케이스 입출력 전담
@@ -17,15 +19,17 @@ public class ReinstatementConsole {
         String policyNo = input("증권번호");
 
         System.out.println("\n[시스템] 계약정보 조회 중 (증권번호: " + policyNo + ")...");
-        boolean isLapsed = rnd.nextInt(10) < 7;
-        System.out.println("[시스템] 조회 결과: " + (isLapsed ? "실효 계약 (부활 가능)" : "부활 불가 계약"));
+        String contractStatus = input("계약상태를 입력하세요(유지/실효/해지/만기)");
+        boolean canReinstate = ReinstatementService.canReinstate(contractStatus);
+        System.out.println("[시스템] 조회 결과: "
+                + (canReinstate ? "실효 계약 (부활 가능)" : "부활 불가 계약 (상태: " + contractStatus + ")"));
 
-        if (!isLapsed) {
+        if (!canReinstate) {
             System.out.println("[시스템] \"부활 신청이 불가능한 계약입니다\" — 부활 처리를 종료합니다.");
             return;
         }
 
-        System.out.println("[시스템] 증권번호: " + policyNo + " | 계약상태: 실효 | 미납보험료: 450,000원");
+        System.out.println("[시스템] 증권번호: " + policyNo + " | 계약상태: " + contractStatus + " | 미납보험료: 450,000원");
 
         System.out.println("\n[계약관리담당자] 부활 신청 정보를 입력합니다.");
         input("부활 사유");
