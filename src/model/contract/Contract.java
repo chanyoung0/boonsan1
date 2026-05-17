@@ -75,10 +75,23 @@ public class Contract {
     public void executeContract() {}
 
     // 계약 정보 조회
-    public void getContractInfo() {}
+    public String getContractInfo() {
+        return "Contract{policyNumber='" + policyNumber
+                + "', contractStatus=" + contractStatus
+                + ", paymentCycle=" + paymentCycle
+                + ", hasUnpaidPremium=" + hasUnpaidPremium
+                + ", installmentCount=" + installmentCount + "}";
+    }
 
     // 증권번호 발행
-    public void issuePolicyNumber() {}
+    public String issuePolicyNumber() {
+        if (policyNumber != null && !policyNumber.trim().isEmpty()) {
+            return policyNumber;
+        }
+        long sequence = (System.currentTimeMillis() % 999_999L) + 1L;
+        this.policyNumber = String.format("P2024-%06d", sequence);
+        return policyNumber;
+    }
 
     // 계약 갱신
     public void renewContract() {}
