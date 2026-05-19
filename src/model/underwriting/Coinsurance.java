@@ -12,6 +12,10 @@ public class Coinsurance {
     private BigDecimal retainedAmount;
     private float retainedShareRate;
 
+    // DB 전환을 위해 추가된 필드.
+    private String coinsuranceId;
+    private String applicationId;
+
     private List<Coinsurer> coinsurerList;
 
     public Coinsurance() {
@@ -51,6 +55,10 @@ public class Coinsurance {
     public void           setRetainedShareRate(float v)      { this.retainedShareRate = v; }
     public List<Coinsurer> getCoinsurerList()                { return coinsurerList; }
     public void           setCoinsurerList(List<Coinsurer> v){ this.coinsurerList = v; }
+    public String         getCoinsuranceId()                 { return coinsuranceId; }
+    public void           setCoinsuranceId(String v)         { this.coinsuranceId = v; }
+    public String         getApplicationId()                 { return applicationId; }
+    public void           setApplicationId(String v)         { this.applicationId = v; }
 
     @Override
     public String toString() {

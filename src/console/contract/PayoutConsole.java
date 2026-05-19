@@ -75,28 +75,30 @@ public class PayoutConsole {
                 deductionAmount,
                 deductionItem
         );
-        String payoutId = PayoutService.getPayoutId(payout);
+        if (payout == null) {
+            System.out.println("[오류] 제지급금 등록에 실패했습니다. DB 연결을 확인하세요.");
+            return;
+        }
 
         System.out.println("[시스템] 제지급금 등록 완료");
-        System.out.println("  지급번호: " + payoutId);
-        System.out.println("  증권번호: " + policyNumber);
+        System.out.println("  지급번호: " + payout.getPayoutId());
+        System.out.println("  증권번호: " + payout.getPolicyNumber());
         System.out.println("  최종 지급금액: " + formatMoney(payout.getFinalPaymentAmount()));
-        System.out.println("  상태: " + PayoutService.getPayoutStatus(payoutId));
-        System.out.println(PayoutService.createPayoutCalculationSummary(payoutId));
+        System.out.println("  상태: " + PayoutService.getPayoutStatus(payout));
+        System.out.println(PayoutService.createPayoutCalculationSummary(payout));
     }
 
     private static void approvePayout() {
         System.out.println("\n[제지급금 승인]");
         printPayoutList();
         String payoutId = input("승인할 지급번호");
-        if (PayoutService.isCancelled(payoutId)) {
-            System.out.println("[오류] 취소된 제지급금은 승인할 수 없습니다.");
-            return;
-        }
-
         Payout payout = PayoutService.findPayoutById(payoutId);
         if (payout == null) {
             System.out.println("[오류] 해당 지급번호를 찾을 수 없습니다.");
+            return;
+        }
+        if (payout.isCancelled()) {
+            System.out.println("[오류] 취소된 제지급금은 승인할 수 없습니다.");
             return;
         }
 
@@ -105,33 +107,37 @@ public class PayoutConsole {
         String approvalChoice = sc.nextLine().trim();
         if ("2".equals(approvalChoice)) {
             String rejectionReason = input("반려 사유");
-            System.out.println(PayoutService.createPayoutRejectionMessage(payoutId, rejectionReason));
+            Payout rejected = PayoutService.cancelPayout(payoutId, rejectionReason);
+            if (rejected == null) {
+                System.out.println("[오류] 반려 처리에 실패했습니다.");
+                return;
+            }
+            System.out.println(PayoutService.createPayoutRejectionMessage(rejected, rejectionReason));
             return;
         }
 
-        payout = PayoutService.approvePayout(payoutId);
-        if (payout == null) {
+        Payout approved = PayoutService.approvePayout(payoutId);
+        if (approved == null) {
             System.out.println("[오류] 해당 지급번호를 승인할 수 없는 상태입니다.");
             return;
         }
 
         System.out.println("[시스템] 제지급금 승인 완료");
-        System.out.println("  승인일시: " + payout.getApprovedAt());
-        System.out.println("  상태: " + PayoutService.getPayoutStatus(payoutId));
+        System.out.println("  승인일시: " + approved.getApprovedAt());
+        System.out.println("  상태: " + PayoutService.getPayoutStatus(approved));
     }
 
     private static void processPayout() {
         System.out.println("\n[제지급금 지급 처리]");
         printPayoutList();
         String payoutId = input("지급 처리할 지급번호");
-        if (PayoutService.isCancelled(payoutId)) {
-            System.out.println("[오류] 취소된 제지급금은 지급 처리할 수 없습니다.");
-            return;
-        }
-
         Payout payout = PayoutService.findPayoutById(payoutId);
         if (payout == null) {
             System.out.println("[오류] 해당 지급번호를 찾을 수 없습니다.");
+            return;
+        }
+        if (payout.isCancelled()) {
+            System.out.println("[오류] 취소된 제지급금은 지급 처리할 수 없습니다.");
             return;
         }
         if (payout.getApprovedAt() == null) {
@@ -139,11 +145,15 @@ public class PayoutConsole {
             return;
         }
 
-        payout = PayoutService.processPayout(payoutId);
+        Payout processed = PayoutService.processPayout(payoutId);
+        if (processed == null) {
+            System.out.println("[오류] 지급 처리에 실패했습니다.");
+            return;
+        }
         System.out.println("[시스템] 제지급금 지급 처리 완료");
-        System.out.println("  지급일시: " + payout.getPaidAt());
-        System.out.println("  상태: " + PayoutService.getPayoutStatus(payoutId));
-        System.out.println(PayoutService.createPaymentNotice(payoutId));
+        System.out.println("  지급일시: " + processed.getPaidAt());
+        System.out.println("  상태: " + PayoutService.getPayoutStatus(processed));
+        System.out.println(PayoutService.createPaymentNotice(processed));
     }
 
     private static void cancelPayout() {
@@ -156,12 +166,16 @@ public class PayoutConsole {
             return;
         }
         String reason = input("취소/반려 사유");
-        payout = PayoutService.cancelPayout(payoutId);
+        Payout cancelled = PayoutService.cancelPayout(payoutId, reason);
+        if (cancelled == null) {
+            System.out.println("[오류] 취소 처리에 실패했습니다.");
+            return;
+        }
 
         System.out.println("[시스템] 제지급금 취소 처리 완료");
-        System.out.println("  지급번호: " + payoutId);
-        System.out.println("  상태: " + PayoutService.getPayoutStatus(payoutId));
-        System.out.println(PayoutService.createCancellationMessage(payoutId, reason));
+        System.out.println("  지급번호: " + cancelled.getPayoutId());
+        System.out.println("  상태: " + PayoutService.getPayoutStatus(cancelled));
+        System.out.println(PayoutService.createCancellationMessage(cancelled, reason));
     }
 
     private static void printPayoutList() {
@@ -173,14 +187,13 @@ public class PayoutConsole {
         }
 
         for (Payout payout : payoutList) {
-            String payoutId = PayoutService.getPayoutId(payout);
-            System.out.println("  지급번호: " + payoutId
-                    + " | 증권번호: " + PayoutService.getPolicyNumber(payoutId)
+            System.out.println("  지급번호: " + payout.getPayoutId()
+                    + " | 증권번호: " + payout.getPolicyNumber()
                     + " | 지급유형: " + payout.getPaymentType()
                     + " | 산정기준: " + payout.getCalculationBasis()
                     + " | 기준금액: " + formatMoney(payout.getCalculatedAmount())
                     + " | 최종지급금액: " + formatMoney(payout.getFinalPaymentAmount())
-                    + " | 상태: " + PayoutService.getPayoutStatus(payoutId));
+                    + " | 상태: " + PayoutService.getPayoutStatus(payout));
         }
     }
 

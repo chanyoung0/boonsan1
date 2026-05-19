@@ -23,6 +23,9 @@ public class Reinsurance {
     private BigDecimal settlementAmount;
     private SettlementMethod settlementMethod;
 
+    // DB 전환을 위해 추가된 필드 — 한 계약에 여러 재보험 처리가 가능하므로 별도 PK.
+    private String reinsuranceId;
+
     public Reinsurance() {}
 
     public Reinsurance(String contractId, String reinsurerName, ReinsuranceMethod reinsuranceMethod,
@@ -77,6 +80,8 @@ public class Reinsurance {
     public void             setSettlementAmount(BigDecimal v)       { this.settlementAmount = v; }
     public SettlementMethod getSettlementMethod()                   { return settlementMethod; }
     public void             setSettlementMethod(SettlementMethod v) { this.settlementMethod = v; }
+    public String           getReinsuranceId()                      { return reinsuranceId; }
+    public void             setReinsuranceId(String v)              { this.reinsuranceId = v; }
 
     @Override
     public String toString() {

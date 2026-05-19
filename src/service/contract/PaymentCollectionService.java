@@ -1,14 +1,54 @@
 package service.contract;
 
+import db.PaymentCollectionDBO;
+import db.TransferDBO;
+import db.UnpaidNoticeDBO;
 import enums.ProcessingResult;
+import enums.TransferType;
 import model.contract.PaymentCollection;
+import model.contract.Transfer;
+import model.contract.UnpaidNotice;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// 분납/수금 관리 서비스 — 이관 유형 판정 순수 비즈니스 로직 담당
+// 분납/수금 관리 서비스 — 이관 유형 판정 + 영속화 담당
 public class PaymentCollectionService {
+
+    private static final PaymentCollectionDBO paymentCollectionDBO = new PaymentCollectionDBO();
+    private static final TransferDBO transferDBO = new TransferDBO();
+    private static final UnpaidNoticeDBO unpaidNoticeDBO = new UnpaidNoticeDBO();
+
+    public static boolean savePaymentCollection(PaymentCollection collection, String policyNumber) {
+        if (collection == null) {
+            return false;
+        }
+        if (collection.getPaymentCollectionId() == null || collection.getPaymentCollectionId().isEmpty()) {
+            collection.setPaymentCollectionId("PC-" + System.currentTimeMillis());
+        }
+        collection.setPolicyNumber(policyNumber);
+        return paymentCollectionDBO.save(collection);
+    }
+
+    public static Transfer createAndSaveTransfer(String paymentCollectionId, String transferChoice) {
+        TransferType transferType = "2".equals(transferChoice)
+                ? TransferType.CANCELLATION : TransferType.VISIT_COLLECTION;
+        Transfer transfer = new Transfer(transferType, null, LocalDateTime.now());
+        transfer.setTransferId("TR-" + System.currentTimeMillis());
+        transfer.setPaymentCollectionId(paymentCollectionId);
+        return transferDBO.save(transfer) ? transfer : null;
+    }
+
+    public static UnpaidNotice createAndSaveUnpaidNotice(String paymentCollectionId,
+                                                         BigDecimal unpaidAmount,
+                                                         LocalDateTime dueDate) {
+        UnpaidNotice notice = new UnpaidNotice(unpaidAmount, dueDate, null, LocalDateTime.now());
+        notice.setUnpaidNoticeId("UN-" + System.currentTimeMillis());
+        notice.setPaymentCollectionId(paymentCollectionId);
+        notice.sendNotice();
+        return unpaidNoticeDBO.save(notice) ? notice : null;
+    }
 
     public static PaymentCollection createCollectionResult(String resultChoice) {
         boolean allSuccess = isAllSuccessChoice(resultChoice);

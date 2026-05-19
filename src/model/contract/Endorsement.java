@@ -15,6 +15,10 @@ public class Endorsement {
     private String previousContent;
     private LocalDateTime processedAt;
 
+    // DB 전환을 위해 추가된 필드 — 행 식별자 + 어떤 계약에 대한 배서인지 추적.
+    private String endorsementId;
+    private String policyNumber;
+
     public Endorsement() {}
 
     public Endorsement(EndorsementType endorsementType, ChangeReason changeReason,
@@ -48,6 +52,10 @@ public class Endorsement {
     public void           setPreviousContent(String v)      { this.previousContent = v; }
     public LocalDateTime  getProcessedAt()                  { return processedAt; }
     public void           setProcessedAt(LocalDateTime v)   { this.processedAt = v; }
+    public String         getEndorsementId()                { return endorsementId; }
+    public void           setEndorsementId(String v)        { this.endorsementId = v; }
+    public String         getPolicyNumber()                 { return policyNumber; }
+    public void           setPolicyNumber(String v)         { this.policyNumber = v; }
 
     @Override
     public String toString() {

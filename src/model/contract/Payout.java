@@ -20,6 +20,12 @@ public class Payout {
     private PaymentType paymentType;
     private String processor;
 
+    // DB 전환을 위해 추가된 필드 — PayoutService 가 관리하던 메모리 Map들을 모델 내부로 흡수.
+    private String payoutId;
+    private String policyNumber;
+    private boolean cancelled;
+    private String rejectionReason;
+
     private DamageInvestigation damageInvestigation;
     private InsurancePayment insurancePayment;
 
@@ -49,7 +55,7 @@ public class Payout {
     }
 
     public void cancelPayment()   {
-        // 취소 상태 필드가 없어 취소 여부는 service 목록에서 관리한다.
+        this.cancelled = true;
     }
 
     public void processPayment()  {
@@ -76,6 +82,14 @@ public class Payout {
     public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
     public InsurancePayment    getInsurancePayment()                    { return insurancePayment; }
     public void                setInsurancePayment(InsurancePayment v)  { this.insurancePayment = v; }
+    public String              getPayoutId()                            { return payoutId; }
+    public void                setPayoutId(String v)                    { this.payoutId = v; }
+    public String              getPolicyNumber()                        { return policyNumber; }
+    public void                setPolicyNumber(String v)                { this.policyNumber = v; }
+    public boolean             isCancelled()                            { return cancelled; }
+    public void                setCancelled(boolean v)                  { this.cancelled = v; }
+    public String              getRejectionReason()                     { return rejectionReason; }
+    public void                setRejectionReason(String v)             { this.rejectionReason = v; }
 
     @Override
     public String toString() {

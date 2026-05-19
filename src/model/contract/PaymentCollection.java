@@ -16,6 +16,10 @@ public class PaymentCollection {
     private BigDecimal unpaidAmount;
     private int unpaidInstallmentCount;
 
+    // DB 전환을 위해 추가된 필드.
+    private String paymentCollectionId;
+    private String policyNumber;
+
     public PaymentCollection() {}
 
     public PaymentCollection(LocalDate dueDate, BigDecimal collectedAmount,
@@ -53,6 +57,10 @@ public class PaymentCollection {
     public void            setUnpaidAmount(BigDecimal v)            { this.unpaidAmount = v; }
     public int             getUnpaidInstallmentCount()              { return unpaidInstallmentCount; }
     public void            setUnpaidInstallmentCount(int v)         { this.unpaidInstallmentCount = v; }
+    public String          getPaymentCollectionId()                 { return paymentCollectionId; }
+    public void            setPaymentCollectionId(String v)         { this.paymentCollectionId = v; }
+    public String          getPolicyNumber()                        { return policyNumber; }
+    public void            setPolicyNumber(String v)                { this.policyNumber = v; }
 
     @Override
     public String toString() {

@@ -1,12 +1,30 @@
 package service.contract;
 
+import db.MaturityNoticeDBO;
 import enums.DeliveryMethod;
 import model.contract.MaturityNotice;
 
 import java.time.LocalDateTime;
 
-// 만기계약 관리 서비스 — 재계약 의사 처리 순수 비즈니스 로직 담당
+// 만기계약 관리 서비스 — 재계약 의사 처리 + 영속화 담당
 public class MaturityContractService {
+
+    private static final MaturityNoticeDBO maturityNoticeDBO = new MaturityNoticeDBO();
+
+    public static boolean saveMaturityNotice(MaturityNotice notice, String policyNumber) {
+        if (notice == null) {
+            return false;
+        }
+        if (notice.getMaturityNoticeId() == null || notice.getMaturityNoticeId().isEmpty()) {
+            notice.setMaturityNoticeId("MN-" + System.currentTimeMillis());
+        }
+        notice.setPolicyNumber(policyNumber);
+        return maturityNoticeDBO.save(notice);
+    }
+
+    public static boolean updateMaturityNotice(MaturityNotice notice) {
+        return maturityNoticeDBO.update(notice);
+    }
 
     public static MaturityNotice createMaturityNotice(DeliveryMethod deliveryMethod) {
         MaturityNotice maturityNotice = new MaturityNotice(deliveryMethod, LocalDateTime.now());

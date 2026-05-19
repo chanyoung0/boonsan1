@@ -12,6 +12,10 @@ public class MaturityNotice {
     private Boolean renewalIntention;
     private LocalDateTime sentAt;
 
+    // DB 전환을 위해 추가된 필드.
+    private String maturityNoticeId;
+    private String policyNumber;
+
     public MaturityNotice() {}
 
     public MaturityNotice(DeliveryMethod deliveryMethod, LocalDateTime sentAt) {
@@ -30,6 +34,10 @@ public class MaturityNotice {
     public void           setRenewalIntention(Boolean v)    { this.renewalIntention = v; }
     public LocalDateTime  getSentAt()                       { return sentAt; }
     public void           setSentAt(LocalDateTime v)        { this.sentAt = v; }
+    public String         getMaturityNoticeId()             { return maturityNoticeId; }
+    public void           setMaturityNoticeId(String v)     { this.maturityNoticeId = v; }
+    public String         getPolicyNumber()                 { return policyNumber; }
+    public void           setPolicyNumber(String v)         { this.policyNumber = v; }
 
     @Override
     public String toString() {

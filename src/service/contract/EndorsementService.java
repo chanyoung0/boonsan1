@@ -1,11 +1,29 @@
 package service.contract;
 
+import db.EndorsementDBO;
 import model.contract.Endorsement;
 
 import java.time.LocalDateTime;
 
-// 배서 관리 서비스 — 배서 심사 필요 여부 판단 순수 비즈니스 로직 담당
+// 배서 관리 서비스 — 배서 심사 필요 여부 판단 + 영속화 담당
 public class EndorsementService {
+
+    private static final EndorsementDBO endorsementDBO = new EndorsementDBO();
+
+    public static boolean saveEndorsement(Endorsement endorsement, String policyNumber) {
+        if (endorsement == null) {
+            return false;
+        }
+        if (endorsement.getEndorsementId() == null || endorsement.getEndorsementId().isEmpty()) {
+            endorsement.setEndorsementId("END-" + System.currentTimeMillis());
+        }
+        endorsement.setPolicyNumber(policyNumber);
+        return endorsementDBO.save(endorsement);
+    }
+
+    public static boolean updateEndorsement(Endorsement endorsement) {
+        return endorsementDBO.update(endorsement);
+    }
 
     // 배서유형별 심사 필요 여부 판단 (가입금액 변경/특약 추가 → 위험 변동 → 심사 필요)
     public static boolean needsUnderwriting(String endorsementType) {

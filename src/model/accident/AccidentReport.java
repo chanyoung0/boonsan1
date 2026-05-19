@@ -16,6 +16,10 @@ public class AccidentReport {
     private String damageDetails;
     private String reportNo;
 
+    // DB 전환을 위해 추가된 필드 — 콘솔 입력은 받지만 저장 위치가 없었음.
+    private String policyNumber;
+    private LocalDateTime accidentAt;
+
     private List<Document> documentList;
     private DamageInvestigation damageInvestigation;
 
@@ -62,6 +66,10 @@ public class AccidentReport {
     public void                setDocumentList(List<Document> v)     { this.documentList = v; }
     public DamageInvestigation getDamageInvestigation()              { return damageInvestigation; }
     public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
+    public String              getPolicyNumber()                     { return policyNumber; }
+    public void                setPolicyNumber(String v)             { this.policyNumber = v; }
+    public LocalDateTime       getAccidentAt()                       { return accidentAt; }
+    public void                setAccidentAt(LocalDateTime v)        { this.accidentAt = v; }
 
     @Override
     public String toString() {

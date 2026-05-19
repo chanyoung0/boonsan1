@@ -1,5 +1,6 @@
 package service.accident;
 
+import db.SubrogationDBO;
 import enums.SubrogationStatus;
 import model.accident.InsurancePayment;
 import model.accident.Subrogation;
@@ -9,6 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class SubrogationService {
+
+    private static final SubrogationDBO subrogationDBO = new SubrogationDBO();
 
     public static Subrogation createSubrogation(InsurancePayment payment, String offenderName,
                                                 String offenderContact, float faultRatio,
@@ -85,5 +88,13 @@ public class SubrogationService {
         } catch (RuntimeException e) {
             return LocalDateTime.now().plusDays(14);
         }
+    }
+
+    public static boolean saveSubrogation(Subrogation subrogation) {
+        return subrogationDBO.save(subrogation);
+    }
+
+    public static boolean updateSubrogation(Subrogation subrogation) {
+        return subrogationDBO.update(subrogation);
     }
 }

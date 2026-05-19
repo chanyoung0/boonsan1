@@ -13,6 +13,10 @@ public class UnpaidNotice {
     private LocalDateTime sentAt;
     private BigDecimal unpaidAmount;
 
+    // DB 전환을 위해 추가된 필드.
+    private String unpaidNoticeId;
+    private String paymentCollectionId;
+
     public UnpaidNotice() {}
 
     public UnpaidNotice(BigDecimal unpaidAmount, LocalDateTime dueDate,
@@ -34,6 +38,10 @@ public class UnpaidNotice {
     public void           setSentAt(LocalDateTime v)      { this.sentAt = v; }
     public BigDecimal     getUnpaidAmount()               { return unpaidAmount; }
     public void           setUnpaidAmount(BigDecimal v)   { this.unpaidAmount = v; }
+    public String         getUnpaidNoticeId()             { return unpaidNoticeId; }
+    public void           setUnpaidNoticeId(String v)     { this.unpaidNoticeId = v; }
+    public String         getPaymentCollectionId()        { return paymentCollectionId; }
+    public void           setPaymentCollectionId(String v){ this.paymentCollectionId = v; }
 
     @Override
     public String toString() {

@@ -21,6 +21,10 @@ public class UnderwritingRequest {
     private UnderwritingResultType underwritingResult;
     private UnderwritingType underwritingType;
 
+    // DB 전환을 위해 추가된 필드 — 행 식별자 + 어떤 계약(배서/부활 등)에 대한 요청인지.
+    private String requestId;
+    private String policyNumber;
+
     public UnderwritingRequest() {}
 
     public UnderwritingRequest(LocalDateTime appliedAt, RequestReason requestReason,
@@ -56,6 +60,10 @@ public class UnderwritingRequest {
     public void                 setUnderwritingResult(UnderwritingResultType v){ this.underwritingResult = v; }
     public UnderwritingType     getUnderwritingType()                   { return underwritingType; }
     public void                 setUnderwritingType(UnderwritingType v) { this.underwritingType = v; }
+    public String               getRequestId()                          { return requestId; }
+    public void                 setRequestId(String v)                  { this.requestId = v; }
+    public String               getPolicyNumber()                       { return policyNumber; }
+    public void                 setPolicyNumber(String v)               { this.policyNumber = v; }
 
     @Override
     public String toString() {

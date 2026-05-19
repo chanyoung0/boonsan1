@@ -12,6 +12,10 @@ import java.util.List;
 // 언더라이팅 이력 도메인 모델 — 피보험자 심사 판단 결과 이력 관리
 public class UnderwritingHistory {
 
+    // DB 전환을 위해 추가된 필드 — 행 식별자 + 어떤 피보험자의 이력인지.
+    private String historyId;
+    private String insuredPersonId;
+
     private int age;
     private String alcoholConsumption;
     private BigDecimal annualIncome;
@@ -94,6 +98,10 @@ public class UnderwritingHistory {
     public void                   setVehicleNumber(String v)           { this.vehicleNumber = v; }
     public List<AccidentHistory>  getAccidentHistoryList()             { return accidentHistoryList; }
     public void                   setAccidentHistoryList(List<AccidentHistory> v){ this.accidentHistoryList = v; }
+    public String                 getHistoryId()                       { return historyId; }
+    public void                   setHistoryId(String v)               { this.historyId = v; }
+    public String                 getInsuredPersonId()                 { return insuredPersonId; }
+    public void                   setInsuredPersonId(String v)         { this.insuredPersonId = v; }
 
     @Override
     public String toString() {

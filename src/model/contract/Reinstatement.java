@@ -17,6 +17,10 @@ public class Reinstatement {
     private ReinstatementReason reinstatementReason;
     private BigDecimal unpaidPremium;
 
+    // DB 전환을 위해 추가된 필드.
+    private String reinstatementId;
+    private String policyNumber;
+
     public Reinstatement() {}
 
     public Reinstatement(ReinstatementReason reinstatementReason, BigDecimal unpaidPremium,
@@ -48,6 +52,10 @@ public class Reinstatement {
     public void                setReinstatementReason(ReinstatementReason v){ this.reinstatementReason = v; }
     public BigDecimal          getUnpaidPremium()                     { return unpaidPremium; }
     public void                setUnpaidPremium(BigDecimal v)         { this.unpaidPremium = v; }
+    public String              getReinstatementId()                   { return reinstatementId; }
+    public void                setReinstatementId(String v)           { this.reinstatementId = v; }
+    public String              getPolicyNumber()                      { return policyNumber; }
+    public void                setPolicyNumber(String v)              { this.policyNumber = v; }
 
     @Override
     public String toString() {

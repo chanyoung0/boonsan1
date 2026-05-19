@@ -13,6 +13,10 @@ public class UnderwritingResult {
     private SurchargeCondition surchargeCondition;
     private UnderwritingResultType underwritingResult;
 
+    // DB 전환을 위해 추가된 필드 — 행 식별자 + 어떤 Underwriting 의 결과인지.
+    private String resultId;
+    private String underwritingId;
+
     public UnderwritingResult() {}
 
     public UnderwritingResult(UnderwritingResultType underwritingResult, String rejectionReason,
@@ -37,6 +41,10 @@ public class UnderwritingResult {
     public void                 setSurchargeCondition(SurchargeCondition v) { this.surchargeCondition = v; }
     public UnderwritingResultType getUnderwritingResult()           { return underwritingResult; }
     public void                 setUnderwritingResult(UnderwritingResultType v) { this.underwritingResult = v; }
+    public String               getResultId()                       { return resultId; }
+    public void                 setResultId(String v)               { this.resultId = v; }
+    public String               getUnderwritingId()                 { return underwritingId; }
+    public void                 setUnderwritingId(String v)         { this.underwritingId = v; }
 
     @Override
     public String toString() {

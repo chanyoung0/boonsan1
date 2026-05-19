@@ -1,8 +1,15 @@
 package console.contract;
 
+import enums.ReinstatementReason;
+import model.contract.Reinstatement;
 import service.contract.ReinstatementService;
 
 import static common.ConsoleUtil.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 // 부활 관리 콘솔 I/O — 계약관리담당자 유스케이스 입출력 전담
 public class ReinstatementConsole {
@@ -32,11 +39,22 @@ public class ReinstatementConsole {
         System.out.println("[시스템] 증권번호: " + policyNo + " | 계약상태: " + contractStatus + " | 미납보험료: 450,000원");
 
         System.out.println("\n[계약관리담당자] 부활 신청 정보를 입력합니다.");
-        input("부활 사유");
+        String reasonInput = input("부활 사유 (UNPAID_PREMIUM/CUSTOMER_REQUEST/POLICY_REVIEW)");
         input("미납보험료 납입확인 (완료/미완료)");
-        input("건강상태 변동여부 (있음/없음)");
-        input("최종납입일 (YYYY-MM-DD)");
-        input("부활희망일 (YYYY-MM-DD)");
+        String healthChangedInput = input("건강상태 변동여부 (있음/없음)");
+        String lastPaidInput = input("최종납입일 (YYYY-MM-DD)");
+        String desiredInput = input("부활희망일 (YYYY-MM-DD)");
+
+        Reinstatement reinstatement = new Reinstatement(
+                parseReason(reasonInput),
+                BigDecimal.valueOf(450_000L),
+                LocalDateTime.now(),
+                parseDateTime(desiredInput),
+                parseDate(lastPaidInput),
+                "있음".equals(healthChangedInput)
+        );
+        reinstatement.applyReinstatement();
+        reinstatement.calculateUnpaidPremium();
 
         System.out.println("\n[시스템] 부활 신청 내용 — 피보험자: " + name + " | 증권번호: " + policyNo);
 
@@ -47,16 +65,48 @@ public class ReinstatementConsole {
         System.out.println("\n[시스템] 심사 결과: " + uwResult);
         enter();
 
+        reinstatement.setProcessedAt(LocalDateTime.now());
+        reinstatement.processReinstatement();
+
         System.out.println("[시스템] 부활 처리 결과를 DB에 저장 중...");
-        if (!simulateDbSave()) {
+        if (!ReinstatementService.saveReinstatement(reinstatement, policyNo)) {
             System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
             return;
         }
 
         if (uwResult.contains("승인")) {
-            System.out.println("[시스템] 부활 처리 완료. 계약상태: '유효'로 갱신");
+            System.out.println("[시스템] 부활 처리 완료. 계약상태: '유효'로 갱신 | 부활번호: "
+                    + reinstatement.getReinstatementId());
         } else {
-            System.out.println("[시스템] 심사 " + uwResult + ". 부활 처리가 거절되었습니다.");
+            System.out.println("[시스템] 심사 " + uwResult + ". 부활 처리가 거절되었습니다. | 부활번호: "
+                    + reinstatement.getReinstatementId());
+        }
+    }
+
+    private static ReinstatementReason parseReason(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return ReinstatementReason.valueOf(value.trim());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static LocalDateTime parseDateTime(String value) {
+        LocalDate date = parseDate(value);
+        return date == null ? null : date.atStartOfDay();
+    }
+
+    private static LocalDate parseDate(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value.trim());
+        } catch (DateTimeParseException e) {
+            return null;
         }
     }
 }

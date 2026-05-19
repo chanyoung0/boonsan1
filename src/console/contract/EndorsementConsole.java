@@ -58,13 +58,15 @@ public class EndorsementConsole {
         System.out.println("\n[시스템] 심사 결과: " + uwResult);
         enter();
 
+        System.out.println(EndorsementService.createEndorsementSaveSummary(
+                policyNo, endorsement, changeReason, uwResult));
+
         System.out.println("[시스템] 배서 내용을 DB에 저장 중...");
-        if (!simulateDbSave()) {
+        if (!EndorsementService.saveEndorsement(endorsement, policyNo)) {
             System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
             return;
         }
-        System.out.println(EndorsementService.createEndorsementSaveSummary(
-                policyNo, endorsement, changeReason, uwResult));
-        System.out.println("[시스템] 배서 내용이 저장되고 계약정보가 갱신되었습니다. 증권번호: " + policyNo);
+        System.out.println("[시스템] 배서 저장 완료 | 배서번호: " + endorsement.getEndorsementId()
+                + " | 증권번호: " + policyNo);
     }
 }

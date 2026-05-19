@@ -101,13 +101,19 @@ public class DamageInvestigationConsole {
         input("특이사항 (없으면 Enter)");
         System.out.println("\n[시스템] 최종 지급품의서가 출력되었습니다.");
 
-        input("사원번호");
+        String adjusterId = input("사원번호");
+        investigation.setAdjusterId(adjusterId);
+
         System.out.println("[시스템] 지급품의서를 DB에 저장 중...");
-        if (!simulateDbSave()) {
+        if (!DamageInvestigationService.saveInvestigation(investigation)) {
             System.out.print("[오류] \"저장 실패\" - 다시 시도하시겠습니까? (Y/N): ");
             if (!"Y".equalsIgnoreCase(sc.nextLine().trim())) { System.out.println("[시스템] 관리자에게 오류를 통보합니다."); return; }
+            if (!DamageInvestigationService.saveInvestigation(investigation)) {
+                System.out.println("[시스템] 재시도 실패. 관리자에게 오류를 통보합니다.");
+                return;
+            }
         }
-        System.out.println("[시스템] 지급품의서 저장 완료 | 사고 접수 상태: '결재 필요'");
+        System.out.println("[시스템] 지급품의서 저장 완료 | 사고 접수 상태: '결재 필요' | 조사번호: " + investigation.getInvestigationId());
 
         String paymentAvailable = input("보험금 지급이 가능합니까? (Y/N)");
         if (!DamageInvestigationService.isYes(paymentAvailable)) {
@@ -159,6 +165,11 @@ public class DamageInvestigationConsole {
         outsourceRequest.setResult("위탁 조사 결과 반영");
         outsourceRequest.receiveResult();
         enter();
+
+        if (!DamageInvestigationService.saveOutsourceRequest(outsourceRequest)) {
+            System.out.println("  [오류] 위탁요청 DB 저장 실패 — 위탁 흐름을 종료합니다.");
+            return null;
+        }
         System.out.println("  [시스템] 협력업체에 문서 전달 완료 | 사고 조사 상태: '손해조사 위탁'");
         System.out.println("  [시스템] 위탁요청번호: " + outsourceRequest.getRequestId()
                 + " | 협력업체: " + selectedPartner.getPartnerName()
@@ -190,11 +201,18 @@ public class DamageInvestigationConsole {
         if (investigation != null) {
             investigation.setInsurancePayment(payment);
         }
+
+        if (!DamageInvestigationService.savePayment(payment)) {
+            System.out.println("  [오류] 보험금 지급 DB 저장 실패 — 사건 종료.");
+            return;
+        }
+
         enter();
         if (payment.generatePaymentRecord() == null) {
             System.out.println("  [시스템] 지급기록 객체는 현재 모델 연결이 없어 지급 요약 출력으로 대체합니다.");
         }
         PaymentStatus paymentStatus = payment.transfer();
+        DamageInvestigationService.updatePayment(payment);
         System.out.println("  [시스템] 이체 완료: " + formatAmount(paymentAmount.longValue()) + " → " + payment.getPaymentAccount());
         enter();
         payment.sendNotification();
@@ -241,15 +259,22 @@ public class DamageInvestigationConsole {
                 depositAccount
         );
 
+        if (!SubrogationService.saveSubrogation(subrogation)) {
+            System.out.println("    [오류] 구상권 DB 저장 실패 — 구상 흐름을 종료합니다.");
+            return;
+        }
+
         System.out.println("    [시스템] 구상 접수 완료 | 구상번호: " + subrogation.getSubrogationId());
         System.out.println("    [시스템] 구상금액: " + formatAmount(subrogation.getPaymentAmount().longValue()) + " | 상태: " + subrogation.getSubrogationStatus());
         System.out.println("    [시스템] 구상 문서 요약: " + subrogation.generateSubrogationDocument());
 
         SubrogationStatus claimStatus = SubrogationService.sendClaim(subrogation);
+        SubrogationService.updateSubrogation(subrogation);
         System.out.println("    [시스템] 구상 청구 발송 완료 | 상태: " + claimStatus);
 
         String depositAnswer = input("  가해자 구상금 입금이 확인되었습니까? (Y/N)");
         SubrogationStatus depositStatus = SubrogationService.confirmDeposit(subrogation, depositAnswer);
+        SubrogationService.updateSubrogation(subrogation);
         if (depositStatus == SubrogationStatus.COMPLETED) {
             System.out.println("    [시스템] 입금 확인 완료 | 구상 상태: '" + depositStatus + "' | 사건 상태: '구상 완료'");
         } else {
@@ -311,6 +336,11 @@ public class DamageInvestigationConsole {
             AcceptanceStatus status = objection.rejectObjection();
             System.out.println("    [시스템] 이의제기 객체 처리상태: " + status + " | 이의번호: " + objection.getObjectionId());
         }
+
+        if (!DamageInvestigationService.saveObjection(objection)) {
+            System.out.println("    [오류] 이의제기 DB 저장 실패 — 처리 결과는 메모리에만 유지됩니다.");
+        }
+
         String message = DamageInvestigationService.processObjection(objResult);
         System.out.println("    [시스템] " + message);
     }

@@ -20,6 +20,10 @@ public class Underwriting {
     private UnderwritingType underwritingType;
     private LocalDateTime underwrittenAt;
 
+    // DB 전환을 위해 추가된 필드 — 행 식별자 + 관련 청약 추적.
+    private String underwritingId;
+    private String applicationId;
+
     private Coinsurance coinsurance;
     private UnderwritingResult underwritingResult;
 
@@ -82,6 +86,10 @@ public class Underwriting {
     public void               setCoinsurance(Coinsurance v)             { this.coinsurance = v; }
     public UnderwritingResult getUnderwritingResult()                   { return underwritingResult; }
     public void               setUnderwritingResult(UnderwritingResult v){ this.underwritingResult = v; }
+    public String             getUnderwritingId()                       { return underwritingId; }
+    public void               setUnderwritingId(String v)               { this.underwritingId = v; }
+    public String             getApplicationId()                        { return applicationId; }
+    public void               setApplicationId(String v)                { this.applicationId = v; }
 
     @Override
     public String toString() {
