@@ -19,7 +19,7 @@ public class AccidentReportConsole {
         System.out.println("\n[보험가입자] '사고 접수' 버튼을 누릅니다.");
         System.out.println("[시스템] 사고 접수 화면:");
         String policyNumber = input("보험 증권번호");
-        input("사고 일시 (YYYY-MM-DD HH:MM)");
+        String accidentAtText = input("사고 일시 (YYYY-MM-DD HH:MM)");
         String accidentDescription = input("사고 경위");
         String damageDetails = input("피해 내용 (예: 차량 파손, 부상)");
 
@@ -45,29 +45,45 @@ public class AccidentReportConsole {
         System.out.print(">> 선택: ");
         String docChoice = sc.nextLine().trim();
 
+        String documentSubmissionStatus;
+        String accidentStatus;
         if (AccidentReportService.isDocumentDeferred(docChoice)) {
             accidentReport.deferSubmission();
             accidentReport.saveAsDocumentPending();
+            documentSubmissionStatus = "PENDING";
+            accidentStatus = "DOCUMENT_PENDING";
             System.out.println("[시스템] '서류 미제출' 상태로 접수 처리합니다.");
         } else {
             input("  사고경위서 파일명");
             input("  진단서 파일명 (없으면 Enter)");
             input("  청구서류 파일명");
             enter();
+            documentSubmissionStatus = "SUBMITTED";
+            accidentStatus = "INVESTIGATION_REQUIRED";
         }
 
-        System.out.println("[시스템] 접수 내용을 DB에 저장 중...");
-        if (!simulateDbSave()) {
-            System.out.println("[오류] \"저장 실패\" - 관리자에게 오류를 통보합니다.");
-            return;
-        }
         String reportNo = AccidentReportService.generateReportNo();
         accidentReport.setReportNo(reportNo);
         accidentReport.register();
         accidentReport.changeStatus();
+
+        System.out.println("[시스템] 접수 내용을 DB에 저장 중...");
+        AccidentReport savedReport = AccidentReportService.registerAccidentReport(
+                accidentReport,
+                policyNumber,
+                accidentStatus,
+                documentSubmissionStatus,
+                accidentAtText
+        );
+        if (savedReport == null) {
+            System.out.println("[오류] \"저장 실패\" - 관리자에게 오류를 통보합니다.");
+            return;
+        }
         System.out.println("[시스템] 사고 접수 번호: " + reportNo);
         System.out.println("[시스템] \"정상적으로 접수되었습니다.\" | 사고 상태: '현장 조사 필요'");
         System.out.println("[시스템] AccidentReport 객체 생성 완료 | reportNo: " + accidentReport.getReportNo());
-        System.out.println("[시스템] 사고상태 저장은 현재 모델 구조상 보류됩니다.");
+        System.out.println("[시스템] 사고 접수 정보가 DB에 저장되었습니다. | 저장상태: "
+                + AccidentReportService.getAccidentStatus(reportNo)
+                + " | 서류상태: " + AccidentReportService.getDocumentSubmissionStatus(reportNo));
     }
 }
