@@ -1,26 +1,16 @@
 package service.contract;
 
+import db.PayoutDBO;
 import enums.CalculationBasis;
-import enums.ContractStatus;
-import enums.PaymentCycle;
 import enums.PaymentType;
-import model.contract.Contract;
 import model.contract.Payout;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class PayoutService {
 
-    private static final Map<String, Payout> payoutMap = new LinkedHashMap<>();
-    private static final Map<String, Contract> contractMap = new LinkedHashMap<>();
-    private static final Map<String, String> payoutPolicyNumberMap = new LinkedHashMap<>();
-    private static final Set<String> cancelledPayoutIdSet = new LinkedHashSet<>();
+    private static final PayoutDBO payoutDBO = new PayoutDBO();
 
     public static Payout createPayout(String policyNumber, String processor, PaymentType paymentType,
                                       CalculationBasis calculationBasis, BigDecimal baseAmount,
@@ -29,12 +19,10 @@ public class PayoutService {
         Payout payout = new Payout(processor, paymentType, calculationBasis,
                 baseAmount, finalPaymentAmount, deductionItem, null);
         payout.calculatePayment();
-
-        String payoutId = generatePayoutId();
-        payoutMap.put(payoutId, payout);
-        payoutPolicyNumberMap.put(payoutId, policyNumber);
-        addPayoutToContract(resolveContract(policyNumber), payout);
-        return payout;
+        payout.setPayoutId(generatePayoutId());
+        payout.setPolicyNumber(policyNumber);
+        payout.setStatus("REGISTERED");
+        return payoutDBO.save(payout) ? payout : null;
     }
 
     public static BigDecimal calculateFinalPaymentAmount(BigDecimal baseAmount, BigDecimal deductionAmount) {
@@ -49,20 +37,22 @@ public class PayoutService {
 
     public static Payout approvePayout(String payoutId) {
         Payout payout = findPayoutById(payoutId);
-        if (payout == null || isCancelled(payoutId)) {
+        if (payout == null || isCancelled(payout)) {
             return null;
         }
         payout.approvePayment();
-        return payout;
+        payout.setStatus("APPROVED");
+        return payoutDBO.update(payout) ? payout : null;
     }
 
     public static Payout processPayout(String payoutId) {
         Payout payout = findPayoutById(payoutId);
-        if (payout == null || isCancelled(payoutId) || payout.getApprovedAt() == null) {
+        if (payout == null || isCancelled(payout) || payout.getApprovedAt() == null) {
             return null;
         }
         payout.processPayment();
-        return payout;
+        payout.setStatus("PAID");
+        return payoutDBO.update(payout) ? payout : null;
     }
 
     public static Payout cancelPayout(String payoutId) {
@@ -71,35 +61,25 @@ public class PayoutService {
             return null;
         }
         payout.cancelPayment();
-        cancelledPayoutIdSet.add(payoutId);
-        return payout;
+        payout.setStatus("CANCELLED");
+        return payoutDBO.update(payout) ? payout : null;
     }
 
     public static List<Payout> getPayoutList() {
-        return new ArrayList<>(payoutMap.values());
+        return payoutDBO.findAll();
     }
 
     public static Payout findPayoutById(String payoutId) {
-        return payoutMap.get(payoutId);
-    }
-
-    public static void addPayoutToContract(Contract contract, Payout payout) {
-        if (contract != null && payout != null) {
-            contract.getPayoutList().add(payout);
-        }
+        return payoutDBO.findById(payoutId);
     }
 
     public static String getPayoutId(Payout payout) {
-        for (Map.Entry<String, Payout> entry : payoutMap.entrySet()) {
-            if (entry.getValue() == payout) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return payout == null ? null : payout.getPayoutId();
     }
 
     public static String getPolicyNumber(String payoutId) {
-        return payoutPolicyNumberMap.get(payoutId);
+        Payout payout = findPayoutById(payoutId);
+        return payout == null ? null : payout.getPolicyNumber();
     }
 
     public static String getPayoutStatus(String payoutId) {
@@ -107,16 +87,7 @@ public class PayoutService {
         if (payout == null) {
             return "NOT_FOUND";
         }
-        if (isCancelled(payoutId)) {
-            return "CANCELLED";
-        }
-        if (payout.getPaidAt() != null) {
-            return "PAID";
-        }
-        if (payout.getApprovedAt() != null) {
-            return "APPROVED";
-        }
-        return "REGISTERED";
+        return payout.getStatus();
     }
 
     public static String createPayoutCalculationSummary(String payoutId) {
@@ -125,7 +96,7 @@ public class PayoutService {
             return "[시스템] 지급금 산출 정보 없음";
         }
         return "[시스템] 지급금 산출 결과"
-                + "\n  증권번호: " + getPolicyNumber(payoutId)
+                + "\n  증권번호: " + payout.getPolicyNumber()
                 + "\n  지급유형: " + payout.getPaymentType()
                 + "\n  산출금액: " + formatAmount(payout.getCalculatedAmount())
                 + "\n  산출기준: " + payout.getCalculationBasis()
@@ -137,8 +108,7 @@ public class PayoutService {
         return "[시스템] 지급금 산출 결과 반려"
                 + "\n  지급번호: " + payoutId
                 + "\n  증권번호: " + getPolicyNumber(payoutId)
-                + "\n  반려사유: " + emptyToDefault(rejectionReason)
-                + "\n  안내: 반려 상태 필드가 없어 실제 상태 저장은 보류됩니다.";
+                + "\n  반려사유: " + emptyToDefault(rejectionReason);
     }
 
     public static String createPaymentNotice(String payoutId) {
@@ -147,7 +117,7 @@ public class PayoutService {
             return "[시스템] 지급안내장 생성 불가";
         }
         return "[시스템] 지급안내장 자동 발송 완료"
-                + "\n  증권번호: " + getPolicyNumber(payoutId)
+                + "\n  증권번호: " + payout.getPolicyNumber()
                 + "\n  지급유형: " + payout.getPaymentType()
                 + "\n  지급금액: " + formatAmount(payout.getFinalPaymentAmount())
                 + "\n  지급일시: " + payout.getPaidAt()
@@ -158,26 +128,15 @@ public class PayoutService {
         return "[시스템] 제지급금 취소/반려 사유 기록"
                 + "\n  지급번호: " + payoutId
                 + "\n  증권번호: " + getPolicyNumber(payoutId)
-                + "\n  사유: " + emptyToDefault(reason)
-                + "\n  안내: 취소 사유 저장 필드가 없어 출력 메시지로만 반영됩니다.";
+                + "\n  사유: " + emptyToDefault(reason);
     }
 
     public static boolean isCancelled(String payoutId) {
-        return cancelledPayoutIdSet.contains(payoutId);
+        return "CANCELLED".equals(getPayoutStatus(payoutId));
     }
 
-    private static Contract resolveContract(String policyNumber) {
-        Contract contract = contractMap.get(policyNumber);
-        if (contract != null) {
-            return contract;
-        }
-
-        Contract newContract = new Contract();
-        newContract.setPolicyNumber(policyNumber);
-        newContract.setContractStatus(ContractStatus.ACTIVE);
-        newContract.setPaymentCycle(PaymentCycle.MONTHLY);
-        contractMap.put(policyNumber, newContract);
-        return newContract;
+    private static boolean isCancelled(Payout payout) {
+        return "CANCELLED".equals(payout.getStatus());
     }
 
     private static String generatePayoutId() {

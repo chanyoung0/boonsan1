@@ -18,7 +18,10 @@ public class Payout {
     private BigDecimal finalPaymentAmount;
     private LocalDateTime paidAt;
     private PaymentType paymentType;
+    private String payoutId;
+    private String policyNumber;
     private String processor;
+    private String status;  // REGISTERED, APPROVED, PAID, CANCELLED
 
     private DamageInvestigation damageInvestigation;
     private InsurancePayment insurancePayment;
@@ -70,8 +73,14 @@ public class Payout {
     public void                setPaidAt(LocalDateTime v)               { this.paidAt = v; }
     public PaymentType         getPaymentType()                         { return paymentType; }
     public void                setPaymentType(PaymentType v)            { this.paymentType = v; }
+    public String              getPayoutId()                            { return payoutId; }
+    public void                setPayoutId(String v)                    { this.payoutId = v; }
+    public String              getPolicyNumber()                        { return policyNumber; }
+    public void                setPolicyNumber(String v)                { this.policyNumber = v; }
     public String              getProcessor()                           { return processor; }
     public void                setProcessor(String v)                   { this.processor = v; }
+    public String              getStatus()                              { return status; }
+    public void                setStatus(String v)                      { this.status = v; }
     public DamageInvestigation getDamageInvestigation()                 { return damageInvestigation; }
     public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
     public InsurancePayment    getInsurancePayment()                    { return insurancePayment; }

@@ -7,6 +7,7 @@ public class Authorization {
 
     private LocalDateTime approvedAt;
     private boolean isApproved;
+    private String productCode;
     private LocalDateTime requestedAt;
     private String requestId;
     private String requestReason;
@@ -41,6 +42,8 @@ public class Authorization {
     public void                         setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }
     public boolean                      isApproved()                             { return isApproved; }
     public void                         setApproved(boolean v)                   { this.isApproved = v; }
+    public String                       getProductCode()                         { return productCode; }
+    public void                         setProductCode(String v)                 { this.productCode = v; }
     public LocalDateTime                getRequestedAt()                         { return requestedAt; }
     public void                         setRequestedAt(LocalDateTime v)          { this.requestedAt = v; }
     public String                       getRequestId()                           { return requestId; }

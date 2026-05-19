@@ -116,6 +116,10 @@ public class InsuranceProductConsole {
                 return;
         }
 
+        if (product == null) {
+            System.out.println("[오류] 상품 등록에 실패했습니다. DB 연결 또는 입력값을 확인하세요.");
+            return;
+        }
         System.out.println(InsuranceProductService.createDesignSummary(product, productName,
                 targetCustomer, salesChannel, paymentPeriod, mainCoverageName, coverageDetails,
                 exemptionCondition, paymentCondition, availableAge, restrictionCondition,

@@ -89,11 +89,6 @@ public class PayoutConsole {
         System.out.println("\n[제지급금 승인]");
         printPayoutList();
         String payoutId = input("승인할 지급번호");
-        if (PayoutService.isCancelled(payoutId)) {
-            System.out.println("[오류] 취소된 제지급금은 승인할 수 없습니다.");
-            return;
-        }
-
         Payout payout = PayoutService.findPayoutById(payoutId);
         if (payout == null) {
             System.out.println("[오류] 해당 지급번호를 찾을 수 없습니다.");
@@ -124,11 +119,6 @@ public class PayoutConsole {
         System.out.println("\n[제지급금 지급 처리]");
         printPayoutList();
         String payoutId = input("지급 처리할 지급번호");
-        if (PayoutService.isCancelled(payoutId)) {
-            System.out.println("[오류] 취소된 제지급금은 지급 처리할 수 없습니다.");
-            return;
-        }
-
         Payout payout = PayoutService.findPayoutById(payoutId);
         if (payout == null) {
             System.out.println("[오류] 해당 지급번호를 찾을 수 없습니다.");
@@ -140,6 +130,10 @@ public class PayoutConsole {
         }
 
         payout = PayoutService.processPayout(payoutId);
+        if (payout == null) {
+            System.out.println("[오류] 해당 지급번호를 지급 처리할 수 없는 상태입니다.");
+            return;
+        }
         System.out.println("[시스템] 제지급금 지급 처리 완료");
         System.out.println("  지급일시: " + payout.getPaidAt());
         System.out.println("  상태: " + PayoutService.getPayoutStatus(payoutId));
