@@ -75,6 +75,10 @@ public class PayoutConsole {
                 deductionAmount,
                 deductionItem
         );
+        if (payout == null) {
+            System.out.println("[오류] 제지급금 등록에 실패했습니다. DB 연결 또는 입력값을 확인하세요.");
+            return;
+        }
         String payoutId = PayoutService.getPayoutId(payout);
 
         System.out.println("[시스템] 제지급금 등록 완료");
@@ -167,13 +171,15 @@ public class PayoutConsole {
     private static void printPayoutList() {
         System.out.println("\n[제지급금 목록 조회]");
         List<Payout> payoutList = PayoutService.getPayoutList();
+        List<String> payoutIdList = PayoutService.getPayoutIdList();
         if (payoutList.isEmpty()) {
             System.out.println("[시스템] 등록된 제지급금이 없습니다.");
             return;
         }
 
-        for (Payout payout : payoutList) {
-            String payoutId = PayoutService.getPayoutId(payout);
+        for (int i = 0; i < payoutList.size(); i++) {
+            Payout payout = payoutList.get(i);
+            String payoutId = i < payoutIdList.size() ? payoutIdList.get(i) : PayoutService.getPayoutId(payout);
             System.out.println("  지급번호: " + payoutId
                     + " | 증권번호: " + PayoutService.getPolicyNumber(payoutId)
                     + " | 지급유형: " + payout.getPaymentType()
