@@ -75,6 +75,10 @@ public class PartnerConsole {
 
         Partner partner = PartnerService.registerPartner(id, partnerName, partnerType,
                 contact, responsibility, evaluationGrade);
+        if (partner == null) {
+            System.out.println("[오류] 협력업체 등록에 실패했습니다. DB 연결 또는 입력값을 확인하세요.");
+            return;
+        }
         System.out.println("[시스템] 협력업체 등록 완료");
         printPartner(partner);
     }
@@ -98,6 +102,10 @@ public class PartnerConsole {
 
         Partner updatedPartner = PartnerService.updatePartner(id, partnerName, partnerType,
                 contact, responsibility, evaluationGrade);
+        if (updatedPartner == null) {
+            System.out.println("[오류] 협력업체 수정에 실패했습니다. DB 연결 또는 입력값을 확인하세요.");
+            return;
+        }
         System.out.println("[시스템] 협력업체 수정 완료");
         printPartner(updatedPartner);
     }

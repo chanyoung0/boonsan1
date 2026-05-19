@@ -1,16 +1,15 @@
 package service.partner;
 
+import db.PartnerDBO;
 import enums.EvaluationGrade;
 import model.partner.Partner;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class PartnerService {
 
-    private static final Map<String, Partner> partnerMap = new LinkedHashMap<>();
+    private static final PartnerDBO partnerDBO = new PartnerDBO();
 
     public static Partner registerPartner(String id, String partnerName, String partnerType,
                                           String contact, String responsibility,
@@ -20,8 +19,7 @@ public class PartnerService {
                 responsibility, evaluationGrade);
         partner.register();
         partner.save();
-        partnerMap.put(partnerId, partner);
-        return partner;
+        return partnerDBO.save(partner) ? partner : null;
     }
 
     public static Partner updatePartner(String id, String partnerName, String partnerType,
@@ -48,12 +46,11 @@ public class PartnerService {
             partner.setEvaluationGrade(evaluationGrade);
         }
         partner.update();
-        partnerMap.put(id, partner);
-        return partner;
+        return partnerDBO.update(partner) ? partner : null;
     }
 
     public static Partner findPartnerById(String id) {
-        Partner partner = partnerMap.get(id);
+        Partner partner = partnerDBO.findById(id);
         if (partner != null) {
             partner.searchPartner();
         }
@@ -61,14 +58,14 @@ public class PartnerService {
     }
 
     public static List<Partner> getPartnerList() {
-        return new ArrayList<>(partnerMap.values());
+        return partnerDBO.findAll();
     }
 
     public static List<Partner> searchPartners(String partnerName, String partnerType,
                                                EvaluationGrade evaluationGrade,
                                                String availabilityStatus) {
         List<Partner> result = new ArrayList<>();
-        for (Partner partner : partnerMap.values()) {
+        for (Partner partner : partnerDBO.findAll()) {
             if (!containsText(partner.getPartnerName(), partnerName)) {
                 continue;
             }
@@ -88,7 +85,7 @@ public class PartnerService {
 
     public static List<Partner> getAvailablePartnerList() {
         List<Partner> availablePartnerList = new ArrayList<>();
-        for (Partner partner : partnerMap.values()) {
+        for (Partner partner : partnerDBO.findAll()) {
             if (partner.getEvaluationGrade() != EvaluationGrade.SUSPENDED) {
                 availablePartnerList.add(partner);
             }
