@@ -18,6 +18,7 @@ public class AccidentReportConsole {
 
         System.out.println("\n[보험가입자] '사고 접수' 버튼을 누릅니다.");
         System.out.println("[시스템] 사고 접수 화면:");
+        String policyNumber = input("보험 증권번호");
         input("사고 일시 (YYYY-MM-DD HH:MM)");
         String accidentDescription = input("사고 경위");
         String damageDetails = input("피해 내용 (예: 차량 파손, 부상)");
