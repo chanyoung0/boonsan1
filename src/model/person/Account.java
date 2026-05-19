@@ -5,7 +5,7 @@ import enums.BankName;
 
 import java.math.BigDecimal;
 
-// 계좌 도메인 모델 — 보험료 납입 및 보험금 지급용 계좌 정보 관리
+// 계좌 도메인 모델 — 보험료 자동이체 및 보험금 수령 계좌 정보 관리
 public class Account {
 
     private String accountHolder;
@@ -16,41 +16,45 @@ public class Account {
 
     public Account() {}
 
-    // 계좌 기본 정보로 초기화
-    public Account(String accountHolder, String accountNumber, AccountType accountType, BankName bankName, BigDecimal balance) {
-        this.accountHolder = accountHolder;
+    public Account(String accountNumber, String accountHolder, BankName bankName,
+                   AccountType accountType, BigDecimal balance) {
         this.accountNumber = accountNumber;
-        this.accountType = accountType;
+        this.accountHolder = accountHolder;
         this.bankName = bankName;
+        this.accountType = accountType;
         this.balance = balance;
     }
 
     // 자동이체 해지
-    public void cancelAutoTransfer() {}
-
-    // 계좌 변경
-    public void changeAccount() {}
-
-    // 잔액이 0보다 큰지 확인
-    public boolean checkBalance() {
-        return balance != null && balance.signum() > 0;
+    public void cancelAutoTransfer() {
+        if (accountNumber == null || accountNumber.isEmpty())
+            throw new IllegalStateException("해지할 계좌번호가 없습니다.");
     }
 
-    public String getAccountHolder() { return accountHolder; }
-    public String getAccountNumber() { return accountNumber; }
-    public AccountType getAccountType() { return accountType; }
-    public BankName getBankName() { return bankName; }
-    public BigDecimal getBalance() { return balance; }
+    // 계좌 변경
+    public void changeAccount() {
+        if (accountNumber == null || accountNumber.isEmpty())
+            throw new IllegalStateException("변경할 계좌번호가 없습니다.");
+        if (bankName == null)
+            throw new IllegalStateException("은행 정보가 없습니다.");
+    }
 
-    public void setAccountHolder(String accountHolder) { this.accountHolder = accountHolder; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
-    public void setAccountType(AccountType accountType) { this.accountType = accountType; }
-    public void setBankName(BankName bankName) { this.bankName = bankName; }
-    public void setBalance(BigDecimal balance) { this.balance = balance; }
+    // 잔액 확인 — 이체 가능 여부 반환
+    public boolean checkBalance() { return balance != null && balance.compareTo(BigDecimal.ZERO) > 0; }
+
+    public String      getAccountHolder()           { return accountHolder; }
+    public void        setAccountHolder(String v)   { this.accountHolder = v; }
+    public String      getAccountNumber()           { return accountNumber; }
+    public void        setAccountNumber(String v)   { this.accountNumber = v; }
+    public AccountType getAccountType()             { return accountType; }
+    public void        setAccountType(AccountType v){ this.accountType = v; }
+    public BankName    getBankName()                { return bankName; }
+    public void        setBankName(BankName v)      { this.bankName = v; }
+    public BigDecimal  getBalance()                 { return balance; }
+    public void        setBalance(BigDecimal v)     { this.balance = v; }
 
     @Override
     public String toString() {
-        return "Account{holder='" + accountHolder + "', no='" + accountNumber
-                + "', bank=" + bankName + ", balance=" + balance + "}";
+        return "Account{accountNumber='" + accountNumber + "', accountHolder='" + accountHolder + "', bankName=" + bankName + "}";
     }
 }

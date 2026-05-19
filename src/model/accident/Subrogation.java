@@ -8,64 +8,77 @@ import java.time.LocalDateTime;
 // 구상권 도메인 모델 — 보험금 지급 후 제3자 구상 처리 정보 관리
 public class Subrogation {
 
-    private String subrogationId;
-    private String offenderName;
-    private String offenderContact;
-    private float faultRatio;
-    private BigDecimal paymentAmount;
     private String depositAccount;
+    private float faultRatio;
+    private String offenderContact;
+    private String offenderName;
+    private BigDecimal paymentAmount;
     private LocalDateTime paymentDeadline;
+    private String subrogationId;
     private SubrogationStatus subrogationStatus;
-    private InsurancePayment insurancePayment;
 
     public Subrogation() {}
 
-    // 구상 기본 정보로 초기화
-    public Subrogation(String subrogationId, String offenderName, float faultRatio, BigDecimal paymentAmount) {
+    public Subrogation(String subrogationId, String offenderName, String offenderContact,
+                       float faultRatio, BigDecimal paymentAmount,
+                       LocalDateTime paymentDeadline, String depositAccount,
+                       SubrogationStatus subrogationStatus) {
         this.subrogationId = subrogationId;
         this.offenderName = offenderName;
+        this.offenderContact = offenderContact;
         this.faultRatio = faultRatio;
         this.paymentAmount = paymentAmount;
-        this.subrogationStatus = SubrogationStatus.IN_PROGRESS;
+        this.paymentDeadline = paymentDeadline;
+        this.depositAccount = depositAccount;
+        this.subrogationStatus = subrogationStatus;
     }
 
     // 입금 확인
-    public void confirmDeposit() {}
-
-    // 구상 문서 생성
-    public void generateSubrogationDocument() {}
-
-    // 지급 상세 조회 — 원 보험금 지급 객체 반환
-    public InsurancePayment retrievePaymentDetails() {
-        return insurancePayment;
+    public void confirmDeposit() {
+        if (depositAccount == null || depositAccount.isEmpty())
+            throw new IllegalStateException("입금 계좌가 설정되지 않았습니다.");
+        this.subrogationStatus = SubrogationStatus.COMPLETED;
     }
 
+    // 구상 문서 생성
+    public void generateSubrogationDocument() {
+        if (subrogationId == null || subrogationId.isEmpty())
+            this.subrogationId = "SUB-" + System.currentTimeMillis();
+        if (offenderName == null || offenderName.isEmpty())
+            throw new IllegalStateException("가해자 정보가 없습니다.");
+    }
+
+    // 지급 상세 조회 — 관련 InsurancePayment 반환
+    public InsurancePayment retrievePaymentDetails() { return null; }
+
     // 구상 청구 발송
-    public void sendClaim() {}
+    public void sendClaim() {
+        if (offenderContact == null || offenderContact.isEmpty())
+            throw new IllegalStateException("가해자 연락처가 없습니다.");
+        if (paymentAmount == null || paymentAmount.compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("구상 금액이 유효하지 않습니다.");
+        this.subrogationStatus = SubrogationStatus.IN_PROGRESS;
+    }
 
-    public String getSubrogationId() { return subrogationId; }
-    public String getOffenderName() { return offenderName; }
-    public String getOffenderContact() { return offenderContact; }
-    public float getFaultRatio() { return faultRatio; }
-    public BigDecimal getPaymentAmount() { return paymentAmount; }
-    public String getDepositAccount() { return depositAccount; }
-    public LocalDateTime getPaymentDeadline() { return paymentDeadline; }
-    public SubrogationStatus getSubrogationStatus() { return subrogationStatus; }
-    public InsurancePayment getInsurancePayment() { return insurancePayment; }
-
-    public void setSubrogationId(String s) { this.subrogationId = s; }
-    public void setOffenderName(String s) { this.offenderName = s; }
-    public void setOffenderContact(String s) { this.offenderContact = s; }
-    public void setFaultRatio(float v) { this.faultRatio = v; }
-    public void setPaymentAmount(BigDecimal v) { this.paymentAmount = v; }
-    public void setDepositAccount(String s) { this.depositAccount = s; }
-    public void setPaymentDeadline(LocalDateTime t) { this.paymentDeadline = t; }
-    public void setSubrogationStatus(SubrogationStatus s) { this.subrogationStatus = s; }
-    public void setInsurancePayment(InsurancePayment p) { this.insurancePayment = p; }
+    public String           getDepositAccount()                     { return depositAccount; }
+    public void             setDepositAccount(String v)             { this.depositAccount = v; }
+    public float            getFaultRatio()                         { return faultRatio; }
+    public void             setFaultRatio(float v)                  { this.faultRatio = v; }
+    public String           getOffenderContact()                    { return offenderContact; }
+    public void             setOffenderContact(String v)            { this.offenderContact = v; }
+    public String           getOffenderName()                       { return offenderName; }
+    public void             setOffenderName(String v)               { this.offenderName = v; }
+    public BigDecimal       getPaymentAmount()                      { return paymentAmount; }
+    public void             setPaymentAmount(BigDecimal v)          { this.paymentAmount = v; }
+    public LocalDateTime    getPaymentDeadline()                    { return paymentDeadline; }
+    public void             setPaymentDeadline(LocalDateTime v)     { this.paymentDeadline = v; }
+    public String           getSubrogationId()                      { return subrogationId; }
+    public void             setSubrogationId(String v)              { this.subrogationId = v; }
+    public SubrogationStatus getSubrogationStatus()                 { return subrogationStatus; }
+    public void             setSubrogationStatus(SubrogationStatus v){ this.subrogationStatus = v; }
 
     @Override
     public String toString() {
-        return "Subrogation{id='" + subrogationId + "', offender='" + offenderName
-                + "', amount=" + paymentAmount + ", status=" + subrogationStatus + "}";
+        return "Subrogation{subrogationId='" + subrogationId + "', offenderName='" + offenderName + "', subrogationStatus=" + subrogationStatus + "}";
     }
 }

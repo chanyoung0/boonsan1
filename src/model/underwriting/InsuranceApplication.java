@@ -1,84 +1,94 @@
 package model.underwriting;
 
 import enums.ApplicationStatus;
+import enums.PaymentCycle;
 import enums.SpecialContractType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// 청약 도메인 모델 — 보험 가입 신청 정보 관리
+// 보험 청약 도메인 모델 — 보험 가입 신청 정보 관리
 public class InsuranceApplication {
 
     private String applicationId;
     private ApplicationStatus applicationStatus;
     private LocalDateTime appliedAt;
     private String appliedCondition;
-    private String productCode;
-    private String insuredPersonInfo;
     private BigDecimal insuredAmount;
+    private String insuredPersonInfo;
+    private PaymentCycle paymentCycle;
     private BigDecimal premium;
-    private String paymentCycle;
+    private String productCode;
     private SpecialContractType specialContractList;
     private String termsVersion;
 
     public InsuranceApplication() {}
 
-    // 청약 기본 정보로 초기화
-    public InsuranceApplication(String applicationId, String productCode, String insuredPersonInfo,
-                                BigDecimal insuredAmount, BigDecimal premium, String paymentCycle) {
-        this.applicationId = applicationId;
+    public InsuranceApplication(String productCode, String insuredPersonInfo, BigDecimal insuredAmount,
+                                BigDecimal premium, PaymentCycle paymentCycle, SpecialContractType specialContractList,
+                                String termsVersion, String appliedCondition) {
         this.productCode = productCode;
         this.insuredPersonInfo = insuredPersonInfo;
         this.insuredAmount = insuredAmount;
         this.premium = premium;
         this.paymentCycle = paymentCycle;
-        this.applicationStatus = ApplicationStatus.PENDING;
-        this.appliedAt = LocalDateTime.now();
+        this.specialContractList = specialContractList;
+        this.termsVersion = termsVersion;
+        this.appliedCondition = appliedCondition;
     }
 
     // 청약 상태 변경
-    public void changeApplicationStatus() {}
+    public void changeApplicationStatus() {
+        if (applicationStatus == null)
+            throw new IllegalStateException("청약 상태가 설정되지 않았습니다.");
+    }
 
     // 청약 확정
-    public void confirmApplication() {}
+    public void confirmApplication() {
+        if (applicationId == null || applicationId.isEmpty())
+            throw new IllegalStateException("청약번호가 없습니다.");
+        this.applicationStatus = ApplicationStatus.APPROVED;
+    }
 
-    // 증권번호 발급
-    public void issuePolicyNumber() {}
+    // 증권번호 발행
+    public void issuePolicyNumber() {
+        if (applicationStatus != ApplicationStatus.APPROVED)
+            throw new IllegalStateException("승인된 청약만 증권번호를 발행할 수 있습니다.");
+    }
 
-    // 청약 접수 — 채번된 청약번호 반환
+    // 청약 접수 — 생성된 청약번호 반환
     public String receiveApplication() {
         this.applicationStatus = ApplicationStatus.PENDING;
         this.appliedAt = LocalDateTime.now();
-        return this.applicationId;
+        this.applicationId = "APP-" + System.currentTimeMillis();
+        return applicationId;
     }
 
-    public String getApplicationId() { return applicationId; }
-    public ApplicationStatus getApplicationStatus() { return applicationStatus; }
-    public LocalDateTime getAppliedAt() { return appliedAt; }
-    public String getAppliedCondition() { return appliedCondition; }
-    public String getProductCode() { return productCode; }
-    public String getInsuredPersonInfo() { return insuredPersonInfo; }
-    public BigDecimal getInsuredAmount() { return insuredAmount; }
-    public BigDecimal getPremium() { return premium; }
-    public String getPaymentCycle() { return paymentCycle; }
-    public SpecialContractType getSpecialContractList() { return specialContractList; }
-    public String getTermsVersion() { return termsVersion; }
-
-    public void setApplicationId(String s) { this.applicationId = s; }
-    public void setApplicationStatus(ApplicationStatus s) { this.applicationStatus = s; }
-    public void setAppliedAt(LocalDateTime t) { this.appliedAt = t; }
-    public void setAppliedCondition(String s) { this.appliedCondition = s; }
-    public void setProductCode(String s) { this.productCode = s; }
-    public void setInsuredPersonInfo(String s) { this.insuredPersonInfo = s; }
-    public void setInsuredAmount(BigDecimal v) { this.insuredAmount = v; }
-    public void setPremium(BigDecimal v) { this.premium = v; }
-    public void setPaymentCycle(String s) { this.paymentCycle = s; }
-    public void setSpecialContractList(SpecialContractType t) { this.specialContractList = t; }
-    public void setTermsVersion(String s) { this.termsVersion = s; }
+    public String              getApplicationId()                       { return applicationId; }
+    public void                setApplicationId(String v)              { this.applicationId = v; }
+    public ApplicationStatus   getApplicationStatus()                  { return applicationStatus; }
+    public void                setApplicationStatus(ApplicationStatus v){ this.applicationStatus = v; }
+    public LocalDateTime       getAppliedAt()                          { return appliedAt; }
+    public void                setAppliedAt(LocalDateTime v)           { this.appliedAt = v; }
+    public String              getAppliedCondition()                   { return appliedCondition; }
+    public void                setAppliedCondition(String v)           { this.appliedCondition = v; }
+    public BigDecimal          getInsuredAmount()                      { return insuredAmount; }
+    public void                setInsuredAmount(BigDecimal v)          { this.insuredAmount = v; }
+    public String              getInsuredPersonInfo()                  { return insuredPersonInfo; }
+    public void                setInsuredPersonInfo(String v)          { this.insuredPersonInfo = v; }
+    public PaymentCycle        getPaymentCycle()                       { return paymentCycle; }
+    public void                setPaymentCycle(PaymentCycle v)         { this.paymentCycle = v; }
+    public BigDecimal          getPremium()                            { return premium; }
+    public void                setPremium(BigDecimal v)                { this.premium = v; }
+    public String              getProductCode()                        { return productCode; }
+    public void                setProductCode(String v)                { this.productCode = v; }
+    public SpecialContractType getSpecialContractList()                { return specialContractList; }
+    public void                setSpecialContractList(SpecialContractType v){ this.specialContractList = v; }
+    public String              getTermsVersion()                       { return termsVersion; }
+    public void                setTermsVersion(String v)               { this.termsVersion = v; }
 
     @Override
     public String toString() {
-        return "InsuranceApplication{id='" + applicationId + "', status=" + applicationStatus
-                + ", amount=" + insuredAmount + "}";
+        return "InsuranceApplication{applicationId='" + applicationId + "', applicationStatus=" + applicationStatus + "}";
     }
 }

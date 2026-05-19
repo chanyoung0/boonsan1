@@ -1,13 +1,10 @@
 package model.contract;
 
 import enums.ReinstatementReason;
-import model.underwriting.UnderwritingRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 // 부활 도메인 모델 — 실효 계약 부활 신청 및 처리 정보 관리
 public class Reinstatement {
@@ -19,49 +16,58 @@ public class Reinstatement {
     private LocalDateTime processedAt;
     private ReinstatementReason reinstatementReason;
     private BigDecimal unpaidPremium;
-    private final List<UnderwritingRequest> underwritingRequests = new ArrayList<>();
 
     public Reinstatement() {}
 
-    // 부활 신청 기본 정보로 초기화
-    public Reinstatement(ReinstatementReason reason, BigDecimal unpaidPremium, LocalDateTime desiredDate, LocalDate lastPaidDate) {
-        this.reinstatementReason = reason;
+    public Reinstatement(ReinstatementReason reinstatementReason, BigDecimal unpaidPremium,
+                         LocalDateTime appliedAt, LocalDateTime desiredDate,
+                         LocalDate lastPaidDate, boolean hasHealthChanged) {
+        this.reinstatementReason = reinstatementReason;
         this.unpaidPremium = unpaidPremium;
+        this.appliedAt = appliedAt;
         this.desiredDate = desiredDate;
         this.lastPaidDate = lastPaidDate;
-        this.appliedAt = LocalDateTime.now();
+        this.hasHealthChanged = hasHealthChanged;
     }
 
     // 부활 신청
-    public void applyReinstatement() {}
+    public void applyReinstatement() {
+        if (reinstatementReason == null)
+            throw new IllegalStateException("부활 사유가 설정되지 않았습니다.");
+        if (this.appliedAt == null) this.appliedAt = LocalDateTime.now();
+    }
 
     // 미납 보험료 계산
-    public void calculateUnpaidPremium() {}
+    public void calculateUnpaidPremium() {
+        if (lastPaidDate == null)
+            throw new IllegalStateException("최종 납입일이 설정되지 않았습니다.");
+        if (unpaidPremium == null) this.unpaidPremium = BigDecimal.ZERO;
+    }
 
     // 부활 처리
-    public void processReinstatement() {}
+    public void processReinstatement() {
+        if (unpaidPremium == null)
+            throw new IllegalStateException("미납 보험료가 계산되지 않았습니다.");
+        this.processedAt = LocalDateTime.now();
+    }
 
-    public LocalDateTime getAppliedAt() { return appliedAt; }
-    public LocalDateTime getDesiredDate() { return desiredDate; }
-    public boolean isHasHealthChanged() { return hasHealthChanged; }
-    public LocalDate getLastPaidDate() { return lastPaidDate; }
-    public LocalDateTime getProcessedAt() { return processedAt; }
-    public ReinstatementReason getReinstatementReason() { return reinstatementReason; }
-    public BigDecimal getUnpaidPremium() { return unpaidPremium; }
-    public List<UnderwritingRequest> getUnderwritingRequests() { return underwritingRequests; }
-
-    public void setAppliedAt(LocalDateTime t) { this.appliedAt = t; }
-    public void setDesiredDate(LocalDateTime t) { this.desiredDate = t; }
-    public void setHasHealthChanged(boolean b) { this.hasHealthChanged = b; }
-    public void setLastPaidDate(LocalDate d) { this.lastPaidDate = d; }
-    public void setProcessedAt(LocalDateTime t) { this.processedAt = t; }
-    public void setReinstatementReason(ReinstatementReason r) { this.reinstatementReason = r; }
-    public void setUnpaidPremium(BigDecimal v) { this.unpaidPremium = v; }
-    public void addUnderwritingRequest(UnderwritingRequest r) { this.underwritingRequests.add(r); }
+    public LocalDateTime       getAppliedAt()                         { return appliedAt; }
+    public void                setAppliedAt(LocalDateTime v)          { this.appliedAt = v; }
+    public LocalDateTime       getDesiredDate()                       { return desiredDate; }
+    public void                setDesiredDate(LocalDateTime v)        { this.desiredDate = v; }
+    public boolean             isHasHealthChanged()                   { return hasHealthChanged; }
+    public void                setHasHealthChanged(boolean v)         { this.hasHealthChanged = v; }
+    public LocalDate           getLastPaidDate()                      { return lastPaidDate; }
+    public void                setLastPaidDate(LocalDate v)           { this.lastPaidDate = v; }
+    public LocalDateTime       getProcessedAt()                       { return processedAt; }
+    public void                setProcessedAt(LocalDateTime v)        { this.processedAt = v; }
+    public ReinstatementReason getReinstatementReason()               { return reinstatementReason; }
+    public void                setReinstatementReason(ReinstatementReason v){ this.reinstatementReason = v; }
+    public BigDecimal          getUnpaidPremium()                     { return unpaidPremium; }
+    public void                setUnpaidPremium(BigDecimal v)         { this.unpaidPremium = v; }
 
     @Override
     public String toString() {
-        return "Reinstatement{reason=" + reinstatementReason + ", unpaid=" + unpaidPremium
-                + ", appliedAt=" + appliedAt + "}";
+        return "Reinstatement{reinstatementReason=" + reinstatementReason + ", unpaidPremium=" + unpaidPremium + "}";
     }
 }

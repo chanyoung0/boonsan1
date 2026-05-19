@@ -10,113 +10,150 @@ import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Reinsurance;
 import model.underwriting.UnderwritingHistory;
+import model.underwriting.UnderwritingRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// 보험 계약 도메인 모델 — 증권발행 후 생성되는 핵심 계약 엔티티, 다수 종속 객체의 집약 클래스
+// 보험 계약 도메인 모델 — 증권발행 완료 후 생성되는 핵심 계약 엔티티
 public class Contract {
 
-    private String policyNumber;
+    private Account autoTransferAmount;
     private ContractStatus contractStatus;
     private PaymentCycle paymentCycle;
     private Boolean hasUnpaidPremium;
     private int installmentCount;
+    private String policyNumber;
 
-    // 관계 필드 (Aggregation: Contract → 부분 객체)
     private Insurance insurance;
-    private InsuranceApplication application;
     private InsuredPerson insuredPerson;
-    private Account autoTransferAccount;
+    private Account account;
+    private InsuranceApplication insuranceApplication;
+    private Reinstatement reinstatement;
     private Reinsurance reinsurance;
+    private UnderwritingHistory underwritingHistory;
     private MaturityNotice maturityNotice;
-    private final List<Endorsement> endorsements = new ArrayList<>();
-    private final List<Reinstatement> reinstatements = new ArrayList<>();
-    private final List<PaymentCollection> paymentCollections = new ArrayList<>();
-    private final List<Payout> payouts = new ArrayList<>();
-    private final List<AccidentReport> accidentReports = new ArrayList<>();
-    private final List<UnderwritingHistory> underwritingHistories = new ArrayList<>();
-    private final List<CompensationEvaluation> compensationEvaluations = new ArrayList<>();
-    private final List<Document> documents = new ArrayList<>();
+    private List<Endorsement> endorsementList;
+    private List<AccidentReport> accidentReportList;
+    private List<PaymentCollection> paymentCollectionList;
+    private List<UnderwritingRequest> underwritingRequestList;
+    private List<Payout> payoutList;
+    private List<Document> documentList;
 
-    public Contract() {}
+    public Contract() {
+        this.endorsementList = new ArrayList<>();
+        this.accidentReportList = new ArrayList<>();
+        this.paymentCollectionList = new ArrayList<>();
+        this.underwritingRequestList = new ArrayList<>();
+        this.payoutList = new ArrayList<>();
+        this.documentList = new ArrayList<>();
+    }
 
-    // 계약 기본 정보로 초기화
     public Contract(String policyNumber, ContractStatus contractStatus, PaymentCycle paymentCycle,
-                    int installmentCount, boolean hasUnpaidPremium) {
+                    Boolean hasUnpaidPremium, int installmentCount,
+                    Insurance insurance, InsuredPerson insuredPerson, Account account,
+                    InsuranceApplication insuranceApplication) {
+        this();
         this.policyNumber = policyNumber;
         this.contractStatus = contractStatus;
         this.paymentCycle = paymentCycle;
-        this.installmentCount = installmentCount;
         this.hasUnpaidPremium = hasUnpaidPremium;
+        this.installmentCount = installmentCount;
+        this.insurance = insurance;
+        this.insuredPerson = insuredPerson;
+        this.account = account;
+        this.insuranceApplication = insuranceApplication;
     }
 
     // 계약 상태 변경
-    public void changeContractStatus() {}
-
-    // 납입 상태 확인 — 미납 여부 기준 정상 납입이면 true 반환
-    public boolean checkPaymentStatus() {
-        return Boolean.FALSE.equals(hasUnpaidPremium);
+    public void changeContractStatus() {
+        if (contractStatus == null)
+            throw new IllegalStateException("계약 상태가 설정되지 않았습니다.");
     }
 
+    // 납입 상태 확인 — 미납 여부 반환
+    public boolean checkPaymentStatus() { return hasUnpaidPremium != null && hasUnpaidPremium; }
+
     // 계약 실행
-    public void executeContract() {}
+    public void executeContract() {
+        if (policyNumber == null || policyNumber.isEmpty())
+            throw new IllegalStateException("증권번호가 없습니다.");
+        this.contractStatus = ContractStatus.ACTIVE;
+        this.hasUnpaidPremium = false;
+    }
 
     // 계약 정보 조회
-    public void getContractInfo() {}
+    public void getContractInfo() {
+        if (policyNumber == null || policyNumber.isEmpty())
+            throw new IllegalStateException("증권번호가 없습니다.");
+        if (contractStatus == null)
+            throw new IllegalStateException("계약 상태가 설정되지 않았습니다.");
+    }
 
     // 증권번호 발행
-    public void issuePolicyNumber() {}
+    public void issuePolicyNumber() {
+        if (insuranceApplication == null)
+            throw new IllegalStateException("청약 정보가 없습니다.");
+        if (policyNumber == null || policyNumber.isEmpty())
+            this.policyNumber = "POL-" + System.currentTimeMillis();
+    }
 
     // 계약 갱신
-    public void renewContract() {}
+    public void renewContract() {
+        if (contractStatus == null)
+            throw new IllegalStateException("계약 상태가 설정되지 않았습니다.");
+        this.contractStatus = ContractStatus.ACTIVE;
+        this.hasUnpaidPremium = false;
+    }
 
     // 계약 종료
-    public void terminateContract() {}
+    public void terminateContract() {
+        this.contractStatus = ContractStatus.TERMINATED;
+    }
 
-    public String getPolicyNumber() { return policyNumber; }
-    public ContractStatus getContractStatus() { return contractStatus; }
-    public PaymentCycle getPaymentCycle() { return paymentCycle; }
-    public Boolean getHasUnpaidPremium() { return hasUnpaidPremium; }
-    public int getInstallmentCount() { return installmentCount; }
-    public Insurance getInsurance() { return insurance; }
-    public InsuranceApplication getApplication() { return application; }
-    public InsuredPerson getInsuredPerson() { return insuredPerson; }
-    public Account getAutoTransferAccount() { return autoTransferAccount; }
-    public Reinsurance getReinsurance() { return reinsurance; }
-    public MaturityNotice getMaturityNotice() { return maturityNotice; }
-    public List<Endorsement> getEndorsements() { return endorsements; }
-    public List<Reinstatement> getReinstatements() { return reinstatements; }
-    public List<PaymentCollection> getPaymentCollections() { return paymentCollections; }
-    public List<Payout> getPayouts() { return payouts; }
-    public List<AccidentReport> getAccidentReports() { return accidentReports; }
-    public List<UnderwritingHistory> getUnderwritingHistories() { return underwritingHistories; }
-    public List<CompensationEvaluation> getCompensationEvaluations() { return compensationEvaluations; }
-    public List<Document> getDocuments() { return documents; }
-
-    public void setPolicyNumber(String s) { this.policyNumber = s; }
-    public void setContractStatus(ContractStatus s) { this.contractStatus = s; }
-    public void setPaymentCycle(PaymentCycle c) { this.paymentCycle = c; }
-    public void setHasUnpaidPremium(Boolean b) { this.hasUnpaidPremium = b; }
-    public void setInstallmentCount(int v) { this.installmentCount = v; }
-    public void setInsurance(Insurance i) { this.insurance = i; }
-    public void setApplication(InsuranceApplication a) { this.application = a; }
-    public void setInsuredPerson(InsuredPerson p) { this.insuredPerson = p; }
-    public void setAutoTransferAccount(Account a) { this.autoTransferAccount = a; }
-    public void setReinsurance(Reinsurance r) { this.reinsurance = r; }
-    public void setMaturityNotice(MaturityNotice m) { this.maturityNotice = m; }
-    public void addEndorsement(Endorsement e) { this.endorsements.add(e); }
-    public void addReinstatement(Reinstatement r) { this.reinstatements.add(r); }
-    public void addPaymentCollection(PaymentCollection p) { this.paymentCollections.add(p); }
-    public void addPayout(Payout p) { this.payouts.add(p); }
-    public void addAccidentReport(AccidentReport r) { this.accidentReports.add(r); }
-    public void addUnderwritingHistory(UnderwritingHistory h) { this.underwritingHistories.add(h); }
-    public void addCompensationEvaluation(CompensationEvaluation c) { this.compensationEvaluations.add(c); }
-    public void addDocument(Document d) { this.documents.add(d); }
+    public Account                    getAutoTransferAmount()                         { return autoTransferAmount; }
+    public void                       setAutoTransferAmount(Account v)                { this.autoTransferAmount = v; }
+    public ContractStatus             getContractStatus()                             { return contractStatus; }
+    public void                       setContractStatus(ContractStatus v)             { this.contractStatus = v; }
+    public PaymentCycle               getPaymentCycle()                               { return paymentCycle; }
+    public void                       setPaymentCycle(PaymentCycle v)                 { this.paymentCycle = v; }
+    public Boolean                    getHasUnpaidPremium()                           { return hasUnpaidPremium; }
+    public void                       setHasUnpaidPremium(Boolean v)                  { this.hasUnpaidPremium = v; }
+    public int                        getInstallmentCount()                           { return installmentCount; }
+    public void                       setInstallmentCount(int v)                      { this.installmentCount = v; }
+    public String                     getPolicyNumber()                               { return policyNumber; }
+    public void                       setPolicyNumber(String v)                       { this.policyNumber = v; }
+    public Insurance                  getInsurance()                                  { return insurance; }
+    public void                       setInsurance(Insurance v)                       { this.insurance = v; }
+    public InsuredPerson              getInsuredPerson()                              { return insuredPerson; }
+    public void                       setInsuredPerson(InsuredPerson v)               { this.insuredPerson = v; }
+    public Account                    getAccount()                                    { return account; }
+    public void                       setAccount(Account v)                           { this.account = v; }
+    public InsuranceApplication       getInsuranceApplication()                       { return insuranceApplication; }
+    public void                       setInsuranceApplication(InsuranceApplication v) { this.insuranceApplication = v; }
+    public Reinstatement              getReinstatement()                              { return reinstatement; }
+    public void                       setReinstatement(Reinstatement v)               { this.reinstatement = v; }
+    public Reinsurance                getReinsurance()                                { return reinsurance; }
+    public void                       setReinsurance(Reinsurance v)                   { this.reinsurance = v; }
+    public UnderwritingHistory        getUnderwritingHistory()                        { return underwritingHistory; }
+    public void                       setUnderwritingHistory(UnderwritingHistory v)   { this.underwritingHistory = v; }
+    public MaturityNotice             getMaturityNotice()                             { return maturityNotice; }
+    public void                       setMaturityNotice(MaturityNotice v)             { this.maturityNotice = v; }
+    public List<Endorsement>          getEndorsementList()                            { return endorsementList; }
+    public void                       setEndorsementList(List<Endorsement> v)         { this.endorsementList = v; }
+    public List<AccidentReport>       getAccidentReportList()                         { return accidentReportList; }
+    public void                       setAccidentReportList(List<AccidentReport> v)   { this.accidentReportList = v; }
+    public List<PaymentCollection>    getPaymentCollectionList()                      { return paymentCollectionList; }
+    public void                       setPaymentCollectionList(List<PaymentCollection> v){ this.paymentCollectionList = v; }
+    public List<UnderwritingRequest>  getUnderwritingRequestList()                    { return underwritingRequestList; }
+    public void                       setUnderwritingRequestList(List<UnderwritingRequest> v){ this.underwritingRequestList = v; }
+    public List<Payout>               getPayoutList()                                 { return payoutList; }
+    public void                       setPayoutList(List<Payout> v)                   { this.payoutList = v; }
+    public List<Document>             getDocumentList()                               { return documentList; }
+    public void                       setDocumentList(List<Document> v)               { this.documentList = v; }
 
     @Override
     public String toString() {
-        return "Contract{policyNumber='" + policyNumber + "', status=" + contractStatus
-                + ", paymentCycle=" + paymentCycle + ", unpaid=" + hasUnpaidPremium + "}";
+        return "Contract{policyNumber='" + policyNumber + "', contractStatus=" + contractStatus + "}";
     }
 }

@@ -2,13 +2,10 @@ package model.contract;
 
 import enums.ChangeReason;
 import enums.EndorsementType;
-import model.underwriting.UnderwritingRequest;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-// 배서 도메인 모델 — 계약 내용 변경 신청 및 처리 정보 관리
+// 배서 도메인 모델 — 계약 내용 변경 처리 정보 관리
 public class Endorsement {
 
     private LocalDateTime appliedAt;
@@ -17,47 +14,55 @@ public class Endorsement {
     private String newContent;
     private String previousContent;
     private LocalDateTime processedAt;
-    private final List<UnderwritingRequest> underwritingRequests = new ArrayList<>();
 
     public Endorsement() {}
 
-    // 배서 신청 기본 정보로 초기화
-    public Endorsement(EndorsementType endorsementType, ChangeReason changeReason, String previousContent, String newContent) {
+    public Endorsement(EndorsementType endorsementType, ChangeReason changeReason,
+                       String previousContent, String newContent, LocalDateTime appliedAt) {
         this.endorsementType = endorsementType;
         this.changeReason = changeReason;
         this.previousContent = previousContent;
         this.newContent = newContent;
-        this.appliedAt = LocalDateTime.now();
+        this.appliedAt = appliedAt;
     }
 
-    // 배서 신청
-    public void applyEndorsement() {}
+    // 배서 적용
+    public void applyEndorsement() {
+        if (endorsementType == null)
+            throw new IllegalStateException("배서 유형이 설정되지 않았습니다.");
+        if (this.appliedAt == null) this.appliedAt = LocalDateTime.now();
+    }
 
     // 배서 처리
-    public void processEndorsement() {}
+    public void processEndorsement() {
+        if (appliedAt == null)
+            throw new IllegalStateException("배서 적용일이 없습니다.");
+        this.processedAt = LocalDateTime.now();
+    }
 
-    // 변경 내용 검증
-    public void verifyChanges() {}
+    // 변경 사항 검증
+    public void verifyChanges() {
+        if (previousContent == null || newContent == null)
+            throw new IllegalStateException("변경 전/후 내용이 모두 필요합니다.");
+        if (previousContent.equals(newContent))
+            throw new IllegalStateException("변경 전과 변경 후 내용이 동일합니다.");
+    }
 
-    public LocalDateTime getAppliedAt() { return appliedAt; }
-    public ChangeReason getChangeReason() { return changeReason; }
-    public EndorsementType getEndorsementType() { return endorsementType; }
-    public String getNewContent() { return newContent; }
-    public String getPreviousContent() { return previousContent; }
-    public LocalDateTime getProcessedAt() { return processedAt; }
-    public List<UnderwritingRequest> getUnderwritingRequests() { return underwritingRequests; }
-
-    public void setAppliedAt(LocalDateTime t) { this.appliedAt = t; }
-    public void setChangeReason(ChangeReason r) { this.changeReason = r; }
-    public void setEndorsementType(EndorsementType t) { this.endorsementType = t; }
-    public void setNewContent(String s) { this.newContent = s; }
-    public void setPreviousContent(String s) { this.previousContent = s; }
-    public void setProcessedAt(LocalDateTime t) { this.processedAt = t; }
-    public void addUnderwritingRequest(UnderwritingRequest r) { this.underwritingRequests.add(r); }
+    public LocalDateTime  getAppliedAt()                    { return appliedAt; }
+    public void           setAppliedAt(LocalDateTime v)     { this.appliedAt = v; }
+    public ChangeReason   getChangeReason()                 { return changeReason; }
+    public void           setChangeReason(ChangeReason v)   { this.changeReason = v; }
+    public EndorsementType getEndorsementType()             { return endorsementType; }
+    public void           setEndorsementType(EndorsementType v){ this.endorsementType = v; }
+    public String         getNewContent()                   { return newContent; }
+    public void           setNewContent(String v)           { this.newContent = v; }
+    public String         getPreviousContent()              { return previousContent; }
+    public void           setPreviousContent(String v)      { this.previousContent = v; }
+    public LocalDateTime  getProcessedAt()                  { return processedAt; }
+    public void           setProcessedAt(LocalDateTime v)   { this.processedAt = v; }
 
     @Override
     public String toString() {
-        return "Endorsement{type=" + endorsementType + ", reason=" + changeReason
-                + ", appliedAt=" + appliedAt + "}";
+        return "Endorsement{endorsementType=" + endorsementType + ", changeReason=" + changeReason + "}";
     }
 }

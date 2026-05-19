@@ -15,34 +15,38 @@ public class UnderwritingResult {
 
     public UnderwritingResult() {}
 
-    // 심사 결과 기본 정보로 초기화
-    public UnderwritingResult(LocalDateTime confirmedAt, UnderwritingResultType underwritingResult,
-                              SurchargeCondition surchargeCondition, String rejectionReason) {
-        this.confirmedAt = confirmedAt;
+    public UnderwritingResult(UnderwritingResultType underwritingResult, String rejectionReason,
+                              SurchargeCondition surchargeCondition, LocalDateTime confirmedAt) {
         this.underwritingResult = underwritingResult;
-        this.surchargeCondition = surchargeCondition;
         this.rejectionReason = rejectionReason;
+        this.surchargeCondition = surchargeCondition;
+        this.confirmedAt = confirmedAt;
     }
 
     // 심사 결과 조회
-    public void getResult() {}
+    public void getResult() {
+        if (underwritingResult == null)
+            throw new IllegalStateException("심사 결과가 등록되지 않았습니다.");
+    }
 
     // 심사 결과 등록
-    public void registerResult() {}
+    public void registerResult() {
+        if (underwritingResult == null)
+            throw new IllegalArgumentException("심사 결과 유형이 필요합니다.");
+        if (this.confirmedAt == null) this.confirmedAt = LocalDateTime.now();
+    }
 
-    public LocalDateTime getConfirmedAt() { return confirmedAt; }
-    public String getRejectionReason() { return rejectionReason; }
-    public SurchargeCondition getSurchargeCondition() { return surchargeCondition; }
-    public UnderwritingResultType getUnderwritingResult() { return underwritingResult; }
-
-    public void setConfirmedAt(LocalDateTime confirmedAt) { this.confirmedAt = confirmedAt; }
-    public void setRejectionReason(String s) { this.rejectionReason = s; }
-    public void setSurchargeCondition(SurchargeCondition c) { this.surchargeCondition = c; }
-    public void setUnderwritingResult(UnderwritingResultType r) { this.underwritingResult = r; }
+    public LocalDateTime        getConfirmedAt()                    { return confirmedAt; }
+    public void                 setConfirmedAt(LocalDateTime v)     { this.confirmedAt = v; }
+    public String               getRejectionReason()                { return rejectionReason; }
+    public void                 setRejectionReason(String v)        { this.rejectionReason = v; }
+    public SurchargeCondition   getSurchargeCondition()             { return surchargeCondition; }
+    public void                 setSurchargeCondition(SurchargeCondition v) { this.surchargeCondition = v; }
+    public UnderwritingResultType getUnderwritingResult()           { return underwritingResult; }
+    public void                 setUnderwritingResult(UnderwritingResultType v) { this.underwritingResult = v; }
 
     @Override
     public String toString() {
-        return "UnderwritingResult{result=" + underwritingResult + ", surcharge=" + surchargeCondition
-                + ", confirmedAt=" + confirmedAt + "}";
+        return "UnderwritingResult{underwritingResult=" + underwritingResult + ", confirmedAt=" + confirmedAt + "}";
     }
 }

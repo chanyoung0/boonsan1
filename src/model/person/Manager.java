@@ -1,6 +1,6 @@
 package model.person;
 
-// 직원(담당자) 도메인 모델 — 사원번호/이름/부서 정보 관리
+// 담당자 도메인 모델 — 계약 관리 및 이관 처리 담당자 정보 관리
 public class Manager {
 
     private String employeeNo;
@@ -9,23 +9,21 @@ public class Manager {
 
     public Manager() {}
 
-    // 직원 기본 정보로 초기화
     public Manager(String employeeNo, String name, String department) {
         this.employeeNo = employeeNo;
         this.name = name;
         this.department = department;
     }
 
-    public String getEmployeeNo() { return employeeNo; }
-    public String getName() { return name; }
-    public String getDepartment() { return department; }
-
-    public void setEmployeeNo(String employeeNo) { this.employeeNo = employeeNo; }
-    public void setName(String name) { this.name = name; }
-    public void setDepartment(String department) { this.department = department; }
+    public String getEmployeeNo()              { return employeeNo; }
+    public void   setEmployeeNo(String v)      { this.employeeNo = v; }
+    public String getName()                    { return name; }
+    public void   setName(String v)            { this.name = v; }
+    public String getDepartment()              { return department; }
+    public void   setDepartment(String v)      { this.department = v; }
 
     @Override
     public String toString() {
-        return "Manager{employeeNo='" + employeeNo + "', name='" + name + "', dept='" + department + "'}";
+        return "Manager{employeeNo='" + employeeNo + "', name='" + name + "', department='" + department + "'}";
     }
 }

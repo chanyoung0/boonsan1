@@ -2,6 +2,8 @@ package model.contract;
 
 import enums.CalculationBasis;
 import enums.PaymentType;
+import model.accident.DamageInvestigation;
+import model.accident.InsurancePayment;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,51 +20,72 @@ public class Payout {
     private PaymentType paymentType;
     private String processor;
 
+    private DamageInvestigation damageInvestigation;
+    private InsurancePayment insurancePayment;
+
     public Payout() {}
 
-    // 지급 결정 기본 정보로 초기화
-    public Payout(PaymentType paymentType, CalculationBasis calculationBasis,
-                  BigDecimal calculatedAmount, BigDecimal finalPaymentAmount, String processor) {
+    public Payout(String processor, PaymentType paymentType, CalculationBasis calculationBasis,
+                  BigDecimal calculatedAmount, BigDecimal finalPaymentAmount,
+                  String deductionItem, LocalDateTime approvedAt) {
+        this.processor = processor;
         this.paymentType = paymentType;
         this.calculationBasis = calculationBasis;
         this.calculatedAmount = calculatedAmount;
         this.finalPaymentAmount = finalPaymentAmount;
-        this.processor = processor;
+        this.deductionItem = deductionItem;
+        this.approvedAt = approvedAt;
     }
 
     // 지급 승인
-    public void approvePayment() {}
+    public void approvePayment() {
+        if (calculatedAmount == null)
+            throw new IllegalStateException("산정 금액이 없습니다.");
+        this.approvedAt = LocalDateTime.now();
+    }
 
     // 지급액 산정
-    public void calculatePayment() {}
+    public void calculatePayment() {
+        if (calculatedAmount == null)
+            throw new IllegalStateException("산정 기준 금액이 없습니다.");
+        this.finalPaymentAmount = calculatedAmount;
+    }
 
     // 지급 취소
-    public void cancelPayment() {}
+    public void cancelPayment() {
+        this.finalPaymentAmount = BigDecimal.ZERO;
+    }
 
     // 지급 처리
-    public void processPayment() {}
+    public void processPayment() {
+        if (finalPaymentAmount == null || finalPaymentAmount.compareTo(BigDecimal.ZERO) <= 0)
+            throw new IllegalStateException("지급 금액이 유효하지 않습니다.");
+        this.paidAt = LocalDateTime.now();
+    }
 
-    public LocalDateTime getApprovedAt() { return approvedAt; }
-    public BigDecimal getCalculatedAmount() { return calculatedAmount; }
-    public CalculationBasis getCalculationBasis() { return calculationBasis; }
-    public String getDeductionItem() { return deductionItem; }
-    public BigDecimal getFinalPaymentAmount() { return finalPaymentAmount; }
-    public LocalDateTime getPaidAt() { return paidAt; }
-    public PaymentType getPaymentType() { return paymentType; }
-    public String getProcessor() { return processor; }
-
-    public void setApprovedAt(LocalDateTime t) { this.approvedAt = t; }
-    public void setCalculatedAmount(BigDecimal v) { this.calculatedAmount = v; }
-    public void setCalculationBasis(CalculationBasis c) { this.calculationBasis = c; }
-    public void setDeductionItem(String s) { this.deductionItem = s; }
-    public void setFinalPaymentAmount(BigDecimal v) { this.finalPaymentAmount = v; }
-    public void setPaidAt(LocalDateTime t) { this.paidAt = t; }
-    public void setPaymentType(PaymentType t) { this.paymentType = t; }
-    public void setProcessor(String s) { this.processor = s; }
+    public LocalDateTime       getApprovedAt()                          { return approvedAt; }
+    public void                setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }
+    public BigDecimal          getCalculatedAmount()                    { return calculatedAmount; }
+    public void                setCalculatedAmount(BigDecimal v)        { this.calculatedAmount = v; }
+    public CalculationBasis    getCalculationBasis()                    { return calculationBasis; }
+    public void                setCalculationBasis(CalculationBasis v)  { this.calculationBasis = v; }
+    public String              getDeductionItem()                       { return deductionItem; }
+    public void                setDeductionItem(String v)               { this.deductionItem = v; }
+    public BigDecimal          getFinalPaymentAmount()                  { return finalPaymentAmount; }
+    public void                setFinalPaymentAmount(BigDecimal v)      { this.finalPaymentAmount = v; }
+    public LocalDateTime       getPaidAt()                              { return paidAt; }
+    public void                setPaidAt(LocalDateTime v)               { this.paidAt = v; }
+    public PaymentType         getPaymentType()                         { return paymentType; }
+    public void                setPaymentType(PaymentType v)            { this.paymentType = v; }
+    public String              getProcessor()                           { return processor; }
+    public void                setProcessor(String v)                   { this.processor = v; }
+    public DamageInvestigation getDamageInvestigation()                 { return damageInvestigation; }
+    public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
+    public InsurancePayment    getInsurancePayment()                    { return insurancePayment; }
+    public void                setInsurancePayment(InsurancePayment v)  { this.insurancePayment = v; }
 
     @Override
     public String toString() {
-        return "Payout{type=" + paymentType + ", amount=" + finalPaymentAmount
-                + ", paidAt=" + paidAt + "}";
+        return "Payout{processor='" + processor + "', finalPaymentAmount=" + finalPaymentAmount + "}";
     }
 }

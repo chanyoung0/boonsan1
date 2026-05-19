@@ -7,43 +7,45 @@ import enums.SubmissionStatus;
 
 import java.time.LocalDateTime;
 
-// 사고 접수 서류 도메인 모델 — 사고 신고 시 제출되는 부속 서류 관리
+// 사고 접수 서류 도메인 모델 — 사고 접수에 필요한 서류 정보 관리
 public class AccidentDocument extends Document {
 
+    private LocalDateTime checkDueDate;
     private DocumentName documentName;
     private DocumentType documentType;
     private SubmissionStatus submissionStatus;
-    private LocalDateTime checkDueDate;
 
-    public AccidentDocument() {}
+    public AccidentDocument() { super(); }
 
-    // 사고 서류 식별/제출 상태로 초기화
-    public AccidentDocument(String documentId, LocalDateTime createdAt, DocumentStatus status,
+    public AccidentDocument(String documentId, DocumentStatus status, LocalDateTime createdAt,
                             DocumentName documentName, DocumentType documentType,
                             SubmissionStatus submissionStatus, LocalDateTime checkDueDate) {
-        super(documentId, createdAt, status);
+        super(documentId, status, createdAt);
         this.documentName = documentName;
         this.documentType = documentType;
         this.submissionStatus = submissionStatus;
         this.checkDueDate = checkDueDate;
     }
 
-    // 서류 업로드 처리
-    public void uploadDocument() {}
+    // 서류 업로드
+    public void uploadDocument() {
+        if (documentName == null)
+            throw new IllegalStateException("문서명이 설정되지 않았습니다.");
+        this.submissionStatus = SubmissionStatus.SUBMITTED;
+        this.status = DocumentStatus.SUBMITTED;
+    }
 
-    public DocumentName getDocumentName() { return documentName; }
-    public DocumentType getDocumentType() { return documentType; }
-    public SubmissionStatus getSubmissionStatus() { return submissionStatus; }
-    public LocalDateTime getCheckDueDate() { return checkDueDate; }
-
-    public void setDocumentName(DocumentName documentName) { this.documentName = documentName; }
-    public void setDocumentType(DocumentType documentType) { this.documentType = documentType; }
-    public void setSubmissionStatus(SubmissionStatus submissionStatus) { this.submissionStatus = submissionStatus; }
-    public void setCheckDueDate(LocalDateTime checkDueDate) { this.checkDueDate = checkDueDate; }
+    public LocalDateTime   getCheckDueDate()                    { return checkDueDate; }
+    public void            setCheckDueDate(LocalDateTime v)     { this.checkDueDate = v; }
+    public DocumentName    getDocumentName()                    { return documentName; }
+    public void            setDocumentName(DocumentName v)      { this.documentName = v; }
+    public DocumentType    getDocumentType()                    { return documentType; }
+    public void            setDocumentType(DocumentType v)      { this.documentType = v; }
+    public SubmissionStatus getSubmissionStatus()               { return submissionStatus; }
+    public void            setSubmissionStatus(SubmissionStatus v){ this.submissionStatus = v; }
 
     @Override
     public String toString() {
-        return "AccidentDocument{id='" + documentId + "', name=" + documentName
-                + ", type=" + documentType + ", submission=" + submissionStatus + "}";
+        return "AccidentDocument{documentId='" + documentId + "', documentName=" + documentName + ", submissionStatus=" + submissionStatus + "}";
     }
 }

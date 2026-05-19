@@ -9,11 +9,11 @@ import enums.UnderwritingType;
 
 import java.time.LocalDateTime;
 
-// 언더라이팅 요청 도메인 모델 — 배서/부활 등 심사 요청 정보 관리
+// 언더라이팅 요청 도메인 모델 — 배서/부활 심사 요청 정보 관리
 public class UnderwritingRequest {
 
-    private String appliedId;
     private LocalDateTime appliedAt;
+    private LocalDateTime appliedId;
     private RejectionReason rejectionReason;
     private RequestReason requestReason;
     private RequestStatus requestStatus;
@@ -23,10 +23,8 @@ public class UnderwritingRequest {
 
     public UnderwritingRequest() {}
 
-    // 심사 요청 기본 정보로 초기화
-    public UnderwritingRequest(String appliedId, LocalDateTime appliedAt, RequestReason requestReason,
+    public UnderwritingRequest(LocalDateTime appliedAt, RequestReason requestReason,
                                UnderwritingType underwritingType, RequestStatus requestStatus) {
-        this.appliedId = appliedId;
         this.appliedAt = appliedAt;
         this.requestReason = requestReason;
         this.underwritingType = underwritingType;
@@ -34,35 +32,45 @@ public class UnderwritingRequest {
     }
 
     // U/W 요청 상태 변경
-    public void changeUWStatus() {}
+    public void changeUWStatus() {
+        if (requestStatus == null)
+            throw new IllegalStateException("심사 요청 상태가 설정되지 않았습니다.");
+    }
 
     // U/W 결과 등록
-    public void registerUWResult() {}
+    public void registerUWResult() {
+        if (underwritingResult == null)
+            throw new IllegalArgumentException("심사 결과 유형이 필요합니다.");
+        this.requestStatus = RequestStatus.COMPLETED;
+    }
 
-    // 언더라이팅 요청 발송
-    public void requestUnderwriting() {}
+    // 언더라이팅 요청
+    public void requestUnderwriting() {
+        if (requestReason == null)
+            throw new IllegalArgumentException("요청 사유가 필요합니다.");
+        this.requestStatus = RequestStatus.PENDING;
+        if (this.appliedAt == null) this.appliedAt = java.time.LocalDateTime.now();
+    }
 
-    public String getAppliedId() { return appliedId; }
-    public LocalDateTime getAppliedAt() { return appliedAt; }
-    public RejectionReason getRejectionReason() { return rejectionReason; }
-    public RequestReason getRequestReason() { return requestReason; }
-    public RequestStatus getRequestStatus() { return requestStatus; }
-    public SurchargeCondition getSurchargeCondition() { return surchargeCondition; }
-    public UnderwritingResultType getUnderwritingResult() { return underwritingResult; }
-    public UnderwritingType getUnderwritingType() { return underwritingType; }
-
-    public void setAppliedId(String s) { this.appliedId = s; }
-    public void setAppliedAt(LocalDateTime t) { this.appliedAt = t; }
-    public void setRejectionReason(RejectionReason r) { this.rejectionReason = r; }
-    public void setRequestReason(RequestReason r) { this.requestReason = r; }
-    public void setRequestStatus(RequestStatus r) { this.requestStatus = r; }
-    public void setSurchargeCondition(SurchargeCondition c) { this.surchargeCondition = c; }
-    public void setUnderwritingResult(UnderwritingResultType r) { this.underwritingResult = r; }
-    public void setUnderwritingType(UnderwritingType t) { this.underwritingType = t; }
+    public LocalDateTime        getAppliedAt()                          { return appliedAt; }
+    public void                 setAppliedAt(LocalDateTime v)           { this.appliedAt = v; }
+    public LocalDateTime        getAppliedId()                          { return appliedId; }
+    public void                 setAppliedId(LocalDateTime v)           { this.appliedId = v; }
+    public RejectionReason      getRejectionReason()                    { return rejectionReason; }
+    public void                 setRejectionReason(RejectionReason v)   { this.rejectionReason = v; }
+    public RequestReason        getRequestReason()                      { return requestReason; }
+    public void                 setRequestReason(RequestReason v)       { this.requestReason = v; }
+    public RequestStatus        getRequestStatus()                      { return requestStatus; }
+    public void                 setRequestStatus(RequestStatus v)       { this.requestStatus = v; }
+    public SurchargeCondition   getSurchargeCondition()                 { return surchargeCondition; }
+    public void                 setSurchargeCondition(SurchargeCondition v){ this.surchargeCondition = v; }
+    public UnderwritingResultType getUnderwritingResult()               { return underwritingResult; }
+    public void                 setUnderwritingResult(UnderwritingResultType v){ this.underwritingResult = v; }
+    public UnderwritingType     getUnderwritingType()                   { return underwritingType; }
+    public void                 setUnderwritingType(UnderwritingType v) { this.underwritingType = v; }
 
     @Override
     public String toString() {
-        return "UnderwritingRequest{appliedId='" + appliedId + "', type=" + underwritingType
-                + ", status=" + requestStatus + "}";
+        return "UnderwritingRequest{requestStatus=" + requestStatus + ", underwritingType=" + underwritingType + "}";
     }
 }

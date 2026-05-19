@@ -6,17 +6,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-// 자동차보험 — 운전자/차종 정보와 사고 이력 보유
+// 자동차보험 도메인 모델 — 차량 정보 기반 자동차보험 상품 관리
 public class AutoInsurance extends Insurance {
 
     private int driverAge;
     private String vehicleType;
-    private final List<AccidentHistory> accidentHistories = new ArrayList<>();
 
-    public AutoInsurance() {}
+    public AutoInsurance() { super(); }
 
-    // 자동차보험 속성으로 초기화
-    public AutoInsurance(String productCode, String insurancePeriod, BigDecimal insuredAmount, BigDecimal premium, BigDecimal maturityRefund,
+    public AutoInsurance(String productCode, String insurancePeriod, BigDecimal insuredAmount,
+                         BigDecimal premium, BigDecimal maturityRefund,
                          int driverAge, String vehicleType) {
         super(productCode, insurancePeriod, insuredAmount, premium, maturityRefund);
         this.driverAge = driverAge;
@@ -24,26 +23,29 @@ public class AutoInsurance extends Insurance {
     }
 
     @Override
-    public void calculatePremium() {}
-
-    @Override
-    public void calculateMaturityRefund() {}
-
-    // 사고 이력 목록 조회
-    public List<AccidentHistory> getAccidentHistory() {
-        return accidentHistories;
+    public void calculatePremium() {
+        if (insuredAmount == null) return;
+        // 기본 요율 0.15%, 고령 운전자(만 60세 초과) 할증
+        double rate = driverAge > 60 ? 0.0020 : 0.0015;
+        this.premium = insuredAmount.multiply(BigDecimal.valueOf(rate));
     }
 
-    public void addAccidentHistory(AccidentHistory h) { this.accidentHistories.add(h); }
+    @Override
+    public void calculateMaturityRefund() {
+        if (premium == null) return;
+        this.maturityRefund = premium.multiply(new BigDecimal("0.1"));
+    }
 
-    public int getDriverAge() { return driverAge; }
-    public String getVehicleType() { return vehicleType; }
+    // 사고 이력 목록 조회
+    public List<AccidentHistory> getAccidentHistory() { return new ArrayList<>(); }
 
-    public void setDriverAge(int driverAge) { this.driverAge = driverAge; }
-    public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }
+    public int    getDriverAge()             { return driverAge; }
+    public void   setDriverAge(int v)        { this.driverAge = v; }
+    public String getVehicleType()           { return vehicleType; }
+    public void   setVehicleType(String v)   { this.vehicleType = v; }
 
     @Override
     public String toString() {
-        return "AutoInsurance{productCode='" + productCode + "', driverAge=" + driverAge + ", vehicleType='" + vehicleType + "'}";
+        return "AutoInsurance{productCode='" + productCode + "', vehicleType='" + vehicleType + "', driverAge=" + driverAge + "}";
     }
 }

@@ -2,10 +2,7 @@ package ui.console;
 
 import static common.ConsoleUtil.line;
 
-/**
- * 콘솔 출력 진입점 — 메뉴/헤더/구분선 등 공통 출력 유틸을 캡슐화.
- * TODO: 추후 Service 내부의 직접 println을 이 클래스의 메서드 호출로 점진 이관.
- */
+// 콘솔 출력 진입점 — 시스템 배너/메뉴/구분선 공통 출력 유틸을 캡슐화
 public class ConsoleView {
 
     // 시스템 헤더 출력
@@ -26,7 +23,11 @@ public class ConsoleView {
         System.out.println("  5. 만기계약 관리");
         System.out.println("  6. 사고 접수");
         System.out.println("  7. 손해조사");
-        System.out.println("  8. 종료");
+        System.out.println("  8. 상품 설계");
+        System.out.println("  9. 제지급금 관리");
+        System.out.println(" 10. 보상 평가 관리");
+        System.out.println(" 11. 협력업체 관리");
+        System.out.println(" 12. 종료");
         System.out.println("=======================================");
         System.out.print(">> 선택: ");
     }

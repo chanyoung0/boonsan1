@@ -10,64 +10,71 @@ import java.util.List;
 // 사고 접수 도메인 모델 — 보험사고 신고 및 접수 정보 관리
 public class AccidentReport {
 
-    private String reportNo;
+    private String accidentDescription;
     private AccidentDetailsType accidentStatus;
     private LocalDateTime createdAt;
-    private String accidentDescription;
     private String damageDetails;
-    private final List<Document> documents = new ArrayList<>();
+    private String reportNo;
+
+    private List<Document> documentList;
     private DamageInvestigation damageInvestigation;
 
-    public AccidentReport() {}
+    public AccidentReport() {
+        this.documentList = new ArrayList<>();
+    }
 
-    // 사고 접수 기본 정보로 초기화
-    public AccidentReport(String reportNo, AccidentDetailsType accidentStatus,
-                          String accidentDescription, String damageDetails) {
+    public AccidentReport(String reportNo, String accidentDescription, String damageDetails,
+                          AccidentDetailsType accidentStatus, LocalDateTime createdAt) {
         this.reportNo = reportNo;
-        this.accidentStatus = accidentStatus;
         this.accidentDescription = accidentDescription;
         this.damageDetails = damageDetails;
-        this.createdAt = LocalDateTime.now();
+        this.accidentStatus = accidentStatus;
+        this.createdAt = createdAt;
+        this.documentList = new ArrayList<>();
     }
 
     // 사고 접수 상태 변경
-    public void changeStatus() {}
-
-    // 사고 접수 연기 — 연기 처리 가능 여부 반환
-    public boolean deferSubmission() {
-        return true;
+    public void changeStatus() {
+        if (accidentStatus == null)
+            throw new IllegalStateException("사고 상태가 설정되지 않았습니다.");
     }
+
+    // 사고 접수 연기 — 성공 여부 반환
+    public boolean deferSubmission() { return true; }
 
     // 사고 접수 등록
-    public void register() {}
-
-    // 계약 정보 조회
-    public void retrieveContractInfo() {}
-
-    // 서류 미비 상태로 저장 — 저장 성공 여부 반환
-    public boolean saveAsDocumentPending() {
-        return true;
+    public void register() {
+        if (reportNo == null || reportNo.isEmpty())
+            this.reportNo = "ACC-" + System.currentTimeMillis();
+        if (this.createdAt == null) this.createdAt = LocalDateTime.now();
     }
 
-    public String getReportNo() { return reportNo; }
-    public AccidentDetailsType getAccidentStatus() { return accidentStatus; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public String getAccidentDescription() { return accidentDescription; }
-    public String getDamageDetails() { return damageDetails; }
-    public List<Document> getDocuments() { return documents; }
-    public DamageInvestigation getDamageInvestigation() { return damageInvestigation; }
+    // 계약 정보 조회
+    public void retrieveContractInfo() {
+        if (reportNo == null || reportNo.isEmpty())
+            throw new IllegalStateException("접수번호가 없습니다.");
+    }
 
-    public void setReportNo(String s) { this.reportNo = s; }
-    public void setAccidentStatus(AccidentDetailsType t) { this.accidentStatus = t; }
-    public void setCreatedAt(LocalDateTime t) { this.createdAt = t; }
-    public void setAccidentDescription(String s) { this.accidentDescription = s; }
-    public void setDamageDetails(String s) { this.damageDetails = s; }
-    public void addDocument(Document d) { this.documents.add(d); }
-    public void setDamageInvestigation(DamageInvestigation di) { this.damageInvestigation = di; }
+    // 서류 미비 상태로 저장 — 성공 여부 반환
+    public boolean saveAsDocumentPending() { return true; }
+
+    public String              getReportNo()                         { return reportNo; }
+    public void                setReportNo(String v)                 { this.reportNo = v; }
+    public String              getAccidentDescription()              { return accidentDescription; }
+    public void                setAccidentDescription(String v)      { this.accidentDescription = v; }
+    public AccidentDetailsType getAccidentStatus()                   { return accidentStatus; }
+    public void                setAccidentStatus(AccidentDetailsType v){ this.accidentStatus = v; }
+    public LocalDateTime       getCreatedAt()                        { return createdAt; }
+    public void                setCreatedAt(LocalDateTime v)         { this.createdAt = v; }
+    public String              getDamageDetails()                    { return damageDetails; }
+    public void                setDamageDetails(String v)            { this.damageDetails = v; }
+    public List<Document>      getDocumentList()                     { return documentList; }
+    public void                setDocumentList(List<Document> v)     { this.documentList = v; }
+    public DamageInvestigation getDamageInvestigation()              { return damageInvestigation; }
+    public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
 
     @Override
     public String toString() {
-        return "AccidentReport{reportNo='" + reportNo + "', status=" + accidentStatus
-                + ", createdAt=" + createdAt + "}";
+        return "AccidentReport{reportNo='" + reportNo + "', accidentStatus=" + accidentStatus + "}";
     }
 }
