@@ -83,6 +83,10 @@ public class CompensationEvaluationConsole {
                 submissionAgencyName,
                 damageAmount
         );
+        if (evaluation == null) {
+            System.out.println("[오류] 보상평가 등록에 실패했습니다. DB 연결 또는 입력값을 확인하세요.");
+            return;
+        }
 
         System.out.println("[시스템] 보상평가 등록 완료");
         System.out.println("  평가번호: " + evaluation.getEvaluationId());
