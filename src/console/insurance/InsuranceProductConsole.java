@@ -116,6 +116,11 @@ public class InsuranceProductConsole {
                 return;
         }
 
+        if (product == null) {
+            System.out.println("[오류] 상품 저장에 실패했습니다. DB 연결 또는 상품코드를 확인하세요.");
+            return;
+        }
+
         System.out.println(InsuranceProductService.createDesignSummary(product, productName,
                 targetCustomer, salesChannel, paymentPeriod, mainCoverageName, coverageDetails,
                 exemptionCondition, paymentCondition, availableAge, restrictionCondition,
@@ -149,6 +154,10 @@ public class InsuranceProductConsole {
 
         Authorization authorization = InsuranceProductService.requestAuthorization(
                 productCode, requestReason, approved);
+        if (authorization == null) {
+            System.out.println("[오류] 상품 인가요청 저장에 실패했습니다. DB 연결 또는 상품코드를 확인하세요.");
+            return;
+        }
 
         System.out.println("[시스템] 상품 인가 요청 처리 완료");
         System.out.println("  요청번호: " + authorization.getRequestId());

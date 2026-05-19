@@ -1,5 +1,7 @@
 package service.insurance;
 
+import db.AuthorizationDBO;
+import db.InsuranceDBO;
 import model.insurance.Authorization;
 import model.insurance.AutoInsurance;
 import model.insurance.FinancialSupervisoryService;
@@ -9,13 +11,9 @@ import model.insurance.MarineInsurance;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class InsuranceProductService {
-
-    private static final List<Insurance> productList = new ArrayList<>();
-    private static final List<Authorization> authorizationList = new ArrayList<>();
 
     public static AutoInsurance designAutoInsurance(String productCode, String insurancePeriod,
                                                     BigDecimal insuredAmount, BigDecimal premium,
@@ -23,8 +21,7 @@ public class InsuranceProductService {
                                                     String vehicleType) {
         AutoInsurance product = new AutoInsurance(productCode, insurancePeriod, insuredAmount,
                 premium, maturityRefund, driverAge, vehicleType);
-        registerProduct(product);
-        return product;
+        return registerProduct(product) ? product : null;
     }
 
     public static FireInsurance designFireInsurance(String productCode, String insurancePeriod,
@@ -33,8 +30,7 @@ public class InsuranceProductService {
                                                     String location) {
         FireInsurance product = new FireInsurance(productCode, insurancePeriod, insuredAmount,
                 premium, maturityRefund, buildingType, location);
-        registerProduct(product);
-        return product;
+        return registerProduct(product) ? product : null;
     }
 
     public static MarineInsurance designMarineInsurance(String productCode, String insurancePeriod,
@@ -43,12 +39,11 @@ public class InsuranceProductService {
                                                         String shippingRoute) {
         MarineInsurance product = new MarineInsurance(productCode, insurancePeriod, insuredAmount,
                 premium, maturityRefund, vesselType, shippingRoute);
-        registerProduct(product);
-        return product;
+        return registerProduct(product) ? product : null;
     }
 
     public static List<Insurance> getProductList() {
-        return new ArrayList<>(productList);
+        return createInsuranceDbo().findAll();
     }
 
     public static String createDesignSummary(Insurance product, String productName,
@@ -108,12 +103,7 @@ public class InsuranceProductService {
     }
 
     public static Insurance findProductByCode(String productCode) {
-        for (Insurance product : productList) {
-            if (product.getProductCode().equals(productCode)) {
-                return product;
-            }
-        }
-        return null;
+        return createInsuranceDbo().findByProductCode(productCode);
     }
 
     public static Authorization requestAuthorization(String productCode, String requestReason,
@@ -143,17 +133,17 @@ public class InsuranceProductService {
         supervisoryService.sendAuthorizationResult();
         authorization.applyAuthorizationResult();
         authorization.updateProductStatus();
-        authorizationList.add(authorization);
-        return authorization;
+
+        return createAuthorizationDbo().save(authorization, productCode) ? authorization : null;
     }
 
     public static List<Authorization> getAuthorizationList() {
-        return new ArrayList<>(authorizationList);
+        return createAuthorizationDbo().findAll();
     }
 
-    private static void registerProduct(Insurance product) {
+    private static boolean registerProduct(Insurance product) {
         product.saveProductInfo();
-        productList.add(product);
+        return createInsuranceDbo().save(product);
     }
 
     private static String resolveProductType(Insurance product) {
@@ -175,5 +165,13 @@ public class InsuranceProductService {
 
     private static String emptyToDefault(String value) {
         return value == null || value.trim().isEmpty() ? "미입력" : value;
+    }
+
+    private static InsuranceDBO createInsuranceDbo() {
+        return new InsuranceDBO();
+    }
+
+    private static AuthorizationDBO createAuthorizationDbo() {
+        return new AuthorizationDBO();
     }
 }
