@@ -9,9 +9,14 @@ import static common.ConsoleUtil.*;
 // 손해조사 콘솔 I/O — 손해사정인/SIU 유스케이스 입출력 전담
 public class DamageInvestigationConsole {
 
-    public static void run() {
-        DamageInvestigationService service = new DamageInvestigationService();
+    private final DamageInvestigationService service;
 
+    // 의존성 주입으로 초기화
+    public DamageInvestigationConsole(DamageInvestigationService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 손해조사를 한다");
         System.out.println("액터: 손해사정인, SIU(보험사고조사팀)");
@@ -82,7 +87,7 @@ public class DamageInvestigationConsole {
         System.out.println("[시스템] 지급품의서 저장 완료 | 사고 접수 상태: '결재 필요'");
 
         System.out.println("\n  >> <<extend>> [보험금을 지급한다] 시나리오 시작");
-        insurancePaymentSub(reportNo, investigation, service);
+        insurancePaymentSub(reportNo, investigation);
     }
 
     private static void outsourceInvestigation() {
@@ -97,7 +102,7 @@ public class DamageInvestigationConsole {
         System.out.println("  [시스템] 위탁 조사 결과가 시스템에 반영되었습니다.");
     }
 
-    private static void insurancePaymentSub(String reportNo, DamageInvestigation investigation, DamageInvestigationService service) {
+    private void insurancePaymentSub(String reportNo, DamageInvestigation investigation) {
         System.out.println("\n  [보험금을 지급한다]");
         System.out.println("  [시스템] 사고번호: " + reportNo + " | 최종 결정보험금: 980,000원");
         enter();
@@ -116,7 +121,7 @@ public class DamageInvestigationConsole {
 
         if (objected) {
             System.out.println("  >> <<extend>> [이의 제기를 처리한다] 시나리오 시작");
-            objectionSub(service);
+            objectionSub();
         }
 
         System.out.print("\n  제3자 과실로 구상 처리가 필요합니까? (Y/N): ");
@@ -128,7 +133,7 @@ public class DamageInvestigationConsole {
         }
     }
 
-    private static void objectionSub(DamageInvestigationService service) {
+    private void objectionSub() {
         System.out.println("\n    [이의 제기를 처리한다]");
         System.out.println("    [시스템] 이의 사유: 치료비 산정 오류 | 원 지급액: 980,000원");
         System.out.println("    1. 기각  2. 수용 (재조사)  3. 법률과 이관");

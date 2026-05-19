@@ -7,9 +7,14 @@ import static common.ConsoleUtil.*;
 // 협력업체 관리 콘솔 I/O — 보상담당자 유스케이스 입출력 전담
 public class PartnerManagementConsole {
 
-    public static void run() {
-        PartnerManagementService service = new PartnerManagementService();
+    private final PartnerManagementService service;
 
+    // 의존성 주입으로 초기화
+    public PartnerManagementConsole(PartnerManagementService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 협력업체를 관리한다");
         System.out.println("액터: 보상담당자");

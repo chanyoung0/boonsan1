@@ -7,9 +7,14 @@ import static common.ConsoleUtil.*;
 // 사고 접수 콘솔 I/O — 보험가입자/보험사 직원 유스케이스 입출력 전담
 public class AccidentReportConsole {
 
-    public static void run() {
-        AccidentReportService service = new AccidentReportService();
+    private final AccidentReportService service;
 
+    // 의존성 주입으로 초기화
+    public AccidentReportConsole(AccidentReportService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 사고를 접수한다");
         System.out.println("액터: 보험가입자, 보험사 직원");

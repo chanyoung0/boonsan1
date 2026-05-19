@@ -1,62 +1,77 @@
-import console.underwriting.UnderwritingConsole;
-import console.contract.EndorsementConsole;
-import console.contract.ReinstatementConsole;
-import console.contract.PaymentCollectionConsole;
-import console.contract.MaturityContractConsole;
-import console.contract.PayoutConsole;
+import common.ConsoleNotifier;
+import common.IdGenerator;
+import common.Notifier;
+import common.SequenceIdGenerator;
 import console.accident.AccidentReportConsole;
 import console.accident.DamageInvestigationConsole;
-import console.insurance.InsuranceDesignConsole;
 import console.compensation.CompensationEvaluationConsole;
 import console.compensation.PartnerManagementConsole;
+import console.contract.EndorsementConsole;
+import console.contract.MaturityContractConsole;
+import console.contract.PaymentCollectionConsole;
+import console.contract.PayoutConsole;
+import console.contract.ReinstatementConsole;
+import console.insurance.InsuranceDesignConsole;
+import console.underwriting.UnderwritingConsole;
+import service.accident.AccidentReportService;
+import service.accident.DamageInvestigationService;
+import service.compensation.CompensationEvaluationService;
+import service.compensation.PartnerManagementService;
+import service.contract.EndorsementService;
+import service.contract.MaturityContractService;
+import service.contract.PaymentCollectionService;
+import service.contract.PayoutService;
+import service.contract.ReinstatementService;
+import service.insurance.InsuranceDesignService;
+import service.underwriting.UnderwritingService;
+import ui.console.ConsoleView;
+import ui.console.InsuranceManagementCli;
 
-import static common.ConsoleUtil.*;
+import java.time.Clock;
 
+// 보험 관리 시스템 진입점 — 의존성 와이어링 후 CLI 실행
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("================================================");
-        System.out.println("       신동아화재 보험 관리 시스템               ");
-        System.out.println("================================================");
+        // 인프라 (추후 외부 알림/DB 시퀀스 구현체로 교체 가능)
+        Clock clock = Clock.systemDefaultZone();
+        @SuppressWarnings("unused") IdGenerator idGenerator = new SequenceIdGenerator(clock);
+        @SuppressWarnings("unused") Notifier notifier = new ConsoleNotifier();
 
-        while (true) {
-            System.out.println();
-            System.out.println("============== 메인 메뉴 ==============");
-            System.out.println("  1. 보험청약 심사");
-            System.out.println("  2. 배서 관리");
-            System.out.println("  3. 부활 관리");
-            System.out.println("  4. 분납/수금 관리");
-            System.out.println("  5. 만기계약 관리");
-            System.out.println("  6. 사고 접수");
-            System.out.println("  7. 손해조사");
-            System.out.println("  8. 상품 설계");
-            System.out.println("  9. 제지급금 관리");
-            System.out.println(" 10. 보상 평가 관리");
-            System.out.println(" 11. 협력업체 관리");
-            System.out.println(" 12. 종료");
-            System.out.println("=======================================");
-            System.out.print(">> 선택: ");
-            String choice = sc.nextLine().trim();
+        // 서비스 (각 유스케이스 비즈니스 로직)
+        UnderwritingService underwritingService = new UnderwritingService();
+        EndorsementService endorsementService = new EndorsementService();
+        ReinstatementService reinstatementService = new ReinstatementService();
+        PaymentCollectionService paymentCollectionService = new PaymentCollectionService();
+        MaturityContractService maturityContractService = new MaturityContractService();
+        AccidentReportService accidentReportService = new AccidentReportService();
+        DamageInvestigationService damageInvestigationService = new DamageInvestigationService();
+        InsuranceDesignService insuranceDesignService = new InsuranceDesignService();
+        PayoutService payoutService = new PayoutService();
+        CompensationEvaluationService compensationEvaluationService = new CompensationEvaluationService();
+        PartnerManagementService partnerManagementService = new PartnerManagementService();
 
-            switch (choice) {
-                case "1": UnderwritingConsole.run();      break;
-                case "2": EndorsementConsole.run();       break;
-                case "3": ReinstatementConsole.run();     break;
-                case "4": PaymentCollectionConsole.run(); break;
-                case "5": MaturityContractConsole.run();  break;
-                case "6": AccidentReportConsole.run();           break;
-                case "7": DamageInvestigationConsole.run();      break;
-                case "8": InsuranceDesignConsole.run();          break;
-                case "9": PayoutConsole.run();                   break;
-                case "10": CompensationEvaluationConsole.run();  break;
-                case "11": PartnerManagementConsole.run();       break;
-                case "12":
-                    System.out.println("\n시스템을 종료합니다.");
-                    sc.close();
-                    return;
-                default:
-                    System.out.println("[오류] 올바른 번호를 입력하세요.");
-            }
-        }
+        // 콘솔 (유스케이스별 I/O 전담)
+        UnderwritingConsole underwritingConsole = new UnderwritingConsole(underwritingService);
+        EndorsementConsole endorsementConsole = new EndorsementConsole(endorsementService);
+        ReinstatementConsole reinstatementConsole = new ReinstatementConsole(reinstatementService);
+        PaymentCollectionConsole paymentCollectionConsole = new PaymentCollectionConsole(paymentCollectionService);
+        MaturityContractConsole maturityContractConsole = new MaturityContractConsole(maturityContractService);
+        AccidentReportConsole accidentReportConsole = new AccidentReportConsole(accidentReportService);
+        DamageInvestigationConsole damageInvestigationConsole = new DamageInvestigationConsole(damageInvestigationService);
+        InsuranceDesignConsole insuranceDesignConsole = new InsuranceDesignConsole(insuranceDesignService);
+        PayoutConsole payoutConsole = new PayoutConsole(payoutService);
+        CompensationEvaluationConsole compensationEvaluationConsole = new CompensationEvaluationConsole(compensationEvaluationService);
+        PartnerManagementConsole partnerManagementConsole = new PartnerManagementConsole(partnerManagementService);
+
+        // 콘솔 진입점
+        ConsoleView view = new ConsoleView();
+        InsuranceManagementCli cli = new InsuranceManagementCli(view,
+                underwritingConsole, endorsementConsole, reinstatementConsole,
+                paymentCollectionConsole, maturityContractConsole,
+                accidentReportConsole, damageInvestigationConsole,
+                insuranceDesignConsole, payoutConsole,
+                compensationEvaluationConsole, partnerManagementConsole);
+        cli.run();
     }
 }

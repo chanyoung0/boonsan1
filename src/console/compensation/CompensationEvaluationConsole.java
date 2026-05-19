@@ -7,9 +7,14 @@ import static common.ConsoleUtil.*;
 // 보상 평가 관리 콘솔 I/O — 보상담당자 유스케이스 입출력 전담
 public class CompensationEvaluationConsole {
 
-    public static void run() {
-        CompensationEvaluationService service = new CompensationEvaluationService();
+    private final CompensationEvaluationService service;
 
+    // 의존성 주입으로 초기화
+    public CompensationEvaluationConsole(CompensationEvaluationService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 보상 평가를 관리한다");
         System.out.println("액터: 보상담당자");

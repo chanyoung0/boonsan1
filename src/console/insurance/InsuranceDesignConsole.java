@@ -10,9 +10,14 @@ import static common.ConsoleUtil.*;
 // 상품 설계 콘솔 I/O — 상품개발자 유스케이스 입출력 전담
 public class InsuranceDesignConsole {
 
-    public static void run() {
-        InsuranceDesignService service = new InsuranceDesignService();
+    private final InsuranceDesignService service;
 
+    // 의존성 주입으로 초기화
+    public InsuranceDesignConsole(InsuranceDesignService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 상품을 설계한다");
         System.out.println("액터: 상품개발자, 금융감독원");
@@ -88,10 +93,10 @@ public class InsuranceDesignConsole {
             return;
         }
 
-        authorizationRequestSub(productName, productCode, service);
+        authorizationRequestSub(productName, productCode);
     }
 
-    private static void authorizationRequestSub(String productName, String productCode, InsuranceDesignService service) {
+    private void authorizationRequestSub(String productName, String productCode) {
         System.out.println("\n  >> <<extend>> [상품 인가를 요청한다] 시나리오 시작");
         System.out.println("  [시스템] 인가 요청 화면: " + productName + " (" + productCode + ")");
         enter();

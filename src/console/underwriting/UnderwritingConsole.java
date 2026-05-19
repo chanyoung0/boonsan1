@@ -8,9 +8,14 @@ import static common.ConsoleUtil.*;
 // 보험청약 심사 콘솔 I/O — 언더라이터 유스케이스 입출력 전담
 public class UnderwritingConsole {
 
-    public static void run() {
-        UnderwritingService service = new UnderwritingService();
+    private final UnderwritingService service;
 
+    // 의존성 주입으로 초기화
+    public UnderwritingConsole(UnderwritingService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 보험청약을 심사한다");
         System.out.println("액터: 언더라이터");
@@ -97,7 +102,7 @@ public class UnderwritingConsole {
         System.out.println("[시스템] 자동심사 가능 여부: " + (canAutoReview ? "가능" : "불가 — 수동심사 전환"));
 
         if (!canAutoReview) {
-            score = manualUnderwritingInput(score, service);
+            score = manualUnderwritingInput(score);
         }
 
         String  recommended          = service.determineResult(score);
@@ -136,7 +141,7 @@ public class UnderwritingConsole {
         }
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
-        policyIssuanceFlow(name, finalResult, insuranceAmount, service);
+        policyIssuanceFlow(name, finalResult, insuranceAmount);
     }
 
     // 신용정보 조회 I/O — ICIS API 호출 결과 표시, 실패 시 false 반환
@@ -159,7 +164,7 @@ public class UnderwritingConsole {
     }
 
     // 수동심사 I/O — 심사 유형 입력받아 조정된 점수 반환
-    private static int manualUnderwritingInput(int baseScore, UnderwritingService service) {
+    private int manualUnderwritingInput(int baseScore) {
         System.out.println("\n[시스템] 자동심사 불가. 추가 심사 유형을 선택하세요:");
         System.out.println("  1. 진단심사  2. 특인심사  3. 일반심사  4. 이미지심사  5. 적부심사");
         System.out.print(">> 선택: ");
@@ -204,7 +209,7 @@ public class UnderwritingConsole {
     }
 
     // 청약서 및 증권발행 I/O — 입력 수집 후 서비스에 위임
-    private static void policyIssuanceFlow(String name, String finalResult, long insuranceAmount, UnderwritingService service) {
+    private void policyIssuanceFlow(String name, String finalResult, long insuranceAmount) {
         System.out.println("\n  [청약서 및 증권발행]");
         String appliedCondition = "할증".equals(finalResult) ? "할증체 (보험료 15% 인상)" : "표준체 (조건 없음)";
         String appNo = "APP-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);

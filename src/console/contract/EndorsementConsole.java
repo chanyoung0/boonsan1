@@ -7,9 +7,14 @@ import static common.ConsoleUtil.*;
 // 배서 관리 콘솔 I/O — 계약관리담당자 유스케이스 입출력 전담
 public class EndorsementConsole {
 
-    public static void run() {
-        EndorsementService service = new EndorsementService();
+    private final EndorsementService service;
 
+    // 의존성 주입으로 초기화
+    public EndorsementConsole(EndorsementService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 배서를 관리한다");
         System.out.println("액터: 계약관리담당자");

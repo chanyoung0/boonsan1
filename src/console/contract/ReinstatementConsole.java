@@ -9,9 +9,14 @@ import static common.ConsoleUtil.*;
 // 부활 관리 콘솔 I/O — 계약관리담당자 유스케이스 입출력 전담
 public class ReinstatementConsole {
 
-    public static void run() {
-        ReinstatementService service = new ReinstatementService();
+    private final ReinstatementService service;
 
+    // 의존성 주입으로 초기화
+    public ReinstatementConsole(ReinstatementService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 부활을 관리한다");
         System.out.println("액터: 계약관리담당자");

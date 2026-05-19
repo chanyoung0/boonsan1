@@ -8,9 +8,14 @@ import static common.ConsoleUtil.*;
 // 제지급금 관리 콘솔 I/O — 계약관리담당자 유스케이스 입출력 전담
 public class PayoutConsole {
 
-    public static void run() {
-        PayoutService service = new PayoutService();
+    private final PayoutService service;
 
+    // 의존성 주입으로 초기화
+    public PayoutConsole(PayoutService service) {
+        this.service = service;
+    }
+
+    public void run() {
         line();
         System.out.println("[유스케이스] 제지급금을 관리한다");
         System.out.println("액터: 계약관리담당자");
