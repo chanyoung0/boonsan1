@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class InsuranceApplication {
 
     private String applicationId;
+    private String policyNumber;
     private ApplicationStatus applicationStatus;
     private LocalDateTime appliedAt;
     private String appliedCondition;
@@ -55,6 +56,8 @@ public class InsuranceApplication {
 
     public String              getApplicationId()                       { return applicationId; }
     public void                setApplicationId(String v)              { this.applicationId = v; }
+    public String              getPolicyNumber()                        { return policyNumber; }
+    public void                setPolicyNumber(String v)               { this.policyNumber = v; }
     public ApplicationStatus   getApplicationStatus()                  { return applicationStatus; }
     public void                setApplicationStatus(ApplicationStatus v){ this.applicationStatus = v; }
     public LocalDateTime       getAppliedAt()                          { return appliedAt; }

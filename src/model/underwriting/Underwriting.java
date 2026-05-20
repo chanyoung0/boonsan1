@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 // 언더라이팅 도메인 모델 — 청약 위험도 평가 및 인수 심사 정보 관리
 public class Underwriting {
 
+    private String underwritingId;
     private String deductionReason;
     private boolean isCoinsuranceRecommended;
     private String itemizedScores;
@@ -58,6 +59,8 @@ public class Underwriting {
     // 임시 저장
     public void tempSave() {}
 
+    public String             getUnderwritingId()                       { return underwritingId; }
+    public void               setUnderwritingId(String v)              { this.underwritingId = v; }
     public String             getDeductionReason()                      { return deductionReason; }
     public void               setDeductionReason(String v)              { this.deductionReason = v; }
     public boolean            isCoinsuranceRecommended()                { return isCoinsuranceRecommended; }

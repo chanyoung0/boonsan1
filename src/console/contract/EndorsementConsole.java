@@ -59,12 +59,15 @@ public class EndorsementConsole {
         enter();
 
         System.out.println("[시스템] 배서 내용을 DB에 저장 중...");
-        if (!simulateDbSave()) {
+        String endorsementId = EndorsementService.saveEndorsement(
+                policyNo, endorsementType, endorsement, changeReason, uwResult);
+        if (endorsementId == null) {
             System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
             return;
         }
         System.out.println(EndorsementService.createEndorsementSaveSummary(
                 policyNo, endorsement, changeReason, uwResult));
+        System.out.println("[시스템] 배서번호: " + endorsementId);
         System.out.println("[시스템] 배서 내용이 저장되고 계약정보가 갱신되었습니다. 증권번호: " + policyNo);
     }
 }

@@ -62,7 +62,7 @@ public class AccidentReportDBO extends DBA {
     }
 
     public boolean save(AccidentReport report) {
-        return false;
+        throw new UnsupportedOperationException("policyNumber, accidentStatus, documentSubmissionStatus, accidentAtText 파라미터가 필요합니다.");
     }
 
     public boolean save(AccidentReport report, String policyNumber, String accidentStatus,
@@ -86,7 +86,7 @@ public class AccidentReportDBO extends DBA {
     }
 
     public boolean update(AccidentReport report) {
-        return false;
+        throw new UnsupportedOperationException("policyNumber, accidentStatus, documentSubmissionStatus, accidentAtText 파라미터가 필요합니다.");
     }
 
     public boolean update(AccidentReport report, String policyNumber, String accidentStatus,

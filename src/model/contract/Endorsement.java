@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 // 배서 도메인 모델 — 계약 내용 변경 처리 정보 관리
 public class Endorsement {
 
+    private String endorsementId;
+    private String policyNumber;
     private LocalDateTime appliedAt;
     private ChangeReason changeReason;
     private EndorsementType endorsementType;
@@ -36,6 +38,10 @@ public class Endorsement {
                 || endorsementType == EndorsementType.SPECIAL_CONTRACT_CHANGE;
     }
 
+    public String         getEndorsementId()                { return endorsementId; }
+    public void           setEndorsementId(String v)        { this.endorsementId = v; }
+    public String         getPolicyNumber()                 { return policyNumber; }
+    public void           setPolicyNumber(String v)         { this.policyNumber = v; }
     public LocalDateTime  getAppliedAt()                    { return appliedAt; }
     public void           setAppliedAt(LocalDateTime v)     { this.appliedAt = v; }
     public ChangeReason   getChangeReason()                 { return changeReason; }

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 // 지급 결정 도메인 모델 — 보험금 지급 승인 및 산정 정보 관리
 public class Payout {
 
+    private String payoutId;
+    private String policyNumber;
     private LocalDateTime approvedAt;
     private BigDecimal calculatedAmount;
     private CalculationBasis calculationBasis;
@@ -56,6 +58,10 @@ public class Payout {
         this.paidAt = LocalDateTime.now();
     }
 
+    public String              getPayoutId()                            { return payoutId; }
+    public void                setPayoutId(String v)                   { this.payoutId = v; }
+    public String              getPolicyNumber()                        { return policyNumber; }
+    public void                setPolicyNumber(String v)               { this.policyNumber = v; }
     public LocalDateTime       getApprovedAt()                          { return approvedAt; }
     public void                setApprovedAt(LocalDateTime v)           { this.approvedAt = v; }
     public BigDecimal          getCalculatedAmount()                    { return calculatedAmount; }

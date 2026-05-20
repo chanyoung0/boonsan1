@@ -1,9 +1,15 @@
 package service.accident;
 
-import java.math.BigDecimal;
+import db.DamageInvestigationDBO;
+import model.accident.DamageInvestigation;
 
-// 손해조사 서비스 — 이의제기 처리 판정 순수 비즈니스 로직 담당
+import java.math.BigDecimal;
+import java.util.List;
+
+// 손해조사 서비스 — 이의제기 처리 판정, DB 저장 담당
 public class DamageInvestigationService {
+
+    private static final DamageInvestigationDBO damageInvestigationDBO = new DamageInvestigationDBO();
 
     // 이의제기 처리 결과 메시지 반환
     public static String processObjection(String choice) {
@@ -24,11 +30,32 @@ public class DamageInvestigationService {
         return "Y".equalsIgnoreCase(answer) || "1".equals(answer);
     }
 
+    // 손해조사 결과를 DB에 저장하고 생성된 조사번호를 반환한다
+    public static String saveDamageInvestigation(DamageInvestigation investigation, String reportNo) {
+        if (investigation == null || investigation.getInvestigationId() == null || reportNo == null) {
+            return null;
+        }
+        boolean saved = damageInvestigationDBO.save(investigation, reportNo, "PENDING");
+        return saved ? investigation.getInvestigationId() : null;
+    }
+
+    public static List<DamageInvestigation> getDamageInvestigationList() {
+        return damageInvestigationDBO.findAll();
+    }
+
+    public static DamageInvestigation findDamageInvestigationById(String investigationId) {
+        return damageInvestigationDBO.findById(investigationId);
+    }
+
+    public static String getInvestigationStatus(String investigationId) {
+        String status = damageInvestigationDBO.findStatusById(investigationId);
+        return status == null ? "" : status;
+    }
+
     public static BigDecimal parseAmount(String value) {
         if (value == null || value.trim().isEmpty()) {
             return BigDecimal.ZERO;
         }
-
         try {
             return new BigDecimal(value.replace(",", "").replace("원", "").trim());
         } catch (NumberFormatException e) {
@@ -41,7 +68,6 @@ public class DamageInvestigationService {
         if (amounts == null) {
             return total;
         }
-
         for (BigDecimal amount : amounts) {
             if (amount != null) {
                 total = total.add(amount);

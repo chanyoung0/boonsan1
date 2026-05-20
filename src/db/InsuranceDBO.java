@@ -54,6 +54,21 @@ public class InsuranceDBO extends DBA {
         return productList;
     }
 
+    public List<String> findAllIds() {
+        List<String> ids = new ArrayList<>();
+        String sql = "SELECT product_code FROM insurance ORDER BY product_code";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                ids.add(resultSet.getString("product_code"));
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB 오류] 보험상품 코드 목록 조회 실패: " + e.getMessage());
+        }
+        return ids;
+    }
+
     public boolean save(Insurance insurance) {
         String sql = "INSERT INTO insurance "
                 + "(product_code, product_type, insurance_period, insured_amount, premium, maturity_refund, "

@@ -1,12 +1,16 @@
 package service.contract;
 
+import db.MaturityNoticeDBO;
 import enums.DeliveryMethod;
 import model.contract.MaturityNotice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-// 만기계약 관리 서비스 — 재계약 의사 처리 순수 비즈니스 로직 담당
+// 만기계약 관리 서비스 — 재계약 의사 처리, DB 저장 담당
 public class MaturityContractService {
+
+    private static final MaturityNoticeDBO maturityNoticeDBO = new MaturityNoticeDBO();
 
     public static MaturityNotice createMaturityNotice(DeliveryMethod deliveryMethod) {
         MaturityNotice maturityNotice = new MaturityNotice(deliveryMethod, LocalDateTime.now());
@@ -37,6 +41,24 @@ public class MaturityContractService {
             maturityNotice.checkRenewalIntention();
         }
         return processRenewalIntention(intention);
+    }
+
+    // 만기 처리 결과를 DB에 저장하고 생성된 안내번호를 반환한다
+    public static String saveMaturityResult(MaturityNotice maturityNotice) {
+        if (maturityNotice == null) {
+            return null;
+        }
+        String noticeId = "MTN-" + System.currentTimeMillis();
+        boolean saved = maturityNoticeDBO.save(maturityNotice, noticeId);
+        return saved ? noticeId : null;
+    }
+
+    public static List<MaturityNotice> getMaturityNoticeList() {
+        return maturityNoticeDBO.findAll();
+    }
+
+    public static MaturityNotice findMaturityNoticeById(String noticeId) {
+        return maturityNoticeDBO.findById(noticeId);
     }
 
     public static String createNoticeDeliverySummary(MaturityNotice maturityNotice) {

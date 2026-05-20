@@ -1,9 +1,22 @@
 package service.underwriting;
 
-// 보험청약 심사 서비스 — 심사 점수 계산 및 판정 순수 비즈니스 로직 담당
+import db.InsuranceApplicationDBO;
+import db.UnderwritingDBO;
+import enums.ApplicationStatus;
+import enums.UnderwritingStatus;
+import enums.UnderwritingType;
+import model.underwriting.InsuranceApplication;
+import model.underwriting.Underwriting;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+// 보험청약 심사 서비스 — 심사 점수 계산, 판정, DB 저장 담당
 public class UnderwritingService {
 
     private static final long REINSURANCE_THRESHOLD = 500_000_000L;
+    private static final UnderwritingDBO underwritingDBO = new UnderwritingDBO();
+    private static final InsuranceApplicationDBO applicationDBO = new InsuranceApplicationDBO();
 
     // 입력값 기반 심사점수 계산 (기본점수 100점에서 감점 합산)
     public static int calculateInputScore(String pastDisease, String medication, String surgery,
@@ -59,6 +72,59 @@ public class UnderwritingService {
     // 재보험 처리 필요 여부 판단 (자사 보유한도 초과)
     public static boolean needsReinsurance(long insuranceAmount) {
         return insuranceAmount > REINSURANCE_THRESHOLD;
+    }
+
+    // 심사결과를 DB에 저장하고 생성된 심사번호를 반환한다
+    public static String saveUnderwritingResult(String empNo, String empName, String empDept,
+                                                int score, String finalResult, boolean wasManual) {
+        String underwritingId = "UW-" + System.currentTimeMillis();
+        Underwriting underwriting = new Underwriting();
+        underwriting.setUnderwriter(empName);
+        underwriting.setTotalScore(score);
+        underwriting.setUnderwritingStatus(UnderwritingStatus.COMPLETED);
+        underwriting.setUnderwritingType(wasManual ? UnderwritingType.GENERAL : UnderwritingType.AUTO);
+        underwriting.setUnderwrittenAt(LocalDateTime.now());
+        if ("거절".equals(finalResult)) {
+            underwriting.setDeductionReason("위험도 기준 초과 (총점 " + score + "점)");
+        }
+        boolean saved = underwritingDBO.save(underwriting, underwritingId, empNo, empName, empDept,
+                resolveUnderwritingResultCode(finalResult));
+        return saved ? underwritingId : null;
+    }
+
+    // 청약 정보를 DB에 저장하고 성공 여부를 반환한다
+    public static boolean saveInsuranceApplication(String applicationId, String policyNumber,
+                                                   String appliedCondition) {
+        InsuranceApplication application = new InsuranceApplication();
+        application.setApplicationId(applicationId);
+        application.setApplicationStatus(ApplicationStatus.APPROVED);
+        application.setAppliedCondition(appliedCondition);
+        application.setAppliedAt(LocalDateTime.now());
+        return applicationDBO.save(application, policyNumber, "APPROVED", appliedCondition);
+    }
+
+    public static List<Underwriting> getUnderwritingList() {
+        return underwritingDBO.findAll();
+    }
+
+    public static Underwriting findUnderwritingById(String underwritingId) {
+        return underwritingDBO.findById(underwritingId);
+    }
+
+    public static String getUnderwritingStatus(String underwritingId) {
+        String status = underwritingDBO.findStatusById(underwritingId);
+        return status == null ? "" : status;
+    }
+
+    public static String getUnderwritingResult(String underwritingId) {
+        String result = underwritingDBO.findResultById(underwritingId);
+        return result == null ? "" : result;
+    }
+
+    private static String resolveUnderwritingResultCode(String finalResult) {
+        if ("할증".equals(finalResult)) return "SURCHARGE";
+        if ("거절".equals(finalResult)) return "REJECTED";
+        return "APPROVED";
     }
 
     private static boolean isYes(String val) {

@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 // 분납/수금 도메인 모델 — 보험료 납입 및 수금 처리 정보 관리
 public class PaymentCollection {
 
+    private String collectionId;
+    private String policyNumber;
     private BigDecimal collectedAmount;
     private LocalDateTime collectedAt;
     private LocalDate dueDate;
@@ -41,6 +43,10 @@ public class PaymentCollection {
     // 수금 처리
     public void processCollection() {}
 
+    public String          getCollectionId()                        { return collectionId; }
+    public void            setCollectionId(String v)               { this.collectionId = v; }
+    public String          getPolicyNumber()                        { return policyNumber; }
+    public void            setPolicyNumber(String v)               { this.policyNumber = v; }
     public BigDecimal      getCollectedAmount()                     { return collectedAmount; }
     public void            setCollectedAmount(BigDecimal v)         { this.collectedAmount = v; }
     public LocalDateTime   getCollectedAt()                         { return collectedAt; }

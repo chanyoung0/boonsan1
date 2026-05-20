@@ -48,10 +48,12 @@ public class ReinstatementConsole {
         enter();
 
         System.out.println("[시스템] 부활 처리 결과를 DB에 저장 중...");
-        if (!simulateDbSave()) {
+        String reinstatementId = ReinstatementService.saveReinstatement(policyNo, uwResult);
+        if (reinstatementId == null) {
             System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
             return;
         }
+        System.out.println("[시스템] 부활번호: " + reinstatementId);
 
         if (uwResult.contains("승인")) {
             System.out.println("[시스템] 부활 처리 완료. 계약상태: '유효'로 갱신");

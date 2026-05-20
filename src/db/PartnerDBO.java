@@ -13,9 +13,11 @@ import java.sql.SQLException;
 // Partner 엔티티 DB 매핑 — partner 테이블 CRUD 담당
 public class PartnerDBO extends DBA {
 
+    private static final String SELECT_COLUMNS =
+            "id, partner_name, partner_type, contact, responsibility, evaluation_grade";
+
     public Partner findById(String partnerId) {
-        String sql = "SELECT id, partner_name, partner_type, contact, responsibility, evaluation_grade "
-                + "FROM partner WHERE id = ?";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM partner WHERE id = ?";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, partnerId);
@@ -31,9 +33,8 @@ public class PartnerDBO extends DBA {
     }
 
     public List<Partner> findAll() {
-        String sql = "SELECT id, partner_name, partner_type, contact, responsibility, evaluation_grade "
-                + "FROM partner ORDER BY id";
         List<Partner> partnerList = new ArrayList<>();
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM partner ORDER BY id";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
@@ -44,6 +45,21 @@ public class PartnerDBO extends DBA {
             System.out.println("[DB 오류] 협력업체 목록 조회 실패: " + e.getMessage());
         }
         return partnerList;
+    }
+
+    public List<String> findAllIds() {
+        List<String> ids = new ArrayList<>();
+        String sql = "SELECT id FROM partner ORDER BY id";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                ids.add(resultSet.getString("id"));
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB 오류] 협력업체 ID 목록 조회 실패: " + e.getMessage());
+        }
+        return ids;
     }
 
     public boolean save(Partner partner) {

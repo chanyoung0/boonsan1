@@ -1,11 +1,15 @@
 package service.contract;
 
+import db.EndorsementDBO;
 import model.contract.Endorsement;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-// 배서 관리 서비스 — 배서 심사 필요 여부 판단 순수 비즈니스 로직 담당
+// 배서 관리 서비스 — 배서 심사 필요 여부 판단, DB 저장 담당
 public class EndorsementService {
+
+    private static final EndorsementDBO endorsementDBO = new EndorsementDBO();
 
     // 배서유형별 심사 필요 여부 판단 (가입금액 변경/특약 추가 → 위험 변동 → 심사 필요)
     public static boolean needsUnderwriting(String endorsementType) {
@@ -23,6 +27,29 @@ public class EndorsementService {
         endorsement.setNewContent(newContent);
         endorsement.setAppliedAt(LocalDateTime.now());
         return endorsement;
+    }
+
+    // 배서를 DB에 저장하고 생성된 배서번호를 반환한다
+    public static String saveEndorsement(String policyNo, String endorsementTypeChoice,
+                                         Endorsement endorsement, String changeReason, String uwResult) {
+        if (endorsement == null || policyNo == null) {
+            return null;
+        }
+        if (endorsement.getProcessedAt() == null) {
+            endorsement.setProcessedAt(LocalDateTime.now());
+        }
+        String endorsementId = "END-" + System.currentTimeMillis();
+        boolean saved = endorsementDBO.save(endorsement, endorsementId, policyNo,
+                endorsementTypeChoice, changeReason, uwResult);
+        return saved ? endorsementId : null;
+    }
+
+    public static List<Endorsement> getEndorsementList() {
+        return endorsementDBO.findAll();
+    }
+
+    public static Endorsement findEndorsementById(String endorsementId) {
+        return endorsementDBO.findById(endorsementId);
     }
 
     public static String createEndorsementRequestSummary(String policyNo, String endorsementType,

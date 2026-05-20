@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 // 부활 도메인 모델 — 실효 계약 부활 신청 및 처리 정보 관리
 public class Reinstatement {
 
+    private String reinstatementId;
+    private String policyNumber;
     private LocalDateTime appliedAt;
     private LocalDateTime desiredDate;
     private boolean hasHealthChanged;
@@ -34,6 +36,10 @@ public class Reinstatement {
     public void calculateUnpaidPremium()   {}
     public void processReinstatement()     {}
 
+    public String              getReinstatementId()                    { return reinstatementId; }
+    public void                setReinstatementId(String v)           { this.reinstatementId = v; }
+    public String              getPolicyNumber()                       { return policyNumber; }
+    public void                setPolicyNumber(String v)              { this.policyNumber = v; }
     public LocalDateTime       getAppliedAt()                         { return appliedAt; }
     public void                setAppliedAt(LocalDateTime v)          { this.appliedAt = v; }
     public LocalDateTime       getDesiredDate()                       { return desiredDate; }

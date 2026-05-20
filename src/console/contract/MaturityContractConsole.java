@@ -34,6 +34,12 @@ public class MaturityContractConsole {
         String result = MaturityContractService.applyRenewalIntention(maturityNotice, intention);
         System.out.println("[시스템] " + result);
         System.out.println(MaturityContractService.createRenewalCheckSummary(maturityNotice));
-        System.out.println("[시스템] 만기 처리 결과가 DB에 저장되었습니다.");
+        System.out.println("[시스템] 만기 처리 결과를 DB에 저장 중...");
+        String noticeId = MaturityContractService.saveMaturityResult(maturityNotice);
+        if (noticeId == null) {
+            System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
+            return;
+        }
+        System.out.println("[시스템] 만기 처리 결과가 DB에 저장되었습니다. | 안내번호: " + noticeId);
     }
 }

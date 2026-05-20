@@ -101,13 +101,15 @@ public class DamageInvestigationConsole {
         input("특이사항 (없으면 Enter)");
         System.out.println("\n[시스템] 최종 지급품의서가 출력되었습니다.");
 
-        input("사원번호");
+        String adjusterId = input("사원번호");
+        investigation.setAdjusterId(adjusterId);
         System.out.println("[시스템] 지급품의서를 DB에 저장 중...");
-        if (!simulateDbSave()) {
-            System.out.print("[오류] \"저장 실패\" - 다시 시도하시겠습니까? (Y/N): ");
-            if (!"Y".equalsIgnoreCase(sc.nextLine().trim())) { System.out.println("[시스템] 관리자에게 오류를 통보합니다."); return; }
+        String investigationId = DamageInvestigationService.saveDamageInvestigation(investigation, reportNo);
+        if (investigationId == null) {
+            System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보합니다.");
+            return;
         }
-        System.out.println("[시스템] 지급품의서 저장 완료 | 사고 접수 상태: '결재 필요'");
+        System.out.println("[시스템] 지급품의서 저장 완료 | 조사번호: " + investigationId + " | 사고 접수 상태: '결재 필요'");
 
         String paymentAvailable = input("보험금 지급이 가능합니까? (Y/N)");
         if (!DamageInvestigationService.isYes(paymentAvailable)) {

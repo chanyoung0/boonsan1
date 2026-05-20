@@ -14,10 +14,12 @@ import java.util.List;
 // CompensationEvaluation entity database operator for compensation_evaluation CRUD.
 public class CompensationEvaluationDBO extends DBA {
 
+    private static final String SELECT_COLUMNS =
+            "evaluation_id, evaluation_month, evaluation_status, evaluation_result, "
+                    + "submission_agency_name, damage_amount, damage_analysis_result, compensation_statistics";
+
     public CompensationEvaluation findById(String evaluationId) {
-        String sql = "SELECT evaluation_id, evaluation_month, evaluation_status, evaluation_result, "
-                + "submission_agency_name, damage_amount, damage_analysis_result, compensation_statistics "
-                + "FROM compensation_evaluation WHERE evaluation_id = ?";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM compensation_evaluation WHERE evaluation_id = ?";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, evaluationId);
@@ -34,9 +36,7 @@ public class CompensationEvaluationDBO extends DBA {
 
     public List<CompensationEvaluation> findAll() {
         List<CompensationEvaluation> evaluationList = new ArrayList<>();
-        String sql = "SELECT evaluation_id, evaluation_month, evaluation_status, evaluation_result, "
-                + "submission_agency_name, damage_amount, damage_analysis_result, compensation_statistics "
-                + "FROM compensation_evaluation ORDER BY evaluation_id";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM compensation_evaluation ORDER BY evaluation_id";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
@@ -47,6 +47,21 @@ public class CompensationEvaluationDBO extends DBA {
             System.out.println("[DB 오류] 보상평가 목록 조회 실패: " + e.getMessage());
         }
         return evaluationList;
+    }
+
+    public List<String> findAllIds() {
+        List<String> ids = new ArrayList<>();
+        String sql = "SELECT evaluation_id FROM compensation_evaluation ORDER BY evaluation_id";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                ids.add(resultSet.getString("evaluation_id"));
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB 오류] 보상평가 ID 목록 조회 실패: " + e.getMessage());
+        }
+        return ids;
     }
 
     public boolean save(CompensationEvaluation evaluation) {

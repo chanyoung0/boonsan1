@@ -33,7 +33,7 @@ public class PaymentCollectionDBO extends DBA {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection lookup failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 조회 실패: " + e.getMessage());
         }
         return null;
     }
@@ -48,7 +48,7 @@ public class PaymentCollectionDBO extends DBA {
                 collectionList.add(mapPaymentCollection(resultSet));
             }
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection list lookup failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 목록 조회 실패: " + e.getMessage());
         }
         return collectionList;
     }
@@ -63,7 +63,7 @@ public class PaymentCollectionDBO extends DBA {
                 collectionIdList.add(resultSet.getString("collection_id"));
             }
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection id list lookup failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 ID 목록 조회 실패: " + e.getMessage());
         }
         return collectionIdList;
     }
@@ -82,7 +82,7 @@ public class PaymentCollectionDBO extends DBA {
     }
 
     public boolean save(PaymentCollection collection) {
-        return false;
+        throw new UnsupportedOperationException("collectionId, policyNumber, collectionStatus, transferType 파라미터가 필요합니다.");
     }
 
     public boolean save(PaymentCollection collection, String collectionId,
@@ -99,13 +99,13 @@ public class PaymentCollectionDBO extends DBA {
             setSaveParams(statement, collection, collectionId, policyNumber, collectionStatus, transferType);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection save failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 저장 실패: " + e.getMessage());
         }
         return false;
     }
 
     public boolean update(PaymentCollection collection) {
-        return false;
+        throw new UnsupportedOperationException("collectionId, policyNumber, collectionStatus, transferType 파라미터가 필요합니다.");
     }
 
     public boolean update(PaymentCollection collection, String collectionId,
@@ -132,7 +132,7 @@ public class PaymentCollectionDBO extends DBA {
             statement.setString(10, collectionId);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection update failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 수정 실패: " + e.getMessage());
         }
         return false;
     }
@@ -144,7 +144,7 @@ public class PaymentCollectionDBO extends DBA {
             statement.setString(1, collectionId);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection delete failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 삭제 실패: " + e.getMessage());
         }
         return false;
     }
@@ -160,13 +160,13 @@ public class PaymentCollectionDBO extends DBA {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("[DB Error] Payment collection column lookup failed: " + e.getMessage());
+            System.out.println("[DB 오류] 분납수금 부가정보 조회 실패: " + e.getMessage());
         }
         return null;
     }
 
     private PaymentCollection mapPaymentCollection(ResultSet resultSet) throws SQLException {
-        return new PaymentCollection(
+        PaymentCollection collection = new PaymentCollection(
                 toLocalDate(resultSet.getDate("due_date")),
                 resultSet.getBigDecimal("collected_amount"),
                 resultSet.getBigDecimal("unpaid_amount"),
@@ -174,6 +174,9 @@ public class PaymentCollectionDBO extends DBA {
                 resolveProcessingResult(resultSet.getString("processing_result")),
                 toLocalDateTime(resultSet.getTimestamp("collected_at"))
         );
+        collection.setCollectionId(resultSet.getString("collection_id"));
+        collection.setPolicyNumber(resultSet.getString("policy_number"));
+        return collection;
     }
 
     private void setSaveParams(PreparedStatement statement, PaymentCollection collection,

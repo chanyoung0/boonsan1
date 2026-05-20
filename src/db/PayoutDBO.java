@@ -130,7 +130,7 @@ public class PayoutDBO extends DBA {
     }
 
     public boolean save(Payout payout) {
-        return false;
+        throw new UnsupportedOperationException("payoutId, policyNumber, payoutStatus 파라미터가 필요합니다.");
     }
 
     public boolean save(Payout payout, String payoutId, String policyNumber, String payoutStatus) {
@@ -152,7 +152,7 @@ public class PayoutDBO extends DBA {
     }
 
     public boolean update(Payout payout) {
-        return false;
+        throw new UnsupportedOperationException("payoutId, policyNumber, payoutStatus 파라미터가 필요합니다.");
     }
 
     public boolean update(Payout payout, String payoutId, String policyNumber, String payoutStatus) {
@@ -206,6 +206,8 @@ public class PayoutDBO extends DBA {
                 resultSet.getString("deduction_item"),
                 toLocalDateTime(resultSet.getTimestamp("approved_at"))
         );
+        payout.setPayoutId(resultSet.getString("payout_id"));
+        payout.setPolicyNumber(resultSet.getString("policy_number"));
         payout.setPaidAt(toLocalDateTime(resultSet.getTimestamp("paid_at")));
         return payout;
     }

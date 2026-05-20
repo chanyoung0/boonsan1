@@ -130,14 +130,16 @@ public class UnderwritingConsole {
         String finalResult = "2".equals(finalChoice) ? "할증" : "3".equals(finalChoice) ? "거절" : "승인";
 
         System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
-        if (!simulateDbSave()) {
-            System.out.println("[오류] 저장 실패.");
-            enter();
-            if (!simulateDbSave()) { System.out.println("[시스템] 관리자에게 오류를 통보하고 시스템을 종료합니다."); return; }
+        String underwritingId = UnderwritingService.saveUnderwritingResult(
+                empNo, empName, empDept, score, finalResult, !canAutoReview);
+        if (underwritingId == null) {
+            System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보하고 시스템을 종료합니다.");
+            return;
         }
 
         System.out.println("[시스템] 사원번호: " + empNo + " | 이름: " + empName + " | 부서: " + empDept);
         System.out.println("[시스템] 최종 심사결과: " + finalResult);
+        System.out.println("[시스템] 심사번호: " + underwritingId);
 
         if ("거절".equals(finalResult)) {
             System.out.println("  거절사유: 위험도 기준 초과 (총점 " + score + "점)");
@@ -224,9 +226,10 @@ public class UnderwritingConsole {
         System.out.println("  [시스템] 증권번호: " + policyNo);
         enter();
         System.out.println("  [시스템] 계약 정보를 DB에 저장 중...");
-        if (!simulateDbSave()) {
-            enter();
-            if (!simulateDbSave()) { System.out.println("  [시스템] 관리자 통보 후 종료합니다."); return; }
+        boolean applicationSaved = UnderwritingService.saveInsuranceApplication(appNo, policyNo, appliedCondition);
+        if (!applicationSaved) {
+            System.out.println("  [시스템] 저장 실패. 관리자 통보 후 종료합니다.");
+            return;
         }
         System.out.println("  [시스템] 청약번호: " + appNo + " | 증권번호: " + policyNo + " | 계약 상태: 유효");
 
