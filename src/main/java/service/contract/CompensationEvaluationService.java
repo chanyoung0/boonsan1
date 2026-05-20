@@ -1,11 +1,14 @@
 package service.contract;
 
-import db.CompensationEvaluationDBO;
+import db.mapper.CompensationEvaluationMapper;
+import db.mybatis.MyBatisSessionFactory;
 import enums.CompensationStatus;
 import enums.EvaluationResult;
 import model.contract.CompensationEvaluation;
+import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CompensationEvaluationService {
@@ -26,7 +29,7 @@ public class CompensationEvaluationService {
                 createCompensationStatistics(evaluationMonth, submissionAgencyName, damageAmount)
         );
         evaluation.calculateCompensationStatistics();
-        return createDbo().save(evaluation) ? evaluation : null;
+        return saveEvaluation(evaluation) ? evaluation : null;
     }
 
     public static String analyzeDamageAmount(BigDecimal damageAmount) {
@@ -104,7 +107,7 @@ public class CompensationEvaluationService {
         }
         evaluation.setEvaluationResult(result);
         evaluation.saveEvaluationResult();
-        return createDbo().update(evaluation) ? evaluation : null;
+        return updateEvaluation(evaluation) ? evaluation : null;
     }
 
     public static CompensationEvaluation closeEvaluation(String evaluationId) {
@@ -113,15 +116,55 @@ public class CompensationEvaluationService {
             return null;
         }
         evaluation.setEvaluationStatus(CompensationStatus.CLOSED);
-        return createDbo().update(evaluation) ? evaluation : null;
+        return updateEvaluation(evaluation) ? evaluation : null;
     }
 
     public static List<CompensationEvaluation> getEvaluationList() {
-        return createDbo().findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(CompensationEvaluationMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보상평가 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static CompensationEvaluation findEvaluationById(String evaluationId) {
-        return createDbo().findById(evaluationId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(CompensationEvaluationMapper.class).findById(evaluationId);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보상평가 조회 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static boolean saveEvaluation(CompensationEvaluation evaluation) {
+        if (evaluation == null) {
+            return false;
+        }
+        String statusName = resolveCompensationStatusName(evaluation);
+        String resultName = resolveEvaluationResultName(evaluation);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(CompensationEvaluationMapper.class)
+                    .insert(evaluation, statusName, resultName) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보상평가 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean updateEvaluation(CompensationEvaluation evaluation) {
+        if (evaluation == null) {
+            return false;
+        }
+        String statusName = resolveCompensationStatusName(evaluation);
+        String resultName = resolveEvaluationResultName(evaluation);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(CompensationEvaluationMapper.class)
+                    .update(evaluation, statusName, resultName) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보상평가 수정 실패: " + e.getMessage());
+            return false;
+        }
     }
 
     private static BigDecimal calculateTotalDamageAmount(List<CompensationEvaluation> evaluationList) {
@@ -149,7 +192,17 @@ public class CompensationEvaluationService {
         return "CE-" + System.currentTimeMillis();
     }
 
-    private static CompensationEvaluationDBO createDbo() {
-        return new CompensationEvaluationDBO();
+    private static String resolveCompensationStatusName(CompensationEvaluation evaluation) {
+        if (evaluation == null || evaluation.getEvaluationStatus() == null) {
+            return CompensationStatus.IN_PROGRESS.name();
+        }
+        return evaluation.getEvaluationStatus().name();
+    }
+
+    private static String resolveEvaluationResultName(CompensationEvaluation evaluation) {
+        if (evaluation == null || evaluation.getEvaluationResult() == null) {
+            return null;
+        }
+        return evaluation.getEvaluationResult().name();
     }
 }

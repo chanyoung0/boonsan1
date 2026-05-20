@@ -1,16 +1,17 @@
 package service.contract;
 
-import db.MaturityNoticeDBO;
+import db.mapper.MaturityNoticeMapper;
+import db.mybatis.MyBatisSessionFactory;
 import enums.DeliveryMethod;
 import model.contract.MaturityNotice;
+import org.apache.ibatis.session.SqlSession;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 // 만기계약 관리 서비스 — 재계약 의사 처리, DB 저장 담당
 public class MaturityContractService {
-
-    private static final MaturityNoticeDBO maturityNoticeDBO = new MaturityNoticeDBO();
 
     public static MaturityNotice createMaturityNotice(DeliveryMethod deliveryMethod) {
         MaturityNotice maturityNotice = new MaturityNotice(deliveryMethod, LocalDateTime.now());
@@ -49,16 +50,34 @@ public class MaturityContractService {
             return null;
         }
         String noticeId = "MTN-" + System.currentTimeMillis();
-        boolean saved = maturityNoticeDBO.save(maturityNotice, noticeId);
-        return saved ? noticeId : null;
+        String deliveryMethod = resolveDeliveryMethodName(maturityNotice);
+        String renewalIntention = resolveRenewalIntention(maturityNotice.getRenewalIntention());
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(MaturityNoticeMapper.class)
+                    .insert(maturityNotice, noticeId, deliveryMethod, renewalIntention);
+            return rows > 0 ? noticeId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 만기 안내 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static List<MaturityNotice> getMaturityNoticeList() {
-        return maturityNoticeDBO.findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(MaturityNoticeMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 만기 안내 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static MaturityNotice findMaturityNoticeById(String noticeId) {
-        return maturityNoticeDBO.findById(noticeId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(MaturityNoticeMapper.class).findById(noticeId);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 만기 안내 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String createNoticeDeliverySummary(MaturityNotice maturityNotice) {
@@ -85,5 +104,17 @@ public class MaturityContractService {
             return "회신 없음";
         }
         return renewalIntention ? "있음" : "없음";
+    }
+
+    private static String resolveDeliveryMethodName(MaturityNotice notice) {
+        if (notice == null || notice.getDeliveryMethod() == null) {
+            return DeliveryMethod.SMS.name();
+        }
+        return notice.getDeliveryMethod().name();
+    }
+
+    private static String resolveRenewalIntention(Boolean value) {
+        if (value == null) return null;
+        return value ? "YES" : "NO";
     }
 }

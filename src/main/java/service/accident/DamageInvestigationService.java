@@ -1,15 +1,16 @@
 package service.accident;
 
-import db.DamageInvestigationDBO;
+import db.mapper.DamageInvestigationMapper;
+import db.mybatis.MyBatisSessionFactory;
 import model.accident.DamageInvestigation;
+import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 // 손해조사 서비스 — 이의제기 처리 판정, DB 저장 담당
 public class DamageInvestigationService {
-
-    private static final DamageInvestigationDBO damageInvestigationDBO = new DamageInvestigationDBO();
 
     // 이의제기 처리 결과 메시지 반환
     public static String processObjection(String choice) {
@@ -35,21 +36,43 @@ public class DamageInvestigationService {
         if (investigation == null || investigation.getInvestigationId() == null || reportNo == null) {
             return null;
         }
-        boolean saved = damageInvestigationDBO.save(investigation, reportNo, "PENDING");
-        return saved ? investigation.getInvestigationId() : null;
+        String statusName = resolveStatusName("PENDING");
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(DamageInvestigationMapper.class)
+                    .insert(investigation, reportNo, statusName);
+            return rows > 0 ? investigation.getInvestigationId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 손해조사 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static List<DamageInvestigation> getDamageInvestigationList() {
-        return damageInvestigationDBO.findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(DamageInvestigationMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 손해조사 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static DamageInvestigation findDamageInvestigationById(String investigationId) {
-        return damageInvestigationDBO.findById(investigationId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(DamageInvestigationMapper.class).findById(investigationId);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 손해조사 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String getInvestigationStatus(String investigationId) {
-        String status = damageInvestigationDBO.findStatusById(investigationId);
-        return status == null ? "" : status;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            String status = s.getMapper(DamageInvestigationMapper.class).findStatusById(investigationId);
+            return status == null ? "" : status;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 손해조사 부가정보 조회 실패: " + e.getMessage());
+            return "";
+        }
     }
 
     public static BigDecimal parseAmount(String value) {
@@ -74,5 +97,12 @@ public class DamageInvestigationService {
             }
         }
         return total;
+    }
+
+    private static String resolveStatusName(String status) {
+        if ("PENDING".equals(status) || "APPROVED".equals(status) || "REJECTED".equals(status)) {
+            return status;
+        }
+        return "PENDING";
     }
 }

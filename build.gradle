@@ -39,6 +39,14 @@ tasks.register('mybatisSmoke', JavaExec) {
     mainClass = 'db.mybatis.MyBatisSmokeTest'
 }
 
+tasks.register('dbCheck', JavaExec) {
+    group = 'verification'
+    description = '실 DB 연결 + 13개 Mapper read + Partner CRUD 한 사이클 검증'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'db.mybatis.DbConnectivityCheck'
+    workingDir = rootDir
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }

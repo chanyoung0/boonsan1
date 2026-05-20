@@ -1,9 +1,12 @@
 package service.accident;
 
-import db.AccidentReportDBO;
+import db.mapper.AccidentReportMapper;
+import db.mybatis.MyBatisSessionFactory;
 import model.accident.AccidentReport;
+import org.apache.ibatis.session.SqlSession;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -11,7 +14,6 @@ import java.util.Random;
 public class AccidentReportService {
 
     private static final Random rnd = new Random();
-    private static final AccidentReportDBO accidentReportDBO = new AccidentReportDBO();
 
     // 사고 접수 번호 생성
     public static String generateReportNo() {
@@ -37,37 +39,70 @@ public class AccidentReportService {
         if (accidentReport.getCreatedAt() == null) {
             accidentReport.setCreatedAt(LocalDateTime.now());
         }
+        if (policyNumber == null) {
+            return null;
+        }
+        String accidentStatusName = resolveAccidentStatus(accidentStatus);
+        String documentStatusName = resolveDocumentSubmissionStatus(documentSubmissionStatus);
 
-        boolean saved = accidentReportDBO.save(
-                accidentReport,
-                policyNumber,
-                resolveAccidentStatus(accidentStatus),
-                resolveDocumentSubmissionStatus(documentSubmissionStatus),
-                accidentAtText
-        );
-        return saved ? accidentReport : null;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(AccidentReportMapper.class)
+                    .insert(accidentReport, policyNumber, accidentStatusName, documentStatusName, accidentAtText);
+            return rows > 0 ? accidentReport : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 접수 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static AccidentReport findAccidentReportByReportNo(String reportNo) {
-        return accidentReportDBO.findByReportNo(reportNo);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AccidentReportMapper.class).findByReportNo(reportNo);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 접수 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static List<AccidentReport> getAccidentReportList() {
-        return accidentReportDBO.findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AccidentReportMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 접수 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static String getPolicyNumber(String reportNo) {
-        String policyNumber = accidentReportDBO.findPolicyNumberByReportNo(reportNo);
-        return policyNumber == null ? "" : policyNumber;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            String policyNumber = s.getMapper(AccidentReportMapper.class).findPolicyNumberByReportNo(reportNo);
+            return policyNumber == null ? "" : policyNumber;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 접수 부가정보 조회 실패: " + e.getMessage());
+            return "";
+        }
     }
 
     public static String getAccidentStatus(String reportNo) {
-        return accidentReportDBO.findStatusByReportNo(reportNo);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            String value = s.getMapper(AccidentReportMapper.class).findStatusByReportNo(reportNo);
+            return resolveAccidentStatus(value);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 접수 부가정보 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String getDocumentSubmissionStatus(String reportNo) {
-        String status = accidentReportDBO.findDocumentSubmissionStatusByReportNo(reportNo);
-        return status == null ? "" : status;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            String value = s.getMapper(AccidentReportMapper.class)
+                    .findDocumentSubmissionStatusByReportNo(reportNo);
+            String status = resolveDocumentSubmissionStatus(value);
+            return status == null ? "" : status;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 접수 부가정보 조회 실패: " + e.getMessage());
+            return "";
+        }
     }
 
     public static String resolveAccidentStatus(String accidentStatus) {

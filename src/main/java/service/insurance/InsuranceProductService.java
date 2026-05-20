@@ -1,16 +1,19 @@
 package service.insurance;
 
-import db.AuthorizationDBO;
-import db.InsuranceDBO;
+import db.mapper.AuthorizationMapper;
+import db.mapper.InsuranceMapper;
+import db.mybatis.MyBatisSessionFactory;
 import model.insurance.Authorization;
 import model.insurance.AutoInsurance;
 import model.insurance.FinancialSupervisoryService;
 import model.insurance.FireInsurance;
 import model.insurance.Insurance;
 import model.insurance.MarineInsurance;
+import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class InsuranceProductService {
@@ -43,7 +46,12 @@ public class InsuranceProductService {
     }
 
     public static List<Insurance> getProductList() {
-        return createInsuranceDbo().findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuranceMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보험상품 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static String createDesignSummary(Insurance product, String productName,
@@ -103,7 +111,12 @@ public class InsuranceProductService {
     }
 
     public static Insurance findProductByCode(String productCode) {
-        return createInsuranceDbo().findByProductCode(productCode);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuranceMapper.class).findByProductCode(productCode);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보험상품 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static Authorization requestAuthorization(String productCode, String requestReason,
@@ -134,16 +147,76 @@ public class InsuranceProductService {
         authorization.applyAuthorizationResult();
         authorization.updateProductStatus();
 
-        return createAuthorizationDbo().save(authorization, productCode) ? authorization : null;
+        return saveAuthorization(authorization, productCode) ? authorization : null;
     }
 
     public static List<Authorization> getAuthorizationList() {
-        return createAuthorizationDbo().findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AuthorizationMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 상품 인가요청 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     private static boolean registerProduct(Insurance product) {
         product.saveProductInfo();
-        return createInsuranceDbo().save(product);
+        return saveInsurance(product);
+    }
+
+    private static boolean saveInsurance(Insurance insurance) {
+        if (insurance == null) {
+            return false;
+        }
+        SubtypeParams params = resolveSubtypeParams(insurance);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuranceMapper.class)
+                    .insert(insurance, params.productType,
+                            params.driverAge, params.vehicleType,
+                            params.buildingType, params.location,
+                            params.vesselType, params.shippingRoute) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 보험상품 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean saveAuthorization(Authorization authorization, String productCode) {
+        if (authorization == null) {
+            return false;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AuthorizationMapper.class).insert(authorization, productCode) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 상품 인가요청 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static SubtypeParams resolveSubtypeParams(Insurance insurance) {
+        SubtypeParams params = new SubtypeParams();
+        if (insurance instanceof AutoInsurance) {
+            AutoInsurance auto = (AutoInsurance) insurance;
+            params.productType = "AUTO";
+            params.driverAge = auto.getDriverAge();
+            params.vehicleType = auto.getVehicleType();
+            return params;
+        }
+        if (insurance instanceof FireInsurance) {
+            FireInsurance fire = (FireInsurance) insurance;
+            params.productType = "FIRE";
+            params.buildingType = fire.getBuildingType();
+            params.location = fire.getLocation();
+            return params;
+        }
+        if (insurance instanceof MarineInsurance) {
+            MarineInsurance marine = (MarineInsurance) insurance;
+            params.productType = "MARINE";
+            params.vesselType = marine.getVesselType();
+            params.shippingRoute = marine.getShippingRoute();
+            return params;
+        }
+        return params;
     }
 
     private static String resolveProductType(Insurance product) {
@@ -167,11 +240,13 @@ public class InsuranceProductService {
         return value == null || value.trim().isEmpty() ? "미입력" : value;
     }
 
-    private static InsuranceDBO createInsuranceDbo() {
-        return new InsuranceDBO();
-    }
-
-    private static AuthorizationDBO createAuthorizationDbo() {
-        return new AuthorizationDBO();
+    private static final class SubtypeParams {
+        String productType;
+        Integer driverAge;
+        String vehicleType;
+        String buildingType;
+        String location;
+        String vesselType;
+        String shippingRoute;
     }
 }

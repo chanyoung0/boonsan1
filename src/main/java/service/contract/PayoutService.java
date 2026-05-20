@@ -1,19 +1,20 @@
 package service.contract;
 
-import db.PayoutDBO;
+import db.mapper.PayoutMapper;
+import db.mybatis.MyBatisSessionFactory;
 import enums.CalculationBasis;
 import enums.ContractStatus;
 import enums.PaymentCycle;
 import enums.PaymentType;
 import model.contract.Contract;
 import model.contract.Payout;
+import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PayoutService {
-
-    private static final PayoutDBO payoutDBO = new PayoutDBO();
 
     public static Payout createPayout(String policyNumber, String processor, PaymentType paymentType,
                                       CalculationBasis calculationBasis, BigDecimal baseAmount,
@@ -24,7 +25,7 @@ public class PayoutService {
         payout.calculatePayment();
 
         String payoutId = generatePayoutId();
-        if (!payoutDBO.save(payout, payoutId, policyNumber, "REGISTERED")) {
+        if (!savePayout(payout, payoutId, policyNumber, "REGISTERED")) {
             return null;
         }
         addPayoutToContract(resolveContract(policyNumber), payout);
@@ -48,7 +49,7 @@ public class PayoutService {
         }
         payout.approvePayment();
         String policyNumber = getPolicyNumber(payoutId);
-        return payoutDBO.update(payout, payoutId, policyNumber, "APPROVED") ? payout : null;
+        return updatePayout(payout, payoutId, policyNumber, "APPROVED") ? payout : null;
     }
 
     public static Payout processPayout(String payoutId) {
@@ -58,7 +59,7 @@ public class PayoutService {
         }
         payout.processPayment();
         String policyNumber = getPolicyNumber(payoutId);
-        return payoutDBO.update(payout, payoutId, policyNumber, "PAID") ? payout : null;
+        return updatePayout(payout, payoutId, policyNumber, "PAID") ? payout : null;
     }
 
     public static Payout cancelPayout(String payoutId) {
@@ -68,19 +69,34 @@ public class PayoutService {
         }
         payout.cancelPayment();
         String policyNumber = getPolicyNumber(payoutId);
-        return payoutDBO.update(payout, payoutId, policyNumber, "CANCELLED") ? payout : null;
+        return updatePayout(payout, payoutId, policyNumber, "CANCELLED") ? payout : null;
     }
 
     public static List<Payout> getPayoutList() {
-        return payoutDBO.findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(PayoutMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static List<String> getPayoutIdList() {
-        return payoutDBO.findAllIds();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(PayoutMapper.class).findAllIds();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 번호 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static Payout findPayoutById(String payoutId) {
-        return payoutDBO.findById(payoutId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(PayoutMapper.class).findById(payoutId);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static void addPayoutToContract(Contract contract, Payout payout) {
@@ -90,16 +106,42 @@ public class PayoutService {
     }
 
     public static String getPayoutId(Payout payout) {
-        return payoutDBO.findIdByPayout(payout);
+        if (payout == null) {
+            return null;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(PayoutMapper.class).findIdByPayout(
+                    payout.getProcessor(),
+                    resolvePaymentTypeName(payout),
+                    resolveCalculationBasisName(payout),
+                    payout.getCalculatedAmount(),
+                    payout.getDeductionItem(),
+                    payout.getFinalPaymentAmount());
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 번호 역조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String getPolicyNumber(String payoutId) {
-        String policyNumber = payoutDBO.findPolicyNumberById(payoutId);
+        String policyNumber;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            policyNumber = s.getMapper(PayoutMapper.class).findPolicyNumberById(payoutId);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 증권번호 조회 실패: " + e.getMessage());
+            return "";
+        }
         return policyNumber == null ? "" : policyNumber;
     }
 
     public static String getPayoutStatus(String payoutId) {
-        return payoutDBO.findStatusById(payoutId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            String value = s.getMapper(PayoutMapper.class).findStatusById(payoutId);
+            return resolvePayoutStatus(value);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 상태 조회 실패: " + e.getMessage());
+            return "NOT_FOUND";
+        }
     }
 
     public static String createPayoutCalculationSummary(String payoutId) {
@@ -147,6 +189,59 @@ public class PayoutService {
 
     public static boolean isCancelled(String payoutId) {
         return "CANCELLED".equals(getPayoutStatus(payoutId));
+    }
+
+    private static boolean savePayout(Payout payout, String payoutId, String policyNumber, String payoutStatus) {
+        if (payout == null || payoutId == null || policyNumber == null) {
+            return false;
+        }
+        String paymentType = resolvePaymentTypeName(payout);
+        String calculationBasis = resolveCalculationBasisName(payout);
+        String statusName = resolvePayoutStatus(payoutStatus);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(PayoutMapper.class)
+                    .insert(payout, payoutId, policyNumber, paymentType, calculationBasis, statusName) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean updatePayout(Payout payout, String payoutId, String policyNumber, String payoutStatus) {
+        if (payout == null || payoutId == null || policyNumber == null) {
+            return false;
+        }
+        String paymentType = resolvePaymentTypeName(payout);
+        String calculationBasis = resolveCalculationBasisName(payout);
+        String statusName = resolvePayoutStatus(payoutStatus);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(PayoutMapper.class)
+                    .update(payout, payoutId, policyNumber, paymentType, calculationBasis, statusName) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 제지급금 수정 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static String resolvePaymentTypeName(Payout payout) {
+        if (payout == null || payout.getPaymentType() == null) {
+            return PaymentType.LUMP_SUM.name();
+        }
+        return payout.getPaymentType().name();
+    }
+
+    private static String resolveCalculationBasisName(Payout payout) {
+        if (payout == null || payout.getCalculationBasis() == null) {
+            return CalculationBasis.MATURITY_REFUND.name();
+        }
+        return payout.getCalculationBasis().name();
+    }
+
+    private static String resolvePayoutStatus(String value) {
+        if ("APPROVED".equals(value) || "PAID".equals(value) || "CANCELLED".equals(value)) {
+            return value;
+        }
+        return "REGISTERED";
     }
 
     private static Contract resolveContract(String policyNumber) {

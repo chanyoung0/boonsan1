@@ -1,15 +1,17 @@
 package service.contract;
 
-import db.EndorsementDBO;
+import db.mapper.EndorsementMapper;
+import db.mybatis.MyBatisSessionFactory;
+import enums.EndorsementType;
 import model.contract.Endorsement;
+import org.apache.ibatis.session.SqlSession;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 // 배서 관리 서비스 — 배서 심사 필요 여부 판단, DB 저장 담당
 public class EndorsementService {
-
-    private static final EndorsementDBO endorsementDBO = new EndorsementDBO();
 
     // 배서유형별 심사 필요 여부 판단 (가입금액 변경/특약 추가 → 위험 변동 → 심사 필요)
     public static boolean needsUnderwriting(String endorsementType) {
@@ -39,17 +41,35 @@ public class EndorsementService {
             endorsement.setProcessedAt(LocalDateTime.now());
         }
         String endorsementId = "END-" + System.currentTimeMillis();
-        boolean saved = endorsementDBO.save(endorsement, endorsementId, policyNo,
-                endorsementTypeChoice, changeReason, uwResult);
-        return saved ? endorsementId : null;
+        String endorsementType = resolveEndorsementTypeChoice(endorsementTypeChoice);
+        String uwResultName = resolveUwResultName(uwResult);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(EndorsementMapper.class)
+                    .insert(endorsement, endorsementId, policyNo,
+                            endorsementType, changeReason, uwResultName);
+            return rows > 0 ? endorsementId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 배서 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static List<Endorsement> getEndorsementList() {
-        return endorsementDBO.findAll();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(EndorsementMapper.class).findAll();
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 배서 목록 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public static Endorsement findEndorsementById(String endorsementId) {
-        return endorsementDBO.findById(endorsementId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(EndorsementMapper.class).findById(endorsementId);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 배서 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String createEndorsementRequestSummary(String policyNo, String endorsementType,
@@ -85,6 +105,27 @@ public class EndorsementService {
             case "4": return "특약 삭제";
             default:  return "미확인";
         }
+    }
+
+    private static String resolveEndorsementTypeChoice(String choice) {
+        switch (choice == null ? "" : choice) {
+            case "1": return EndorsementType.COVERAGE_CHANGE.name();
+            case "2": return EndorsementType.PREMIUM_CHANGE.name();
+            case "3": return EndorsementType.SPECIAL_CONTRACT_CHANGE.name();
+            case "4": return EndorsementType.SPECIAL_CONTRACT_CHANGE.name();
+            default:  return choice;
+        }
+    }
+
+    private static String resolveUwResultName(String uwResult) {
+        if (uwResult == null) return null;
+        if (uwResult.startsWith("할증")) return "SURCHARGE";
+        if (uwResult.startsWith("거절")) return "REJECTED";
+        if (uwResult.startsWith("승인")) return "APPROVED";
+        if ("SURCHARGE".equals(uwResult) || "REJECTED".equals(uwResult) || "APPROVED".equals(uwResult)) {
+            return uwResult;
+        }
+        return null;
     }
 
     private static String emptyToDefault(String value) {
