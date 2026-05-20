@@ -25,3 +25,7 @@ replay_pid*
 /bin/
 
 db.properties
+
+# javac source list files
+sources.txt
+sources_ascii.txt
