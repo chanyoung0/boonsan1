@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="59a36460-e0cd-4ede-aa8a-66b0bbe02732" name="Changes" comment="md 파일 수정" />
+    <list default="true" id="59a36460-e0cd-4ede-aa8a-66b0bbe02732" name="Changes" comment="md 파일 수정">
+      <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/console/accident/DamageInvestigationConsole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/console/accident/DamageInvestigationConsole.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/console/underwriting/UnderwritingConsole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/console/underwriting/UnderwritingConsole.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/accident/DamageInvestigationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/accident/DamageInvestigationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/accident/SubrogationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/accident/SubrogationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/underwriting/UnderwritingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/underwriting/UnderwritingService.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -124,7 +132,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778830508008</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="md 파일 수정">
+      <option name="closed" value="true" />
+      <created>1779267670151</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1779267670151</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

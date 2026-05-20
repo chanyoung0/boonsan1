@@ -1,13 +1,27 @@
 package service.underwriting;
 
+import db.AccidentHistoryDBO;
 import db.InsuranceApplicationDBO;
 import db.UnderwritingDBO;
+import db.UnderwritingHistoryDBO;
+import db.UnderwritingRequestDBO;
+import db.UnderwritingResultDBO;
 import enums.ApplicationStatus;
+import enums.Gender;
+import enums.RequestReason;
+import enums.RequestStatus;
+import enums.SurchargeCondition;
+import enums.UnderwritingResultType;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;
+import model.accident.AccidentHistory;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
+import model.underwriting.UnderwritingHistory;
+import model.underwriting.UnderwritingRequest;
+import model.underwriting.UnderwritingResult;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,6 +31,10 @@ public class UnderwritingService {
     private static final long REINSURANCE_THRESHOLD = 500_000_000L;
     private static final UnderwritingDBO underwritingDBO = new UnderwritingDBO();
     private static final InsuranceApplicationDBO applicationDBO = new InsuranceApplicationDBO();
+    private static final UnderwritingResultDBO resultDBO = new UnderwritingResultDBO();
+    private static final UnderwritingHistoryDBO historyDBO = new UnderwritingHistoryDBO();
+    private static final UnderwritingRequestDBO requestDBO = new UnderwritingRequestDBO();
+    private static final AccidentHistoryDBO accidentHistoryDBO = new AccidentHistoryDBO();
 
     // 입력값 기반 심사점수 계산 (기본점수 100점에서 감점 합산)
     public static int calculateInputScore(String pastDisease, String medication, String surgery,
@@ -89,7 +107,49 @@ public class UnderwritingService {
         }
         boolean saved = underwritingDBO.save(underwriting, underwritingId, empNo, empName, empDept,
                 resolveUnderwritingResultCode(finalResult));
-        return saved ? underwritingId : null;
+        if (!saved) {
+            return null;
+        }
+        UnderwritingResult result = new UnderwritingResult();
+        result.setResultId("RES-" + System.currentTimeMillis());
+        result.setUnderwritingId(underwritingId);
+        result.setUnderwritingResult(resolveUnderwritingResultType(finalResult));
+        result.setConfirmedAt(LocalDateTime.now());
+        if ("거절".equals(finalResult)) {
+            result.setRejectionReason("위험도 기준 초과 (총점 " + score + "점)");
+        }
+        if ("할증".equals(finalResult)) {
+            result.setSurchargeCondition(SurchargeCondition.POOR_HEALTH);
+        }
+        resultDBO.save(result, result.getResultId(), underwritingId);
+        return underwritingId;
+    }
+
+    // 심사 이력을 DB에 저장한다
+    public static boolean saveUnderwritingHistory(UnderwritingHistory history, String underwritingId) {
+        if (history == null || underwritingId == null) {
+            return false;
+        }
+        String historyId = "HIST-" + System.currentTimeMillis();
+        history.setHistoryId(historyId);
+        history.setUnderwritingId(underwritingId);
+        history.setInquiredAt(LocalDateTime.now());
+        return historyDBO.save(history, historyId, underwritingId);
+    }
+
+    // 심사 요청을 DB에 저장한다
+    public static boolean saveUnderwritingRequest(String underwritingId, boolean wasManual, String finalResult) {
+        if (underwritingId == null) {
+            return false;
+        }
+        UnderwritingRequest request = new UnderwritingRequest();
+        request.setRequestId("REQ-" + System.currentTimeMillis());
+        request.setRequestReason(RequestReason.NEW_APPLICATION);
+        request.setRequestStatus(RequestStatus.COMPLETED);
+        request.setUnderwritingType(wasManual ? UnderwritingType.GENERAL : UnderwritingType.AUTO);
+        request.setUnderwritingResult(resolveUnderwritingResultType(finalResult));
+        request.setAppliedAt(LocalDateTime.now());
+        return requestDBO.save(request, request.getRequestId());
     }
 
     // 청약 정보를 DB에 저장하고 성공 여부를 반환한다
@@ -101,6 +161,14 @@ public class UnderwritingService {
         application.setAppliedCondition(appliedCondition);
         application.setAppliedAt(LocalDateTime.now());
         return applicationDBO.save(application, policyNumber, "APPROVED", appliedCondition);
+    }
+
+    public static List<AccidentHistory> getAccidentHistoryList() {
+        return accidentHistoryDBO.findAll();
+    }
+
+    public static List<AccidentHistory> findAccidentHistoriesByHistoryId(String historyId) {
+        return accidentHistoryDBO.findByHistoryId(historyId);
     }
 
     public static List<Underwriting> getUnderwritingList() {
@@ -119,6 +187,12 @@ public class UnderwritingService {
     public static String getUnderwritingResult(String underwritingId) {
         String result = underwritingDBO.findResultById(underwritingId);
         return result == null ? "" : result;
+    }
+
+    private static UnderwritingResultType resolveUnderwritingResultType(String finalResult) {
+        if ("할증".equals(finalResult)) return UnderwritingResultType.SURCHARGE;
+        if ("거절".equals(finalResult)) return UnderwritingResultType.REJECTED;
+        return UnderwritingResultType.APPROVED;
     }
 
     private static String resolveUnderwritingResultCode(String finalResult) {

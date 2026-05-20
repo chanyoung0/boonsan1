@@ -43,7 +43,11 @@
       "PowerShell(git *)",
       "Bash(Get-ChildItem -Path \"C:\\\\workspace\\\\springWorkspace\\\\boonsan1\\\\src\" -Recurse -Directory)",
       "Bash(Select-Object -First 20)",
-      "Bash(xargs grep -l \"AccidentHistoryDBO\")"
+      "Bash(xargs grep -l \"AccidentHistoryDBO\")",
+      "PowerShell($env:PGPASSWORD=\"1234\"; & \"C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe\" -U postgres -d boonsan -c \"SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name;\" 2>&1)",
+      "PowerShell(Get-Command *)",
+      "PowerShell($psql = \"C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe\"; $env:PGPASSWORD = \"postgres\"; & $psql -U postgres -d boonsan -h localhost -c \"\\\\dt\" 2>&1)",
+      "Bash(findstr /S /R \"^import model\\\\.\" *.java db\\\\*.java service\\\\*.java console\\\\*.java)"
     ]
   }
 }

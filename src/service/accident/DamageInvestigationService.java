@@ -1,7 +1,13 @@
 package service.accident;
 
 import db.DamageInvestigationDBO;
+import db.InsurancePaymentDBO;
+import db.ObjectionDBO;
+import db.OutsourceRequestDBO;
 import model.accident.DamageInvestigation;
+import model.accident.InsurancePayment;
+import model.accident.Objection;
+import model.accident.OutsourceRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,6 +16,9 @@ import java.util.List;
 public class DamageInvestigationService {
 
     private static final DamageInvestigationDBO damageInvestigationDBO = new DamageInvestigationDBO();
+    private static final InsurancePaymentDBO insurancePaymentDBO = new InsurancePaymentDBO();
+    private static final ObjectionDBO objectionDBO = new ObjectionDBO();
+    private static final OutsourceRequestDBO outsourceRequestDBO = new OutsourceRequestDBO();
 
     // 이의제기 처리 결과 메시지 반환
     public static String processObjection(String choice) {
@@ -50,6 +59,48 @@ public class DamageInvestigationService {
     public static String getInvestigationStatus(String investigationId) {
         String status = damageInvestigationDBO.findStatusById(investigationId);
         return status == null ? "" : status;
+    }
+
+    // 보험금 지급 정보를 DB에 저장하고 성공 여부를 반환한다
+    public static boolean saveInsurancePayment(InsurancePayment payment, String investigationId) {
+        if (payment == null || payment.getPaymentId() == null || investigationId == null) {
+            return false;
+        }
+        payment.setInvestigationId(investigationId);
+        return insurancePaymentDBO.save(payment, investigationId,
+                payment.getPaymentStatus() == null ? "PENDING" : payment.getPaymentStatus().name());
+    }
+
+    // 이의 신청 정보를 DB에 저장하고 성공 여부를 반환한다
+    public static boolean saveObjection(Objection objection, String paymentId) {
+        if (objection == null || objection.getObjectionId() == null || paymentId == null) {
+            return false;
+        }
+        return objectionDBO.save(objection, paymentId,
+                objection.getAcceptanceStatus() == null ? "PENDING" : objection.getAcceptanceStatus().name());
+    }
+
+    // 외부 위탁 의뢰 정보를 DB에 저장하고 성공 여부를 반환한다
+    public static boolean saveOutsourceRequest(OutsourceRequest request, String investigationId, String partnerId) {
+        if (request == null || request.getRequestId() == null || investigationId == null) {
+            return false;
+        }
+        request.setInvestigationId(investigationId);
+        request.setPartnerId(partnerId);
+        return outsourceRequestDBO.save(request, investigationId, partnerId,
+                request.getRequestStatus() == null ? "PENDING" : request.getRequestStatus().name());
+    }
+
+    public static InsurancePayment findInsurancePaymentByInvestigationId(String investigationId) {
+        return insurancePaymentDBO.findByInvestigationId(investigationId);
+    }
+
+    public static List<Objection> findObjectionsByPaymentId(String paymentId) {
+        return objectionDBO.findByPaymentId(paymentId);
+    }
+
+    public static List<OutsourceRequest> findOutsourceRequestsByInvestigationId(String investigationId) {
+        return outsourceRequestDBO.findByInvestigationId(investigationId);
     }
 
     public static BigDecimal parseAmount(String value) {

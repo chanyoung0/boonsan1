@@ -75,7 +75,7 @@ public class DamageInvestigationConsole {
 
         if ("2".equals(outsource)) {
             System.out.println("  >> <<extend>> [손해조사를 위탁한다] 시나리오 시작");
-            OutsourceRequest outsourceRequest = outsourceInvestigation();
+            OutsourceRequest outsourceRequest = outsourceInvestigation(investigation.getInvestigationId());
             if (outsourceRequest != null) {
                 investigation.delegateInvestigation();
                 investigation.setOutsourceRequest(outsourceRequest);
@@ -122,7 +122,7 @@ public class DamageInvestigationConsole {
         insurancePaymentSub(reportNo, investigation, paymentAmount, repairCost, medicalExpense, lostIncome);
     }
 
-    private static OutsourceRequest outsourceInvestigation() {
+    private static OutsourceRequest outsourceInvestigation(String investigationId) {
         System.out.println("\n  [손해조사를 위탁한다]");
         List<Partner> partnerList = PartnerService.getAvailablePartnerList();
         if (partnerList.isEmpty()) {
@@ -165,6 +165,8 @@ public class DamageInvestigationConsole {
         System.out.println("  [시스템] 위탁요청번호: " + outsourceRequest.getRequestId()
                 + " | 협력업체: " + selectedPartner.getPartnerName()
                 + " | 요청상태: " + outsourceRequest.getRequestStatus());
+        DamageInvestigationService.saveOutsourceRequest(outsourceRequest, investigationId,
+                selectedPartner.getId());
         System.out.println("  [시스템] 위탁 조사 결과가 시스템에 반영되었습니다.");
         return outsourceRequest;
     }
@@ -200,7 +202,10 @@ public class DamageInvestigationConsole {
         System.out.println("  [시스템] 이체 완료: " + formatAmount(paymentAmount.longValue()) + " → " + payment.getPaymentAccount());
         enter();
         payment.sendNotification();
-        System.out.println("  [시스템] 보험금 지급 결과 DB 저장 완료 | 지급상태: '" + paymentStatus + "' | 사건 상태: '지급 완료'");
+        String savedInvestigationId = investigation == null ? null : investigation.getInvestigationId();
+        boolean paymentSaved = DamageInvestigationService.saveInsurancePayment(payment, savedInvestigationId);
+        System.out.println("  [시스템] 보험금 지급 결과 DB 저장 " + (paymentSaved ? "완료" : "실패")
+                + " | 지급상태: '" + paymentStatus + "' | 사건 상태: '지급 완료'");
 
         String response = input("  피보험자 응답을 선택하세요(1. 수령 확인  2. 이의 제기)");
         boolean objected = "2".equals(response);
@@ -208,7 +213,7 @@ public class DamageInvestigationConsole {
 
         if (objected) {
             System.out.println("  >> <<extend>> [이의 제기를 처리한다] 시나리오 시작");
-            objectionSub();
+            objectionSub(payment.getPaymentId());
         } else {
             payment.confirmReceipt();
         }
@@ -243,7 +248,8 @@ public class DamageInvestigationConsole {
                 depositAccount
         );
 
-        System.out.println("    [시스템] 구상 접수 완료 | 구상번호: " + subrogation.getSubrogationId());
+        boolean subrogationSaved = SubrogationService.saveSubrogation(subrogation, payment.getPaymentId());
+        System.out.println("    [시스템] 구상 접수 " + (subrogationSaved ? "완료" : "실패") + " | 구상번호: " + subrogation.getSubrogationId());
         System.out.println("    [시스템] 구상금액: " + formatAmount(subrogation.getPaymentAmount().longValue()) + " | 상태: " + subrogation.getSubrogationStatus());
         System.out.println("    [시스템] 구상 문서 요약: " + subrogation.generateSubrogationDocument());
 
@@ -286,7 +292,7 @@ public class DamageInvestigationConsole {
         return transferredDataList;
     }
 
-    private static void objectionSub() {
+    private static void objectionSub(String paymentId) {
         System.out.println("\n    [이의 제기를 처리한다]");
         System.out.println("    [시스템] 이의 사유: 치료비 산정 오류 | 원 지급액: 980,000원");
         Objection objection = new Objection(
@@ -313,6 +319,7 @@ public class DamageInvestigationConsole {
             AcceptanceStatus status = objection.rejectObjection();
             System.out.println("    [시스템] 이의제기 객체 처리상태: " + status + " | 이의번호: " + objection.getObjectionId());
         }
+        DamageInvestigationService.saveObjection(objection, paymentId);
         String message = DamageInvestigationService.processObjection(objResult);
         System.out.println("    [시스템] " + message);
     }

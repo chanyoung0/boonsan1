@@ -1,5 +1,7 @@
 package console.underwriting;
 
+import enums.Gender;
+import model.underwriting.UnderwritingHistory;
 import service.underwriting.UnderwritingService;
 
 import static common.ConsoleUtil.*;
@@ -18,7 +20,7 @@ public class UnderwritingConsole {
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
         String name = input("이름");
         input("생년월일 (YYYYMMDD)");
-        input("주민등록번호");
+        String residentNo = input("주민등록번호");
         String vehicleNo = input("차량번호");
 
         long insuranceAmount = (long)(rnd.nextInt(20) + 1) * 100_000_000L;
@@ -141,6 +143,12 @@ public class UnderwritingConsole {
         System.out.println("[시스템] 최종 심사결과: " + finalResult);
         System.out.println("[시스템] 심사번호: " + underwritingId);
 
+        UnderwritingHistory history = buildUnderwritingHistory(name, residentNo, age, gender,
+                job, income, bmi, smoking, drinking, medication, surgery, familyHistory,
+                pastDisease, vehicleNo, vehicleModel);
+        UnderwritingService.saveUnderwritingHistory(history, underwritingId);
+        UnderwritingService.saveUnderwritingRequest(underwritingId, !canAutoReview, finalResult);
+
         if ("거절".equals(finalResult)) {
             System.out.println("  거절사유: 위험도 기준 초과 (총점 " + score + "점)");
             return;
@@ -151,6 +159,40 @@ public class UnderwritingConsole {
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
         policyIssuance(name, finalResult, insuranceAmount);
+    }
+
+    private static UnderwritingHistory buildUnderwritingHistory(String name, String residentNo,
+                                                                String age, String gender,
+                                                                String job, String income,
+                                                                String bmi, String smoking,
+                                                                String drinking, String medication,
+                                                                String surgery, String familyHistory,
+                                                                String pastDisease, String vehicleNo,
+                                                                String vehicleModel) {
+        UnderwritingHistory history = new UnderwritingHistory();
+        history.setName(name);
+        history.setResidentRegistrationNumber(residentNo);
+        try { history.setAge(Integer.parseInt(age.replaceAll("[^0-9]", ""))); } catch (NumberFormatException e) { history.setAge(0); }
+        history.setGender(resolveGender(gender));
+        history.setOccupation(job);
+        history.setBMI(bmi);
+        history.setSmoker("Y".equalsIgnoreCase(smoking) || "예".equalsIgnoreCase(smoking));
+        history.setMedicated("Y".equalsIgnoreCase(medication) || "예".equalsIgnoreCase(medication));
+        history.setAlcoholConsumption(drinking);
+        history.setPastMedicalHistory(pastDisease);
+        history.setSurgeryHistory(surgery);
+        history.setFamilyHistory(familyHistory);
+        history.setVehicleNumber(vehicleNo);
+        history.setVehicleModel(vehicleModel);
+        return history;
+    }
+
+    private static Gender resolveGender(String value) {
+        if (value == null) return Gender.OTHER;
+        String v = value.trim();
+        if ("남".equals(v) || "M".equalsIgnoreCase(v) || "MALE".equalsIgnoreCase(v)) return Gender.MALE;
+        if ("여".equals(v) || "F".equalsIgnoreCase(v) || "FEMALE".equalsIgnoreCase(v)) return Gender.FEMALE;
+        return Gender.OTHER;
     }
 
     private static int creditInfoInquiry(String name, int[] creditFlags) {
