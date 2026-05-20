@@ -1,0 +1,24 @@
+Index: .claude/settings.local.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"permissions\": {\r\n    \"allow\": [\r\n      \"Bash(Get-ChildItem -Path \\\"C:\\\\\\\\workspace\\\\\\\\springWorkspace\\\\\\\\boonsan1\\\" -Recurse -Depth 2)\",\r\n      \"Bash(Select-Object FullName, PSIsContainer)\",\r\n      \"Bash(Format-Table -AutoSize)\",\r\n      \"Bash(Get-ChildItem -Path \\\"C:\\\\\\\\workspace\\\\\\\\springWorkspace\\\\\\\\boonsan1\\\" -Recurse -Directory)\",\r\n      \"Bash(Select-Object -ExpandProperty FullName)\",\r\n      \"Bash(Sort-Object)\",\r\n      \"Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java src/insurance/UnderwritingService.java src/common/ConsoleUtil.java src/contract/EndorsementService.java src/contract/ReinstatementService.java)\",\r\n      \"Bash(javac -encoding UTF-8 -sourcepath src -d out src/Main.java)\",\r\n      \"Bash(Get-ChildItem -Path \\\"C:\\\\\\\\workspace\\\\\\\\springWorkspace\\\\\\\\boonsan1\\\\\\\\src\\\" -Recurse -Filter \\\"*.java\\\")\",\r\n      \"Bash(git add *)\",\r\n      \"Bash(git commit -m ' *)\",\r\n      \"Bash(python -c \\\"import pdfplumber; pdf = pdfplumber.open\\\\('C:/workspace/springWorkspace/boonsan1/report.pdf'\\\\); print\\\\(pdf.pages[0].extract_text\\\\(\\\\)\\\\)\\\")\",\r\n      \"Bash(python *)\",\r\n      \"Bash(pip install *)\"\r\n    ]\r\n  }\r\n}\r\n
+===================================================================
+diff --git a/.claude/settings.local.json b/.claude/settings.local.json
+--- a/.claude/settings.local.json	(revision da9b282f0943e84ca25dae8702a47879250dca08)
++++ b/.claude/settings.local.json	(date 1778841768294)
+@@ -14,7 +14,14 @@
+       "Bash(git commit -m ' *)",
+       "Bash(python -c \"import pdfplumber; pdf = pdfplumber.open\\('C:/workspace/springWorkspace/boonsan1/report.pdf'\\); print\\(pdf.pages[0].extract_text\\(\\)\\)\")",
+       "Bash(python *)",
+-      "Bash(pip install *)"
++      "Bash(pip install *)",
++      "Bash(git commit *)",
++      "Bash(git push *)",
++      "Bash(git *)",
++      "Bash(java -cp out Main)",
++      "Bash(java -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -cp out Main)",
++      "Bash(java -Dfile.encoding=UTF-8 -cp src Main)",
++      "Bash(java -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -cp /tmp/boonsan_out Main)"
+     ]
+   }
+ }
