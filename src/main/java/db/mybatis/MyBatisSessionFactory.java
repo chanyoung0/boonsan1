@@ -13,7 +13,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-// MyBatis SqlSessionFactory 공급자 — DBO들이 공유하는 단일 세션 진입점
+// MyBatis SqlSessionFactory 공급자 — 단일 세션 진입점
 public final class MyBatisSessionFactory {
 
     private static final String CONFIG_RESOURCE = "mybatis-config.xml";
@@ -22,7 +22,7 @@ public final class MyBatisSessionFactory {
 
     private MyBatisSessionFactory() {}
 
-    // 자동 커밋 세션 열기 — 현재 DBO 흐름과 동일한 시멘틱 유지
+    // 자동 커밋 세션 열기
     public static SqlSession openSession() {
         return getFactory().openSession(true);
     }

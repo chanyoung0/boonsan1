@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 제지급금 MyBatis Mapper — PayoutDBO가 위임하는 SQL 인터페이스
+// 제지급금 MyBatis Mapper
 public interface PayoutMapper {
 
     Payout findById(String payoutId);

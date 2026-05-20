@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 부활 MyBatis Mapper — ReinstatementDBO가 위임하는 SQL 인터페이스
+// 부활 MyBatis Mapper
 public interface ReinstatementMapper {
 
     Reinstatement findById(String reinstatementId);

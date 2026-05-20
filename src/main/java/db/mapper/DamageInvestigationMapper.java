@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 손해조사 MyBatis Mapper — DamageInvestigationDBO가 위임하는 SQL 인터페이스
+// 손해조사 MyBatis Mapper
 public interface DamageInvestigationMapper {
 
     DamageInvestigation findById(String investigationId);

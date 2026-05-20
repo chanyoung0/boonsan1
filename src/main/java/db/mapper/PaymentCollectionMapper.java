@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 분납/수금 MyBatis Mapper — PaymentCollectionDBO가 위임하는 SQL 인터페이스
+// 분납/수금 MyBatis Mapper
 public interface PaymentCollectionMapper {
 
     PaymentCollection findById(String collectionId);

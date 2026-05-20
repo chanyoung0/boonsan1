@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 배서 MyBatis Mapper — EndorsementDBO가 위임하는 SQL 인터페이스
+// 배서 MyBatis Mapper
 public interface EndorsementMapper {
 
     Endorsement findById(String endorsementId);

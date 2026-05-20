@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 사고 접수 MyBatis Mapper — AccidentReportDBO가 위임하는 SQL 인터페이스
+// 사고 접수 MyBatis Mapper
 public interface AccidentReportMapper {
 
     AccidentReport findByReportNo(String reportNo);

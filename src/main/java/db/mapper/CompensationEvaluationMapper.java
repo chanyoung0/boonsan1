@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 보상평가 MyBatis Mapper — CompensationEvaluationDBO가 위임하는 SQL 인터페이스
+// 보상평가 MyBatis Mapper
 public interface CompensationEvaluationMapper {
 
     CompensationEvaluation findById(String evaluationId);

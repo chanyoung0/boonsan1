@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 보험청약 심사 MyBatis Mapper — UnderwritingDBO가 위임하는 SQL 인터페이스
+// 보험청약 심사 MyBatis Mapper
 public interface UnderwritingMapper {
 
     Underwriting findById(String underwritingId);

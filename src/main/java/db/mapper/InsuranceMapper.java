@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 보험 상품 MyBatis Mapper — InsuranceDBO가 위임하는 SQL 인터페이스
+// 보험 상품 MyBatis Mapper
 public interface InsuranceMapper {
 
     Insurance findByProductCode(String productCode);

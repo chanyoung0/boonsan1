@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 만기 안내 MyBatis Mapper — MaturityNoticeDBO가 위임하는 SQL 인터페이스
+// 만기 안내 MyBatis Mapper
 public interface MaturityNoticeMapper {
 
     MaturityNotice findById(String noticeId);

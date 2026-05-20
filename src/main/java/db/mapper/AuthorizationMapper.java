@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-// 상품 인가 MyBatis Mapper — AuthorizationDBO가 위임하는 SQL 인터페이스
+// 상품 인가 MyBatis Mapper
 public interface AuthorizationMapper {
 
     Authorization findById(String requestId);

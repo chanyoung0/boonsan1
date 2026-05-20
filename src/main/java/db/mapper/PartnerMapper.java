@@ -4,7 +4,7 @@ import model.partner.Partner;
 
 import java.util.List;
 
-// 협력업체 MyBatis Mapper — PartnerDBO가 위임하는 SQL 인터페이스
+// 협력업체 MyBatis Mapper
 public interface PartnerMapper {
 
     Partner findById(String id);
