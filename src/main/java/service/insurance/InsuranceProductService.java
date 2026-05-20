@@ -1,8 +1,8 @@
 package service.insurance;
 
-import db.mapper.AuthorizationMapper;
-import db.mapper.InsuranceMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.AuthorizationMapper;
+import db.InsuranceMapper;
+import db.MyBatisSessionFactory;
 import model.insurance.Authorization;
 import model.insurance.AutoInsurance;
 import model.insurance.FinancialSupervisoryService;

@@ -1,7 +1,7 @@
 package service.partner;
 
-import db.mapper.PartnerMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.PartnerMapper;
+import db.MyBatisSessionFactory;
 import enums.EvaluationGrade;
 import model.partner.Partner;
 import org.apache.ibatis.session.SqlSession;

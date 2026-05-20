@@ -1,7 +1,7 @@
 package service.accident;
 
-import db.mapper.DamageInvestigationMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.DamageInvestigationMapper;
+import db.MyBatisSessionFactory;
 import model.accident.DamageInvestigation;
 import org.apache.ibatis.session.SqlSession;
 

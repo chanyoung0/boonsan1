@@ -1,8 +1,8 @@
 package service.underwriting;
 
-import db.mapper.InsuranceApplicationMapper;
-import db.mapper.UnderwritingMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.InsuranceApplicationMapper;
+import db.UnderwritingMapper;
+import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;

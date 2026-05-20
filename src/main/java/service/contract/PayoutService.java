@@ -1,7 +1,7 @@
 package service.contract;
 
-import db.mapper.PayoutMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.PayoutMapper;
+import db.MyBatisSessionFactory;
 import enums.CalculationBasis;
 import enums.ContractStatus;
 import enums.PaymentCycle;

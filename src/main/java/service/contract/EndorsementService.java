@@ -1,7 +1,7 @@
 package service.contract;
 
-import db.mapper.EndorsementMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.EndorsementMapper;
+import db.MyBatisSessionFactory;
 import enums.EndorsementType;
 import model.contract.Endorsement;
 import org.apache.ibatis.session.SqlSession;

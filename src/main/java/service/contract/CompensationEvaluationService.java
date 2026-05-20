@@ -1,7 +1,7 @@
 package service.contract;
 
-import db.mapper.CompensationEvaluationMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.CompensationEvaluationMapper;
+import db.MyBatisSessionFactory;
 import enums.CompensationStatus;
 import enums.EvaluationResult;
 import model.contract.CompensationEvaluation;

@@ -1,4 +1,4 @@
-package db.mapper;
+package db;
 
 import model.accident.DamageInvestigation;
 import org.apache.ibatis.annotations.Param;

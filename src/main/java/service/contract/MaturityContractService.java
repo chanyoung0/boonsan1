@@ -1,7 +1,7 @@
 package service.contract;
 
-import db.mapper.MaturityNoticeMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.MaturityNoticeMapper;
+import db.MyBatisSessionFactory;
 import enums.DeliveryMethod;
 import model.contract.MaturityNotice;
 import org.apache.ibatis.session.SqlSession;

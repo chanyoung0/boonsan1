@@ -1,4 +1,4 @@
-package db.mapper;
+package db;
 
 import model.contract.MaturityNotice;
 import org.apache.ibatis.annotations.Param;

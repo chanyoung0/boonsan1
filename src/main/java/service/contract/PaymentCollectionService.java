@@ -1,7 +1,7 @@
 package service.contract;
 
-import db.mapper.PaymentCollectionMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.PaymentCollectionMapper;
+import db.MyBatisSessionFactory;
 import enums.ProcessingResult;
 import model.contract.PaymentCollection;
 import org.apache.ibatis.session.SqlSession;

@@ -1,7 +1,7 @@
 package service.contract;
 
-import db.mapper.ReinstatementMapper;
-import db.mybatis.MyBatisSessionFactory;
+import db.ReinstatementMapper;
+import db.MyBatisSessionFactory;
 import model.contract.Reinstatement;
 import org.apache.ibatis.session.SqlSession;
 
