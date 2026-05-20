@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.PartnerMapper">
+
+    <resultMap id="PartnerResult" type="Partner">
+        <id     property="id"               column="id"/>
+        <result property="partnerName"      column="partner_name"/>
+        <result property="partnerType"      column="partner_type"/>
+        <result property="contact"          column="contact"/>
+        <result property="responsibility"   column="responsibility"/>
+        <result property="evaluationGrade"  column="evaluation_grade"
+                javaType="enums.EvaluationGrade"/>
+    </resultMap>
+
+    <sql id="columns">
+        id, partner_name, partner_type, contact, responsibility, evaluation_grade
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="PartnerResult">
+        SELECT <include refid="columns"/>
+        FROM partner
+        WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="PartnerResult">
+        SELECT <include refid="columns"/>
+        FROM partner
+        ORDER BY id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT id FROM partner ORDER BY id
+    </select>
+
+    <insert id="insert" parameterType="Partner">
+        INSERT INTO partner (id, partner_name, partner_type, contact, responsibility, evaluation_grade)
+        VALUES (#{id}, #{partnerName}, #{partnerType}, #{contact}, #{responsibility}, #{evaluationGrade})
+    </insert>
+
+    <update id="update" parameterType="Partner">
+        UPDATE partner
+        SET partner_name = #{partnerName},
+            partner_type = #{partnerType},
+            contact = #{contact},
+            responsibility = #{responsibility},
+            evaluation_grade = #{evaluationGrade}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM partner WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.InsuranceMapper">
+
+    <resultMap id="InsuranceResult" type="Insurance">
+        <id     property="productCode"     column="product_code"/>
+        <result property="insurancePeriod" column="insurance_period"/>
+        <result property="insuredAmount"   column="insured_amount"/>
+        <result property="premium"         column="premium"/>
+        <result property="maturityRefund"  column="maturity_refund"/>
+        <discriminator javaType="string" column="product_type">
+            <case value="AUTO" resultType="AutoInsurance">
+                <result property="driverAge"   column="driver_age"/>
+                <result property="vehicleType" column="vehicle_type"/>
+            </case>
+            <case value="FIRE" resultType="FireInsurance">
+                <result property="buildingType" column="building_type"/>
+                <result property="location"     column="location"/>
+            </case>
+            <case value="MARINE" resultType="MarineInsurance">
+                <result property="vesselType"    column="vessel_type"/>
+                <result property="shippingRoute" column="shipping_route"/>
+            </case>
+        </discriminator>
+    </resultMap>
+
+    <sql id="columns">
+        product_code, product_type, insurance_period, insured_amount, premium, maturity_refund,
+        driver_age, vehicle_type, building_type, location, vessel_type, shipping_route
+    </sql>
+
+    <select id="findByProductCode" parameterType="string" resultMap="InsuranceResult">
+        SELECT <include refid="columns"/>
+        FROM insurance
+        WHERE product_code = #{productCode}
+          AND product_type IN ('AUTO', 'FIRE', 'MARINE')
+    </select>
+
+    <select id="findAll" resultMap="InsuranceResult">
+        SELECT <include refid="columns"/>
+        FROM insurance
+        WHERE product_type IN ('AUTO', 'FIRE', 'MARINE')
+        ORDER BY product_code
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT product_code FROM insurance ORDER BY product_code
+    </select>
+
+    <insert id="insert">
+        INSERT INTO insurance
+        (product_code, product_type, insurance_period, insured_amount, premium, maturity_refund,
+         driver_age, vehicle_type, building_type, location, vessel_type, shipping_route)
+        VALUES (#{ins.productCode}, #{productType}, #{ins.insurancePeriod},
+                #{ins.insuredAmount}, #{ins.premium}, #{ins.maturityRefund},
+                #{driverAge}, #{vehicleType}, #{buildingType}, #{location},
+                #{vesselType}, #{shippingRoute})
+    </insert>
+
+    <update id="update">
+        UPDATE insurance SET
+            product_type     = #{productType},
+            insurance_period = #{ins.insurancePeriod},
+            insured_amount   = #{ins.insuredAmount},
+            premium          = #{ins.premium},
+            maturity_refund  = #{ins.maturityRefund},
+            driver_age       = #{driverAge},
+            vehicle_type     = #{vehicleType},
+            building_type    = #{buildingType},
+            location         = #{location},
+            vessel_type      = #{vesselType},
+            shipping_route   = #{shippingRoute}
+        WHERE product_code = #{ins.productCode}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM insurance WHERE product_code = #{productCode}
+    </delete>
+
+</mapper>

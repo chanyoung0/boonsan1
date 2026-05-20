@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.AccidentReportMapper">
+
+    <resultMap id="AccidentReportResult" type="AccidentReport">
+        <id     property="reportNo"             column="report_no"/>
+        <result property="accidentDescription"  column="accident_description"/>
+        <result property="damageDetails"        column="damage_details"/>
+        <result property="createdAt"            column="created_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        report_no, policy_number, accident_description, damage_details,
+        accident_status, document_submission_status, accident_at_text, created_at
+    </sql>
+
+    <select id="findByReportNo" parameterType="string" resultMap="AccidentReportResult">
+        SELECT <include refid="columns"/>
+        FROM accident_report
+        WHERE report_no = #{reportNo}
+    </select>
+
+    <select id="findAll" resultMap="AccidentReportResult">
+        SELECT <include refid="columns"/>
+        FROM accident_report
+        ORDER BY report_no
+    </select>
+
+    <select id="findPolicyNumberByReportNo" parameterType="string" resultType="string">
+        SELECT policy_number FROM accident_report WHERE report_no = #{reportNo}
+    </select>
+
+    <select id="findStatusByReportNo" parameterType="string" resultType="string">
+        SELECT accident_status FROM accident_report WHERE report_no = #{reportNo}
+    </select>
+
+    <select id="findDocumentSubmissionStatusByReportNo" parameterType="string" resultType="string">
+        SELECT document_submission_status FROM accident_report WHERE report_no = #{reportNo}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO accident_report
+        (report_no, policy_number, accident_description, damage_details,
+         accident_status, document_submission_status, accident_at_text, created_at)
+        VALUES (#{ar.reportNo}, #{policyNumber}, #{ar.accidentDescription}, #{ar.damageDetails},
+                #{accidentStatus}, #{documentSubmissionStatus}, #{accidentAtText}, #{ar.createdAt})
+    </insert>
+
+    <update id="update">
+        UPDATE accident_report SET
+            policy_number              = #{policyNumber},
+            accident_description       = #{ar.accidentDescription},
+            damage_details             = #{ar.damageDetails},
+            accident_status            = #{accidentStatus},
+            document_submission_status = #{documentSubmissionStatus},
+            accident_at_text           = #{accidentAtText},
+            created_at                 = #{ar.createdAt}
+        WHERE report_no = #{ar.reportNo}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM accident_report WHERE report_no = #{reportNo}
+    </delete>
+
+</mapper>

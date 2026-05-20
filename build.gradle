@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+dependencies {
+    implementation 'org.mybatis:mybatis:3.5.16'
+    implementation 'org.postgresql:postgresql:42.7.4'
+    runtimeOnly 'org.slf4j:slf4j-nop:2.0.13'
+}
+
+application {
+    mainClass = 'Main'
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+run {
+    standardInput = System.in
+    workingDir = rootDir
+}
+
+tasks.register('mybatisSmoke', JavaExec) {
+    group = 'verification'
+    description = 'MyBatis 설정/매퍼 XML 파싱 검증 스모크 테스트'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'db.mybatis.MyBatisSmokeTest'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

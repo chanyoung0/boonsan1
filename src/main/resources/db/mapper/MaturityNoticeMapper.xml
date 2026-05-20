@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.MaturityNoticeMapper">
+
+    <resultMap id="MaturityNoticeResult" type="MaturityNotice">
+        <id     property="noticeId"        column="notice_id"/>
+        <result property="deliveryMethod"  column="delivery_method"
+                javaType="enums.DeliveryMethod"/>
+        <result property="sentAt"          column="sent_at"/>
+        <result property="checkedAt"       column="checked_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        notice_id, delivery_method, sent_at, checked_at, renewal_intention
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="MaturityNoticeResult">
+        SELECT <include refid="columns"/>
+        FROM maturity_notice
+        WHERE notice_id = #{noticeId}
+    </select>
+
+    <select id="findAll" resultMap="MaturityNoticeResult">
+        SELECT <include refid="columns"/>
+        FROM maturity_notice
+        ORDER BY notice_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT notice_id FROM maturity_notice ORDER BY notice_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO maturity_notice
+        (notice_id, delivery_method, sent_at, checked_at, renewal_intention)
+        VALUES (#{noticeId}, #{deliveryMethod}, #{mn.sentAt},
+                #{mn.checkedAt}, #{renewalIntention})
+    </insert>
+
+    <update id="update">
+        UPDATE maturity_notice SET
+            delivery_method   = #{deliveryMethod},
+            sent_at           = #{mn.sentAt},
+            checked_at        = #{mn.checkedAt},
+            renewal_intention = #{renewalIntention}
+        WHERE notice_id = #{noticeId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM maturity_notice WHERE notice_id = #{noticeId}
+    </delete>
+
+    <select id="findRenewalIntentionById" parameterType="string" resultType="string">
+        SELECT renewal_intention FROM maturity_notice WHERE notice_id = #{noticeId}
+    </select>
+
+</mapper>

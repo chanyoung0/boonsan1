@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.ReinstatementMapper">
+
+    <resultMap id="ReinstatementResult" type="Reinstatement">
+        <id     property="reinstatementId" column="reinstatement_id"/>
+        <result property="policyNumber"    column="policy_number"/>
+        <result property="appliedAt"       column="applied_at"/>
+        <result property="processedAt"     column="processed_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        reinstatement_id, policy_number, underwriting_result, reinstatement_status,
+        applied_at, processed_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="ReinstatementResult">
+        SELECT <include refid="columns"/>
+        FROM reinstatement
+        WHERE reinstatement_id = #{reinstatementId}
+    </select>
+
+    <select id="findAll" resultMap="ReinstatementResult">
+        SELECT <include refid="columns"/>
+        FROM reinstatement
+        ORDER BY reinstatement_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT reinstatement_id FROM reinstatement ORDER BY reinstatement_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO reinstatement
+        (reinstatement_id, policy_number, underwriting_result, reinstatement_status,
+         applied_at, processed_at)
+        VALUES (#{reinstatementId}, #{policyNumber}, #{uwResult}, #{reinstatementStatus},
+                #{rs.appliedAt}, #{rs.processedAt})
+    </insert>
+
+    <update id="update">
+        UPDATE reinstatement SET
+            policy_number        = #{policyNumber},
+            underwriting_result  = #{uwResult},
+            reinstatement_status = #{reinstatementStatus},
+            applied_at           = #{rs.appliedAt},
+            processed_at         = #{rs.processedAt}
+        WHERE reinstatement_id = #{reinstatementId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM reinstatement WHERE reinstatement_id = #{reinstatementId}
+    </delete>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT reinstatement_status FROM reinstatement WHERE reinstatement_id = #{reinstatementId}
+    </select>
+
+    <select id="findPolicyNumberById" parameterType="string" resultType="string">
+        SELECT policy_number FROM reinstatement WHERE reinstatement_id = #{reinstatementId}
+    </select>
+
+</mapper>

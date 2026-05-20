@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.PaymentCollectionMapper">
+
+    <resultMap id="PaymentCollectionResult" type="PaymentCollection">
+        <id     property="collectionId"           column="collection_id"/>
+        <result property="policyNumber"           column="policy_number"/>
+        <result property="dueDate"                column="due_date"/>
+        <result property="collectedAmount"        column="collected_amount"/>
+        <result property="unpaidAmount"           column="unpaid_amount"/>
+        <result property="unpaidInstallmentCount" column="unpaid_installment_count"/>
+        <result property="processingResult"       column="processing_result"
+                javaType="enums.ProcessingResult"/>
+        <result property="collectedAt"            column="collected_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        collection_id, policy_number, due_date, collected_amount, unpaid_amount,
+        unpaid_installment_count, processing_result, collected_at,
+        transfer_type, collection_status
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="PaymentCollectionResult">
+        SELECT <include refid="columns"/>
+        FROM payment_collection
+        WHERE collection_id = #{collectionId}
+    </select>
+
+    <select id="findAll" resultMap="PaymentCollectionResult">
+        SELECT <include refid="columns"/>
+        FROM payment_collection
+        ORDER BY collection_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT collection_id FROM payment_collection ORDER BY collection_id
+    </select>
+
+    <select id="findPolicyNumberById" parameterType="string" resultType="string">
+        SELECT policy_number FROM payment_collection WHERE collection_id = #{collectionId}
+    </select>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT collection_status FROM payment_collection WHERE collection_id = #{collectionId}
+    </select>
+
+    <select id="findTransferTypeById" parameterType="string" resultType="string">
+        SELECT transfer_type FROM payment_collection WHERE collection_id = #{collectionId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO payment_collection
+        (collection_id, policy_number, due_date, collected_amount, unpaid_amount,
+         unpaid_installment_count, processing_result, collected_at,
+         transfer_type, collection_status)
+        VALUES (#{collectionId}, #{policyNumber}, #{pc.dueDate},
+                #{pc.collectedAmount}, #{pc.unpaidAmount},
+                #{pc.unpaidInstallmentCount}, #{processingResult},
+                #{pc.collectedAt}, #{transferType}, #{collectionStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE payment_collection SET
+            policy_number            = #{policyNumber},
+            due_date                 = #{pc.dueDate},
+            collected_amount         = #{pc.collectedAmount},
+            unpaid_amount            = #{pc.unpaidAmount},
+            unpaid_installment_count = #{pc.unpaidInstallmentCount},
+            processing_result        = #{processingResult},
+            collected_at             = #{pc.collectedAt},
+            transfer_type            = #{transferType},
+            collection_status        = #{collectionStatus}
+        WHERE collection_id = #{collectionId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM payment_collection WHERE collection_id = #{collectionId}
+    </delete>
+
+</mapper>

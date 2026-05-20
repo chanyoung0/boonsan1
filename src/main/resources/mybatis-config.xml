@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="false"/>
+        <setting name="jdbcTypeForNull" value="NULL"/>
+        <setting name="useGeneratedKeys" value="false"/>
+        <setting name="defaultStatementTimeout" value="30"/>
+    </settings>
+
+    <typeAliases>
+        <package name="model.accident"/>
+        <package name="model.contract"/>
+        <package name="model.document"/>
+        <package name="model.insurance"/>
+        <package name="model.partner"/>
+        <package name="model.person"/>
+        <package name="model.underwriting"/>
+    </typeAliases>
+
+    <environments default="default">
+        <environment id="default">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.postgresql.Driver"/>
+                <property name="url" value="${db.url}"/>
+                <property name="username" value="${db.user}"/>
+                <property name="password" value="${db.password}"/>
+                <property name="poolMaximumActiveConnections" value="10"/>
+                <property name="poolMaximumIdleConnections" value="5"/>
+                <property name="poolTimeToWait" value="20000"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper resource="db/mapper/UnderwritingMapper.xml"/>
+        <mapper resource="db/mapper/InsuranceApplicationMapper.xml"/>
+        <mapper resource="db/mapper/EndorsementMapper.xml"/>
+        <mapper resource="db/mapper/ReinstatementMapper.xml"/>
+        <mapper resource="db/mapper/PaymentCollectionMapper.xml"/>
+        <mapper resource="db/mapper/MaturityNoticeMapper.xml"/>
+        <mapper resource="db/mapper/AccidentReportMapper.xml"/>
+        <mapper resource="db/mapper/DamageInvestigationMapper.xml"/>
+        <mapper resource="db/mapper/InsuranceMapper.xml"/>
+        <mapper resource="db/mapper/AuthorizationMapper.xml"/>
+        <mapper resource="db/mapper/PayoutMapper.xml"/>
+        <mapper resource="db/mapper/CompensationEvaluationMapper.xml"/>
+        <mapper resource="db/mapper/PartnerMapper.xml"/>
+    </mappers>
+
+</configuration>

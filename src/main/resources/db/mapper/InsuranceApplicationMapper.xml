@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.InsuranceApplicationMapper">
+
+    <resultMap id="ApplicationResult" type="InsuranceApplication">
+        <id     property="applicationId"     column="application_id"/>
+        <result property="policyNumber"      column="policy_number"/>
+        <result property="applicationStatus" column="application_status"
+                javaType="enums.ApplicationStatus"/>
+        <result property="appliedCondition"  column="applied_condition"/>
+        <result property="appliedAt"         column="applied_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        application_id, policy_number, application_status, applied_condition, applied_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="ApplicationResult">
+        SELECT <include refid="columns"/>
+        FROM insurance_application
+        WHERE application_id = #{applicationId}
+    </select>
+
+    <select id="findAll" resultMap="ApplicationResult">
+        SELECT <include refid="columns"/>
+        FROM insurance_application
+        ORDER BY application_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO insurance_application
+        (application_id, policy_number, application_status, applied_condition, applied_at)
+        VALUES (#{app.applicationId}, #{policyNumber}, #{applicationStatus},
+                #{appliedCondition}, #{app.appliedAt})
+    </insert>
+
+    <update id="update">
+        UPDATE insurance_application SET
+            policy_number      = #{policyNumber},
+            application_status = #{applicationStatus},
+            applied_condition  = #{app.appliedCondition},
+            applied_at         = #{app.appliedAt}
+        WHERE application_id = #{app.applicationId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM insurance_application WHERE application_id = #{applicationId}
+    </delete>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT application_status FROM insurance_application WHERE application_id = #{applicationId}
+    </select>
+
+    <select id="findPolicyNumberById" parameterType="string" resultType="string">
+        SELECT policy_number FROM insurance_application WHERE application_id = #{applicationId}
+    </select>
+
+</mapper>

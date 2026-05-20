@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.AuthorizationMapper">
+
+    <resultMap id="AuthorizationResult" type="Authorization">
+        <id     property="requestId"             column="request_id"/>
+        <result property="requestReason"         column="request_reason"/>
+        <result property="submissionAgencyName"  column="submission_agency_name"/>
+        <result property="requestedAt"           column="requested_at"/>
+        <result property="approvedAt"            column="approved_at"/>
+        <result property="approved"              column="is_approved"/>
+    </resultMap>
+
+    <sql id="columns">
+        request_id, product_code, request_reason, submission_agency_name,
+        requested_at, approved_at, is_approved
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="AuthorizationResult">
+        SELECT <include refid="columns"/>
+        FROM authorization_request
+        WHERE request_id = #{requestId}
+    </select>
+
+    <select id="findAll" resultMap="AuthorizationResult">
+        SELECT <include refid="columns"/>
+        FROM authorization_request
+        ORDER BY request_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO authorization_request
+        (request_id, product_code, request_reason, submission_agency_name,
+         requested_at, approved_at, is_approved)
+        VALUES (#{auth.requestId}, #{productCode}, #{auth.requestReason},
+                #{auth.submissionAgencyName}, #{auth.requestedAt},
+                #{auth.approvedAt}, #{auth.approved})
+    </insert>
+
+    <update id="update">
+        UPDATE authorization_request SET
+            <if test="includeProductCode">product_code = #{productCode},</if>
+            request_reason         = #{auth.requestReason},
+            submission_agency_name = #{auth.submissionAgencyName},
+            requested_at           = #{auth.requestedAt},
+            approved_at            = #{auth.approvedAt},
+            is_approved            = #{auth.approved}
+        WHERE request_id = #{auth.requestId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM authorization_request WHERE request_id = #{requestId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.UnderwritingMapper">
+
+    <resultMap id="UnderwritingResult" type="Underwriting">
+        <id     property="underwritingId"     column="underwriting_id"/>
+        <result property="underwriter"        column="underwriter_name"/>
+        <result property="totalScore"         column="total_score"/>
+        <result property="underwritingStatus" column="underwriting_status"
+                javaType="enums.UnderwritingStatus"/>
+        <result property="underwritingType"   column="underwriting_type"
+                javaType="enums.UnderwritingType"/>
+        <result property="deductionReason"    column="rejection_reason"/>
+        <result property="underwrittenAt"     column="underwritten_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        underwriting_id, underwriter_emp_no, underwriter_name, underwriter_dept,
+        total_score, underwriting_status, underwriting_type, underwriting_result,
+        rejection_reason, underwritten_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="UnderwritingResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting
+        WHERE underwriting_id = #{underwritingId}
+    </select>
+
+    <select id="findAll" resultMap="UnderwritingResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting
+        ORDER BY underwriting_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT underwriting_id FROM underwriting ORDER BY underwriting_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO underwriting
+        (underwriting_id, underwriter_emp_no, underwriter_name, underwriter_dept,
+         total_score, underwriting_status, underwriting_type, underwriting_result,
+         rejection_reason, underwritten_at)
+        VALUES (#{underwritingId}, #{empNo}, #{empName}, #{empDept},
+                #{uw.totalScore},
+                #{uw.underwritingStatus},
+                #{uw.underwritingType},
+                #{uwResult},
+                #{uw.deductionReason},
+                #{uw.underwrittenAt})
+    </insert>
+
+    <update id="update">
+        UPDATE underwriting SET
+            underwriter_emp_no  = #{empNo},
+            underwriter_name    = #{empName},
+            underwriter_dept    = #{empDept},
+            total_score         = #{uw.totalScore},
+            underwriting_status = #{uw.underwritingStatus},
+            underwriting_type   = #{uw.underwritingType},
+            underwriting_result = #{uwResult},
+            rejection_reason    = #{uw.deductionReason},
+            underwritten_at     = #{uw.underwrittenAt}
+        WHERE underwriting_id = #{underwritingId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM underwriting WHERE underwriting_id = #{underwritingId}
+    </delete>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT underwriting_status FROM underwriting WHERE underwriting_id = #{underwritingId}
+    </select>
+
+    <select id="findResultById" parameterType="string" resultType="string">
+        SELECT underwriting_result FROM underwriting WHERE underwriting_id = #{underwritingId}
+    </select>
+
+</mapper>

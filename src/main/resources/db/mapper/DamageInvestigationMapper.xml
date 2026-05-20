@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.DamageInvestigationMapper">
+
+    <resultMap id="DamageInvestigationResult" type="DamageInvestigation">
+        <id     property="investigationId"  column="investigation_id"/>
+        <result property="adjusterId"       column="adjuster_id"/>
+        <result property="medicalExpense"   column="medical_expense"/>
+        <result property="lostIncome"       column="lost_income"/>
+        <result property="repairCost"       column="repair_cost"/>
+        <result property="settlementAmount" column="settlement_amount"/>
+        <result property="faultRatio"       column="fault_ratio"/>
+        <result property="investigationAt"  column="investigation_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        investigation_id, report_no, adjuster_id, medical_expense, lost_income,
+        repair_cost, settlement_amount, fault_ratio, investigation_status, investigation_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="DamageInvestigationResult">
+        SELECT <include refid="columns"/>
+        FROM damage_investigation
+        WHERE investigation_id = #{investigationId}
+    </select>
+
+    <select id="findAll" resultMap="DamageInvestigationResult">
+        SELECT <include refid="columns"/>
+        FROM damage_investigation
+        ORDER BY investigation_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT investigation_id FROM damage_investigation ORDER BY investigation_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO damage_investigation
+        (investigation_id, report_no, adjuster_id, medical_expense, lost_income,
+         repair_cost, settlement_amount, fault_ratio, investigation_status, investigation_at)
+        VALUES (#{di.investigationId}, #{reportNo}, #{di.adjusterId},
+                #{di.medicalExpense}, #{di.lostIncome}, #{di.repairCost},
+                #{di.settlementAmount}, #{di.faultRatio}, #{investigationStatus},
+                #{di.investigationAt})
+    </insert>
+
+    <update id="update">
+        UPDATE damage_investigation SET
+            report_no            = #{reportNo},
+            adjuster_id          = #{di.adjusterId},
+            medical_expense      = #{di.medicalExpense},
+            lost_income          = #{di.lostIncome},
+            repair_cost          = #{di.repairCost},
+            settlement_amount    = #{di.settlementAmount},
+            fault_ratio          = #{di.faultRatio},
+            investigation_status = #{investigationStatus},
+            investigation_at     = #{di.investigationAt}
+        WHERE investigation_id = #{di.investigationId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM damage_investigation WHERE investigation_id = #{investigationId}
+    </delete>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT investigation_status FROM damage_investigation WHERE investigation_id = #{investigationId}
+    </select>
+
+    <select id="findReportNoById" parameterType="string" resultType="string">
+        SELECT report_no FROM damage_investigation WHERE investigation_id = #{investigationId}
+    </select>
+
+</mapper>

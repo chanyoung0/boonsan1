@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.CompensationEvaluationMapper">
+
+    <resultMap id="CompensationEvaluationResult" type="CompensationEvaluation">
+        <id     property="evaluationId"            column="evaluation_id"/>
+        <result property="evaluationMonth"         column="evaluation_month"/>
+        <result property="evaluationStatus"        column="evaluation_status"
+                javaType="enums.CompensationStatus"/>
+        <result property="evaluationResult"        column="evaluation_result"
+                javaType="enums.EvaluationResult"/>
+        <result property="submissionAgencyName"    column="submission_agency_name"/>
+        <result property="damageAmount"            column="damage_amount"/>
+        <result property="damageAnalysisResult"    column="damage_analysis_result"/>
+        <result property="compensationStatistics"  column="compensation_statistics"/>
+    </resultMap>
+
+    <sql id="columns">
+        evaluation_id, evaluation_month, evaluation_status, evaluation_result,
+        submission_agency_name, damage_amount, damage_analysis_result, compensation_statistics
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="CompensationEvaluationResult">
+        SELECT <include refid="columns"/>
+        FROM compensation_evaluation
+        WHERE evaluation_id = #{evaluationId}
+    </select>
+
+    <select id="findAll" resultMap="CompensationEvaluationResult">
+        SELECT <include refid="columns"/>
+        FROM compensation_evaluation
+        ORDER BY evaluation_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT evaluation_id FROM compensation_evaluation ORDER BY evaluation_id
+    </select>
+
+    <insert id="insert">
+        INSERT INTO compensation_evaluation
+        (evaluation_id, evaluation_month, evaluation_status, evaluation_result,
+         submission_agency_name, damage_amount, damage_analysis_result, compensation_statistics)
+        VALUES (#{ce.evaluationId}, #{ce.evaluationMonth}, #{evaluationStatus},
+                #{evaluationResult}, #{ce.submissionAgencyName}, #{ce.damageAmount},
+                #{ce.damageAnalysisResult}, #{ce.compensationStatistics})
+    </insert>
+
+    <update id="update">
+        UPDATE compensation_evaluation SET
+            evaluation_month        = #{ce.evaluationMonth},
+            evaluation_status       = #{evaluationStatus},
+            evaluation_result       = #{evaluationResult},
+            submission_agency_name  = #{ce.submissionAgencyName},
+            damage_amount           = #{ce.damageAmount},
+            damage_analysis_result  = #{ce.damageAnalysisResult},
+            compensation_statistics = #{ce.compensationStatistics}
+        WHERE evaluation_id = #{ce.evaluationId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM compensation_evaluation WHERE evaluation_id = #{evaluationId}
+    </delete>
+
+</mapper>

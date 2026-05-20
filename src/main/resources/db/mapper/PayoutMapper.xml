@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.mapper.PayoutMapper">
+
+    <resultMap id="PayoutResult" type="Payout">
+        <id     property="payoutId"            column="payout_id"/>
+        <result property="policyNumber"        column="policy_number"/>
+        <result property="processor"           column="processor"/>
+        <result property="paymentType"         column="payment_type"
+                javaType="enums.PaymentType"/>
+        <result property="calculationBasis"    column="calculation_basis"
+                javaType="enums.CalculationBasis"/>
+        <result property="calculatedAmount"    column="calculated_amount"/>
+        <result property="deductionItem"       column="deduction_item"/>
+        <result property="finalPaymentAmount"  column="final_payment_amount"/>
+        <result property="approvedAt"          column="approved_at"/>
+        <result property="paidAt"              column="paid_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        payout_id, policy_number, processor, payment_type, calculation_basis,
+        calculated_amount, deduction_item, final_payment_amount,
+        approved_at, paid_at, payout_status
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="PayoutResult">
+        SELECT <include refid="columns"/>
+        FROM payout
+        WHERE payout_id = #{payoutId}
+    </select>
+
+    <select id="findAll" resultMap="PayoutResult">
+        SELECT <include refid="columns"/>
+        FROM payout
+        ORDER BY payout_id
+    </select>
+
+    <select id="findAllIds" resultType="string">
+        SELECT payout_id FROM payout ORDER BY payout_id
+    </select>
+
+    <select id="findPolicyNumberById" parameterType="string" resultType="string">
+        SELECT policy_number FROM payout WHERE payout_id = #{payoutId}
+    </select>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT payout_status FROM payout WHERE payout_id = #{payoutId}
+    </select>
+
+    <select id="findIdByPayout" resultType="string">
+        SELECT payout_id FROM payout
+        WHERE processor             IS NOT DISTINCT FROM #{processor}
+          AND payment_type          IS NOT DISTINCT FROM #{paymentType}
+          AND calculation_basis     IS NOT DISTINCT FROM #{calculationBasis}
+          AND calculated_amount     IS NOT DISTINCT FROM #{calculatedAmount}
+          AND deduction_item        IS NOT DISTINCT FROM #{deductionItem}
+          AND final_payment_amount  IS NOT DISTINCT FROM #{finalPaymentAmount}
+        ORDER BY payout_id DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insert">
+        INSERT INTO payout
+        (payout_id, policy_number, processor, payment_type, calculation_basis,
+         calculated_amount, deduction_item, final_payment_amount,
+         approved_at, paid_at, payout_status)
+        VALUES (#{payoutId}, #{policyNumber}, #{po.processor},
+                #{paymentType}, #{calculationBasis},
+                #{po.calculatedAmount}, #{po.deductionItem}, #{po.finalPaymentAmount},
+                #{po.approvedAt}, #{po.paidAt}, #{payoutStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE payout SET
+            policy_number        = #{policyNumber},
+            processor            = #{po.processor},
+            payment_type         = #{paymentType},
+            calculation_basis    = #{calculationBasis},
+            calculated_amount    = #{po.calculatedAmount},
+            deduction_item       = #{po.deductionItem},
+            final_payment_amount = #{po.finalPaymentAmount},
+            approved_at          = #{po.approvedAt},
+            paid_at              = #{po.paidAt},
+            payout_status        = #{payoutStatus}
+        WHERE payout_id = #{payoutId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM payout WHERE payout_id = #{payoutId}
+    </delete>
+
+</mapper>
