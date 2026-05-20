@@ -1,5 +1,6 @@
 C:\workspace\springWorkspace\boonsan1\src\Main.java
 C:\workspace\springWorkspace\boonsan1\src\common\ConsoleUtil.java
+C:\workspace\springWorkspace\boonsan1\src\console\PartnerConsole.java
 C:\workspace\springWorkspace\boonsan1\src\console\accident\AccidentReportConsole.java
 C:\workspace\springWorkspace\boonsan1\src\console\accident\DamageInvestigationConsole.java
 C:\workspace\springWorkspace\boonsan1\src\console\contract\CompensationEvaluationConsole.java

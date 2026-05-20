@@ -47,7 +47,10 @@
       "PowerShell($env:PGPASSWORD=\"1234\"; & \"C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe\" -U postgres -d boonsan -c \"SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name;\" 2>&1)",
       "PowerShell(Get-Command *)",
       "PowerShell($psql = \"C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe\"; $env:PGPASSWORD = \"postgres\"; & $psql -U postgres -d boonsan -h localhost -c \"\\\\dt\" 2>&1)",
-      "Bash(findstr /S /R \"^import model\\\\.\" *.java db\\\\*.java service\\\\*.java console\\\\*.java)"
+      "Bash(findstr /S /R \"^import model\\\\.\" *.java db\\\\*.java service\\\\*.java console\\\\*.java)",
+      "Bash(Get-ChildItem -Recurse -Path src -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
     ]
   }
 }

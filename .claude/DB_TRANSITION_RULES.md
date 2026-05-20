@@ -59,7 +59,7 @@ src
 ├── Main.java
 ├── common
 ├── console
-│   ├── PartnerConsole.java          ← console 패키지 직속 (sub-package 없음)
+│   ├── PartnerConsole.java          
 │   ├── accident
 │   ├── contract
 │   ├── insurance
