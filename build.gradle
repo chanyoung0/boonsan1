@@ -36,14 +36,14 @@ tasks.register('mybatisSmoke', JavaExec) {
     group = 'verification'
     description = 'MyBatis 설정/매퍼 XML 파싱 검증 스모크 테스트'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'db.mybatis.MyBatisSmokeTest'
+    mainClass = 'db.MyBatisSmokeTest'
 }
 
 tasks.register('dbCheck', JavaExec) {
     group = 'verification'
     description = '실 DB 연결 + 13개 Mapper read + Partner CRUD 한 사이클 검증'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'db.mybatis.DbConnectivityCheck'
+    mainClass = 'db.DbConnectivityCheck'
     workingDir = rootDir
 }
 
