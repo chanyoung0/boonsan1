@@ -30,3 +30,8 @@ db.properties
 .gradle/
 build/
 !gradle-wrapper.jar
+
+# IntelliJ IDEA (사용자별 설정 — 절대 추적 금지)
+.idea/
+*.iml
+out/
