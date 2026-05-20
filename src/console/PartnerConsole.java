@@ -1,4 +1,4 @@
-package console.partner;
+package console;
 
 import enums.EvaluationGrade;
 import model.partner.Partner;

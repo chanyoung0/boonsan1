@@ -8,7 +8,7 @@ import console.contract.CompensationEvaluationConsole;
 import console.accident.AccidentReportConsole;
 import console.accident.DamageInvestigationConsole;
 import console.insurance.InsuranceProductConsole;
-import console.partner.PartnerConsole;
+import console.PartnerConsole;
 
 import static common.ConsoleUtil.*;
 
