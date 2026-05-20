@@ -17,6 +17,8 @@ public class PaymentCollection {
     private ProcessingResult processingResult;
     private BigDecimal unpaidAmount;
     private int unpaidInstallmentCount;
+    private String collectionStatus;
+    private String transferType;
 
     public PaymentCollection() {}
 
@@ -59,6 +61,10 @@ public class PaymentCollection {
     public void            setUnpaidAmount(BigDecimal v)            { this.unpaidAmount = v; }
     public int             getUnpaidInstallmentCount()              { return unpaidInstallmentCount; }
     public void            setUnpaidInstallmentCount(int v)         { this.unpaidInstallmentCount = v; }
+    public String          getCollectionStatus()                    { return collectionStatus; }
+    public void            setCollectionStatus(String v)            { this.collectionStatus = v; }
+    public String          getTransferType()                        { return transferType; }
+    public void            setTransferType(String v)                { this.transferType = v; }
 
     @Override
     public String toString() {

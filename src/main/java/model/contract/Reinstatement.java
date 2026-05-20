@@ -1,6 +1,7 @@
 package model.contract;
 
 import enums.ReinstatementReason;
+import enums.UnderwritingResultType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +18,9 @@ public class Reinstatement {
     private LocalDate lastPaidDate;
     private LocalDateTime processedAt;
     private ReinstatementReason reinstatementReason;
+    private String reinstatementStatus;
     private BigDecimal unpaidPremium;
+    private UnderwritingResultType underwritingResult;
 
     public Reinstatement() {}
 
@@ -50,10 +53,14 @@ public class Reinstatement {
     public void                setLastPaidDate(LocalDate v)           { this.lastPaidDate = v; }
     public LocalDateTime       getProcessedAt()                       { return processedAt; }
     public void                setProcessedAt(LocalDateTime v)        { this.processedAt = v; }
-    public ReinstatementReason getReinstatementReason()               { return reinstatementReason; }
-    public void                setReinstatementReason(ReinstatementReason v){ this.reinstatementReason = v; }
-    public BigDecimal          getUnpaidPremium()                     { return unpaidPremium; }
-    public void                setUnpaidPremium(BigDecimal v)         { this.unpaidPremium = v; }
+    public ReinstatementReason   getReinstatementReason()                      { return reinstatementReason; }
+    public void                  setReinstatementReason(ReinstatementReason v) { this.reinstatementReason = v; }
+    public String                getReinstatementStatus()                      { return reinstatementStatus; }
+    public void                  setReinstatementStatus(String v)              { this.reinstatementStatus = v; }
+    public BigDecimal            getUnpaidPremium()                            { return unpaidPremium; }
+    public void                  setUnpaidPremium(BigDecimal v)                { this.unpaidPremium = v; }
+    public UnderwritingResultType getUnderwritingResult()                      { return underwritingResult; }
+    public void                  setUnderwritingResult(UnderwritingResultType v){ this.underwritingResult = v; }
 
     @Override
     public String toString() {

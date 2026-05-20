@@ -6,8 +6,11 @@
     <resultMap id="ReinstatementResult" type="Reinstatement">
         <id     property="reinstatementId" column="reinstatement_id"/>
         <result property="policyNumber"    column="policy_number"/>
-        <result property="appliedAt"       column="applied_at"/>
-        <result property="processedAt"     column="processed_at"/>
+        <result property="underwritingResult"  column="underwriting_result"
+                javaType="enums.UnderwritingResultType"/>
+        <result property="reinstatementStatus" column="reinstatement_status"/>
+        <result property="appliedAt"           column="applied_at"/>
+        <result property="processedAt"         column="processed_at"/>
     </resultMap>
 
     <sql id="columns">

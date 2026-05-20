@@ -1,6 +1,5 @@
 package model.contract;
 
-import enums.ChangeReason;
 import enums.EndorsementType;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ public class Endorsement {
     private String endorsementId;
     private String policyNumber;
     private LocalDateTime appliedAt;
-    private ChangeReason changeReason;
+    private String changeReason;
     private EndorsementType endorsementType;
     private String newContent;
     private String previousContent;
@@ -19,7 +18,7 @@ public class Endorsement {
 
     public Endorsement() {}
 
-    public Endorsement(EndorsementType endorsementType, ChangeReason changeReason,
+    public Endorsement(EndorsementType endorsementType, String changeReason,
                        String previousContent, String newContent, LocalDateTime appliedAt) {
         this.endorsementType = endorsementType;
         this.changeReason = changeReason;
@@ -44,8 +43,8 @@ public class Endorsement {
     public void           setPolicyNumber(String v)         { this.policyNumber = v; }
     public LocalDateTime  getAppliedAt()                    { return appliedAt; }
     public void           setAppliedAt(LocalDateTime v)     { this.appliedAt = v; }
-    public ChangeReason   getChangeReason()                 { return changeReason; }
-    public void           setChangeReason(ChangeReason v)   { this.changeReason = v; }
+    public String         getChangeReason()                 { return changeReason; }
+    public void           setChangeReason(String v)         { this.changeReason = v; }
     public EndorsementType getEndorsementType()             { return endorsementType; }
     public void           setEndorsementType(EndorsementType v){ this.endorsementType = v; }
     public String         getNewContent()                   { return newContent; }

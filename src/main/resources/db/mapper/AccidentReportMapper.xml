@@ -7,6 +7,7 @@
         <id     property="reportNo"             column="report_no"/>
         <result property="accidentDescription"  column="accident_description"/>
         <result property="damageDetails"        column="damage_details"/>
+        <result property="accidentStatus"       column="accident_status"/>
         <result property="createdAt"            column="created_at"/>
     </resultMap>
 

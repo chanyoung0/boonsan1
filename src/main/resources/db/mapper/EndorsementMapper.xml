@@ -10,6 +10,7 @@
                 javaType="enums.EndorsementType"/>
         <result property="previousContent" column="previous_content"/>
         <result property="newContent"      column="new_content"/>
+        <result property="changeReason"    column="change_reason"/>
         <result property="appliedAt"       column="applied_at"/>
         <result property="processedAt"     column="processed_at"/>
     </resultMap>

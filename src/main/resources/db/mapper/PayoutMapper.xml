@@ -14,8 +14,9 @@
         <result property="calculatedAmount"    column="calculated_amount"/>
         <result property="deductionItem"       column="deduction_item"/>
         <result property="finalPaymentAmount"  column="final_payment_amount"/>
-        <result property="approvedAt"          column="approved_at"/>
-        <result property="paidAt"              column="paid_at"/>
+        <result property="approvedAt"   column="approved_at"/>
+        <result property="paidAt"       column="paid_at"/>
+        <result property="payoutStatus" column="payout_status"/>
     </resultMap>
 
     <sql id="columns">

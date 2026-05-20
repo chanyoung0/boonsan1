@@ -21,6 +21,7 @@ public class Payout {
     private LocalDateTime paidAt;
     private PaymentType paymentType;
     private String processor;
+    private String payoutStatus;
 
     private DamageInvestigation damageInvestigation;
     private InsurancePayment insurancePayment;
@@ -78,6 +79,8 @@ public class Payout {
     public void                setPaymentType(PaymentType v)            { this.paymentType = v; }
     public String              getProcessor()                           { return processor; }
     public void                setProcessor(String v)                   { this.processor = v; }
+    public String              getPayoutStatus()                        { return payoutStatus; }
+    public void                setPayoutStatus(String v)                { this.payoutStatus = v; }
     public DamageInvestigation getDamageInvestigation()                 { return damageInvestigation; }
     public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
     public InsurancePayment    getInsurancePayment()                    { return insurancePayment; }

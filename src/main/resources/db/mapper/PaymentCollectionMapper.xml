@@ -12,7 +12,9 @@
         <result property="unpaidInstallmentCount" column="unpaid_installment_count"/>
         <result property="processingResult"       column="processing_result"
                 javaType="enums.ProcessingResult"/>
-        <result property="collectedAt"            column="collected_at"/>
+        <result property="collectedAt"      column="collected_at"/>
+        <result property="transferType"     column="transfer_type"/>
+        <result property="collectionStatus" column="collection_status"/>
     </resultMap>
 
     <sql id="columns">

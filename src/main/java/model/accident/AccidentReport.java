@@ -1,6 +1,5 @@
 package model.accident;
 
-import enums.AccidentDetailsType;
 import model.document.Document;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ import java.util.List;
 public class AccidentReport {
 
     private String accidentDescription;
-    private AccidentDetailsType accidentStatus;
+    private String accidentStatus;
     private LocalDateTime createdAt;
     private String damageDetails;
     private String reportNo;
@@ -24,7 +23,7 @@ public class AccidentReport {
     }
 
     public AccidentReport(String reportNo, String accidentDescription, String damageDetails,
-                          AccidentDetailsType accidentStatus, LocalDateTime createdAt) {
+                          String accidentStatus, LocalDateTime createdAt) {
         this.reportNo = reportNo;
         this.accidentDescription = accidentDescription;
         this.damageDetails = damageDetails;
@@ -52,8 +51,8 @@ public class AccidentReport {
     public void                setReportNo(String v)                 { this.reportNo = v; }
     public String              getAccidentDescription()              { return accidentDescription; }
     public void                setAccidentDescription(String v)      { this.accidentDescription = v; }
-    public AccidentDetailsType getAccidentStatus()                   { return accidentStatus; }
-    public void                setAccidentStatus(AccidentDetailsType v){ this.accidentStatus = v; }
+    public String              getAccidentStatus()                   { return accidentStatus; }
+    public void                setAccidentStatus(String v)           { this.accidentStatus = v; }
     public LocalDateTime       getCreatedAt()                        { return createdAt; }
     public void                setCreatedAt(LocalDateTime v)         { this.createdAt = v; }
     public String              getDamageDetails()                    { return damageDetails; }
