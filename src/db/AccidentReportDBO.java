@@ -130,8 +130,11 @@ public class AccidentReportDBO extends DBA {
     private AccidentReport mapAccidentReport(ResultSet resultSet) throws SQLException {
         AccidentReport report = new AccidentReport();
         report.setReportNo(resultSet.getString("report_no"));
+        report.setPolicyNumber(resultSet.getString("policy_number"));
         report.setAccidentDescription(resultSet.getString("accident_description"));
         report.setDamageDetails(resultSet.getString("damage_details"));
+        report.setAccidentAtText(resultSet.getString("accident_at_text"));
+        report.setDocumentSubmissionStatus(resultSet.getString("document_submission_status"));
         report.setCreatedAt(toLocalDateTime(resultSet.getTimestamp("created_at")));
         return report;
     }

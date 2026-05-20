@@ -15,6 +15,9 @@ public class AccidentReport {
     private LocalDateTime createdAt;
     private String damageDetails;
     private String reportNo;
+    private String policyNumber;
+    private String accidentAtText;
+    private String documentSubmissionStatus;
 
     private List<Document> documentList;
     private DamageInvestigation damageInvestigation;
@@ -62,6 +65,12 @@ public class AccidentReport {
     public void                setDocumentList(List<Document> v)     { this.documentList = v; }
     public DamageInvestigation getDamageInvestigation()              { return damageInvestigation; }
     public void                setDamageInvestigation(DamageInvestigation v){ this.damageInvestigation = v; }
+    public String              getPolicyNumber()                     { return policyNumber; }
+    public void                setPolicyNumber(String v)             { this.policyNumber = v; }
+    public String              getAccidentAtText()                   { return accidentAtText; }
+    public void                setAccidentAtText(String v)           { this.accidentAtText = v; }
+    public String              getDocumentSubmissionStatus()         { return documentSubmissionStatus; }
+    public void                setDocumentSubmissionStatus(String v) { this.documentSubmissionStatus = v; }
 
     @Override
     public String toString() {
