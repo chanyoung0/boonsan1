@@ -200,3 +200,140 @@ CREATE TABLE partner (
     evaluation_grade    VARCHAR(20),    -- EXCELLENT | GOOD | AVERAGE | POOR
     CONSTRAINT pk_partner PRIMARY KEY (id)
 );
+
+-- =====================================================
+-- 14. 심사 결과 (UnderwritingResultDBO)
+-- =====================================================
+CREATE TABLE underwriting_result (
+    result_id               VARCHAR(50)     NOT NULL,
+    underwriting_id         VARCHAR(50)     NOT NULL,
+    underwriting_result     VARCHAR(30),    -- APPROVED | SURCHARGE | REJECTED | PENDING
+    rejection_reason        TEXT,
+    surcharge_condition     VARCHAR(50),    -- NONE | HIGH_RISK_OCCUPATION | POOR_HEALTH | HAZARDOUS_ACTIVITY
+    confirmed_at            TIMESTAMP,
+    CONSTRAINT pk_underwriting_result PRIMARY KEY (result_id)
+);
+
+-- =====================================================
+-- 15. 언더라이팅 요청 (UnderwritingRequestDBO)
+-- =====================================================
+CREATE TABLE underwriting_request (
+    request_id              VARCHAR(50)     NOT NULL,
+    request_reason          VARCHAR(50),    -- ENDORSEMENT | REINSTATEMENT | RENEWAL | NEW_APPLICATION
+    request_status          VARCHAR(30),    -- PENDING | IN_PROGRESS | COMPLETED | CANCELLED
+    underwriting_type       VARCHAR(30),    -- AUTO | DIAGNOSIS | SPECIAL | GENERAL | IMAGE | FITNESS
+    underwriting_result     VARCHAR(30),    -- APPROVED | SURCHARGE | REJECTED | PENDING
+    rejection_reason        VARCHAR(50),    -- HIGH_RISK | INCOMPLETE_DOCUMENTS | FRAUD_SUSPICION | POLICY_LIMIT
+    surcharge_condition     VARCHAR(50),    -- NONE | HIGH_RISK_OCCUPATION | POOR_HEALTH | HAZARDOUS_ACTIVITY
+    applied_at              TIMESTAMP,
+    applied_id              TIMESTAMP,
+    CONSTRAINT pk_underwriting_request PRIMARY KEY (request_id)
+);
+
+-- =====================================================
+-- 16. 언더라이팅 이력 (UnderwritingHistoryDBO)
+-- =====================================================
+CREATE TABLE underwriting_history (
+    history_id                      VARCHAR(50)     NOT NULL,
+    underwriting_id                 VARCHAR(50)     NOT NULL,
+    name                            VARCHAR(100),
+    age                             INTEGER,
+    gender                          VARCHAR(10),    -- MALE | FEMALE | OTHER
+    occupation                      VARCHAR(100),
+    annual_income                   NUMERIC(15, 2),
+    bmi                             VARCHAR(20),
+    is_smoker                       BOOLEAN         DEFAULT FALSE,
+    is_medicated                    BOOLEAN         DEFAULT FALSE,
+    alcohol_consumption             VARCHAR(100),
+    past_medical_history            TEXT,
+    surgery_history                 TEXT,
+    family_history                  TEXT,
+    resident_registration_number    VARCHAR(20),
+    vehicle_number                  VARCHAR(50),
+    vehicle_model                   VARCHAR(100),
+    inquired_at                     TIMESTAMP,
+    CONSTRAINT pk_underwriting_history PRIMARY KEY (history_id)
+);
+
+-- =====================================================
+-- 17. 사고 이력 (AccidentHistoryDBO)
+-- =====================================================
+CREATE TABLE accident_history (
+    receipt_number          VARCHAR(50)     NOT NULL,
+    history_id              VARCHAR(50),    -- FK: underwriting_history.history_id
+    accident_type           VARCHAR(50),    -- VEHICLE_ACCIDENT | PROPERTY_DAMAGE | INJURY | FIRE | NATURAL_DISASTER
+    location                VARCHAR(200),
+    occurred_at             TIMESTAMP,
+    received_at             TIMESTAMP,
+    claimed_amount          NUMERIC(15, 2),
+    recognized_amount       NUMERIC(15, 2),
+    diagnosis_code          VARCHAR(50),
+    diagnosis_name          VARCHAR(200),
+    treatment_details       TEXT,
+    hospitalization_period  TIMESTAMP,
+    has_surgery             BOOLEAN         DEFAULT FALSE,
+    paid_at                 TIMESTAMP,
+    CONSTRAINT pk_accident_history PRIMARY KEY (receipt_number)
+);
+
+-- =====================================================
+-- 18. 보험금 지급 (InsurancePaymentDBO)
+-- =====================================================
+CREATE TABLE insurance_payment (
+    payment_id              VARCHAR(50)     NOT NULL,
+    investigation_id        VARCHAR(50),    -- FK: damage_investigation.investigation_id
+    payment_account         VARCHAR(100),
+    processor_employee_no   VARCHAR(50),
+    final_settlement_amount NUMERIC(15, 2),
+    final_repair_cost       NUMERIC(15, 2),
+    final_medical_expense   NUMERIC(15, 2),
+    final_lost_income       NUMERIC(15, 2),
+    retention_estimate      NUMERIC(15, 2),
+    payment_status          VARCHAR(30),    -- PENDING | PAID | REJECTED | DISPUTED | CLOSED
+    paid_at                 TIMESTAMP,
+    CONSTRAINT pk_insurance_payment PRIMARY KEY (payment_id)
+);
+
+-- =====================================================
+-- 19. 이의 신청 (ObjectionDBO)
+-- =====================================================
+CREATE TABLE objection (
+    objection_id            VARCHAR(50)     NOT NULL,
+    payment_id              VARCHAR(50),    -- FK: insurance_payment.payment_id
+    claimant_info           VARCHAR(200),
+    objection_reason        TEXT,
+    original_payment_details TEXT,
+    transfer_reason         TEXT,
+    adjusted_amount         NUMERIC(15, 2),
+    acceptance_status       VARCHAR(30),    -- PENDING | ACCEPTED | REJECTED | TRANSFERRED_TO_LEGAL
+    CONSTRAINT pk_objection PRIMARY KEY (objection_id)
+);
+
+-- =====================================================
+-- 20. 구상권 (SubrogationDBO)
+-- =====================================================
+CREATE TABLE subrogation (
+    subrogation_id          VARCHAR(50)     NOT NULL,
+    payment_id              VARCHAR(50),    -- FK: insurance_payment.payment_id
+    offender_name           VARCHAR(100),
+    offender_contact        VARCHAR(100),
+    fault_ratio             REAL,
+    payment_amount          NUMERIC(15, 2),
+    payment_deadline        TIMESTAMP,
+    deposit_account         VARCHAR(100),
+    subrogation_status      VARCHAR(30),    -- PENDING | IN_PROGRESS | COMPLETED | OBJECTED | CLOSED
+    CONSTRAINT pk_subrogation PRIMARY KEY (subrogation_id)
+);
+
+-- =====================================================
+-- 21. 외부 조사 의뢰 (OutsourceRequestDBO)
+-- =====================================================
+CREATE TABLE outsource_request (
+    request_id              VARCHAR(50)     NOT NULL,
+    investigation_id        VARCHAR(50),    -- FK: damage_investigation.investigation_id
+    partner_id              VARCHAR(50),    -- FK: partner.id
+    request_status          VARCHAR(30),    -- PENDING | IN_PROGRESS | COMPLETED | CANCELLED
+    result                  TEXT,
+    request_datetime        TIMESTAMP,
+    CONSTRAINT pk_outsource_request PRIMARY KEY (request_id)
+);

@@ -9,6 +9,8 @@ import java.util.List;
 // 외부 조사 의뢰 도메인 모델 — 손해조사 위탁 요청 정보 관리
 public class OutsourceRequest {
 
+    private String investigationId;
+    private String partnerId;
     private LocalDateTime requestDateTime;
     private String requestId;
     private RequestStatus requestStatus;
@@ -39,6 +41,10 @@ public class OutsourceRequest {
     // 위탁 요청 전송
     public void send()                 {}
 
+    public String         getInvestigationId()                   { return investigationId; }
+    public void           setInvestigationId(String v)          { this.investigationId = v; }
+    public String         getPartnerId()                        { return partnerId; }
+    public void           setPartnerId(String v)                { this.partnerId = v; }
     public LocalDateTime  getRequestDateTime()                  { return requestDateTime; }
     public void           setRequestDateTime(LocalDateTime v)   { this.requestDateTime = v; }
     public String         getRequestId()                        { return requestId; }

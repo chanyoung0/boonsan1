@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 // 구상권 도메인 모델 — 보험금 지급 후 제3자 구상 처리 정보 관리
 public class Subrogation {
 
+    private String paymentId;
     private String depositAccount;
     private float faultRatio;
     private String offenderContact;
@@ -59,6 +60,8 @@ public class Subrogation {
         this.subrogationStatus = SubrogationStatus.IN_PROGRESS;
     }
 
+    public String           getPaymentId()                          { return paymentId; }
+    public void             setPaymentId(String v)                  { this.paymentId = v; }
     public String           getDepositAccount()                     { return depositAccount; }
     public void             setDepositAccount(String v)             { this.depositAccount = v; }
     public float            getFaultRatio()                         { return faultRatio; }

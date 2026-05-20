@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 // 보험금 지급 도메인 모델 — 손해조사 결과 기반 보험금 지급 처리 정보 관리
 public class InsurancePayment {
 
+    private String investigationId;
     private BigDecimal finalLostIncome;
     private BigDecimal finalMedicalExpense;
     private BigDecimal finalRepairCost;
@@ -63,6 +64,8 @@ public class InsurancePayment {
         return paymentStatus;
     }
 
+    public String                  getInvestigationId()                          { return investigationId; }
+    public void                    setInvestigationId(String v)                  { this.investigationId = v; }
     public BigDecimal              getFinalLostIncome()                          { return finalLostIncome; }
     public void                    setFinalLostIncome(BigDecimal v)              { this.finalLostIncome = v; }
     public BigDecimal              getFinalMedicalExpense()                      { return finalMedicalExpense; }

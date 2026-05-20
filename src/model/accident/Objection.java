@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 // 이의 신청 도메인 모델 — 보험금 지급 결과에 대한 이의 신청 정보 관리
 public class Objection {
 
+    private String paymentId;
     private AcceptanceStatus acceptanceStatus;
     private BigDecimal adjustedAmount;
     private String claimantInfo;
@@ -44,6 +45,8 @@ public class Objection {
     // 법률과 이관
     public void transferToLegal() {}
 
+    public String           getPaymentId()                          { return paymentId; }
+    public void             setPaymentId(String v)                  { this.paymentId = v; }
     public AcceptanceStatus getAcceptanceStatus()                   { return acceptanceStatus; }
     public void             setAcceptanceStatus(AcceptanceStatus v) { this.acceptanceStatus = v; }
     public BigDecimal       getAdjustedAmount()                     { return adjustedAmount; }
