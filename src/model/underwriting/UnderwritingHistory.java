@@ -30,6 +30,8 @@ public class UnderwritingHistory {
     private String vehicleModel;
     private String vehicleNumber;
 
+    private String historyId;
+
     private List<AccidentHistory> accidentHistoryList;
 
     public UnderwritingHistory() {
@@ -58,6 +60,8 @@ public class UnderwritingHistory {
     // 심사 이력 수정
     public void updateHistory() {}
 
+    public String                 getHistoryId()                        { return historyId; }
+    public void                   setHistoryId(String v)               { this.historyId = v; }
     public int                    getAge()                              { return age; }
     public void                   setAge(int v)                        { this.age = v; }
     public String                 getAlcoholConsumption()              { return alcoholConsumption; }

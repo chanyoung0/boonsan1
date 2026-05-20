@@ -4,6 +4,40 @@
 -- =====================================================
 
 -- =====================================================
+-- 0-1. 피보험자 (InsuredPersonDBO)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS insured_person (
+    rrn                 VARCHAR(14)     NOT NULL,   -- 주민등록번호 (PK)
+    name                VARCHAR(100),
+    contact             VARCHAR(50),
+    CONSTRAINT pk_insured_person PRIMARY KEY (rrn)
+);
+
+-- =====================================================
+-- 0-2. U/W 심사 이력 (UnderwritingHistoryDBO)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS underwriting_history (
+    history_id          VARCHAR(50)     NOT NULL,
+    rrn                 VARCHAR(14),                -- FK → insured_person.rrn
+    name                VARCHAR(100),
+    age                 INTEGER,
+    gender              VARCHAR(10),                -- MALE | FEMALE | OTHER
+    occupation          VARCHAR(100),
+    bmi                 VARCHAR(10),
+    alcohol_consumption VARCHAR(50),
+    family_history      TEXT,
+    is_medicated        BOOLEAN         DEFAULT FALSE,
+    is_smoker           BOOLEAN         DEFAULT FALSE,
+    past_medical_history TEXT,
+    surgery_history     TEXT,
+    vehicle_model       VARCHAR(100),
+    vehicle_number      VARCHAR(20),
+    inquired_at         TIMESTAMP,
+    CONSTRAINT pk_underwriting_history PRIMARY KEY (history_id),
+    CONSTRAINT fk_uw_history_person FOREIGN KEY (rrn) REFERENCES insured_person (rrn)
+);
+
+-- =====================================================
 -- 1. 보험청약 심사 (UnderwritingDBO)
 -- =====================================================
 CREATE TABLE underwriting (

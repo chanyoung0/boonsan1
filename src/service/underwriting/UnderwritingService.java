@@ -1,12 +1,17 @@
 package service.underwriting;
 
 import db.InsuranceApplicationDBO;
+import db.InsuredPersonDBO;
 import db.UnderwritingDBO;
+import db.UnderwritingHistoryDBO;
 import enums.ApplicationStatus;
+import enums.Gender;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;
+import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
+import model.underwriting.UnderwritingHistory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +22,8 @@ public class UnderwritingService {
     private static final long REINSURANCE_THRESHOLD = 500_000_000L;
     private static final UnderwritingDBO underwritingDBO = new UnderwritingDBO();
     private static final InsuranceApplicationDBO applicationDBO = new InsuranceApplicationDBO();
+    private static final InsuredPersonDBO insuredPersonDBO = new InsuredPersonDBO();
+    private static final UnderwritingHistoryDBO historyDBO = new UnderwritingHistoryDBO();
 
     // 입력값 기반 심사점수 계산 (기본점수 100점에서 감점 합산)
     public static int calculateInputScore(String pastDisease, String medication, String surgery,
@@ -103,6 +110,57 @@ public class UnderwritingService {
         return applicationDBO.save(application, policyNumber, "APPROVED", appliedCondition);
     }
 
+    // 주민등록번호로 피보험자를 조회한다 (null이면 신규 고객)
+    public static InsuredPerson findInsuredPersonByRrn(String rrn) {
+        return insuredPersonDBO.findByRrn(rrn);
+    }
+
+    // 신규 피보험자를 insured_person 테이블에 저장한다
+    public static void saveInsuredPerson(String name, String rrn) {
+        InsuredPerson person = new InsuredPerson();
+        person.setName(name);
+        person.setResidentRegistrationNumber(rrn);
+        insuredPersonDBO.save(person);
+    }
+
+    // 주민등록번호로 가장 최근 심사 이력을 조회한다
+    public static UnderwritingHistory findLatestHistoryByRrn(String rrn) {
+        return historyDBO.findLatestByRrn(rrn);
+    }
+
+    // 심사 시 수집된 피보험자 위험정보를 underwriting_history 테이블에 저장한다
+    public static void saveUnderwritingHistory(String rrn, String name, String age,
+            String gender, String job, String pastDisease, String medication,
+            String surgery, String familyHistory, String smoking, String drinking,
+            String bmi, String vehicleModel, String vehicleNo) {
+        UnderwritingHistory history = new UnderwritingHistory();
+        history.setHistoryId("UWH-" + System.currentTimeMillis());
+        history.setResidentRegistrationNumber(rrn);
+        history.setName(name);
+        history.setAge(parseAge(age));
+        history.setGender(parseGender(gender));
+        history.setOccupation(job);
+        history.setBMI(bmi);
+        history.setAlcoholConsumption(drinking);
+        history.setFamilyHistory(familyHistory);
+        history.setMedicated(isYes(medication));
+        history.setSmoker(isYes(smoking));
+        history.setPastMedicalHistory(pastDisease);
+        history.setSurgeryHistory(surgery);
+        history.setVehicleModel(vehicleModel);
+        history.setVehicleNumber(vehicleNo);
+        history.setInquiredAt(LocalDateTime.now());
+        historyDBO.save(history);
+    }
+
+    // Gender enum을 한국어 문자열로 변환한다
+    public static String genderToKorean(Gender gender) {
+        if (gender == null) return "";
+        if (gender == Gender.MALE) return "남";
+        if (gender == Gender.FEMALE) return "여";
+        return "기타";
+    }
+
     public static List<Underwriting> getUnderwritingList() {
         return underwritingDBO.findAll();
     }
@@ -145,6 +203,13 @@ public class UnderwritingService {
         String v = val.trim();
         return v.equalsIgnoreCase("없음") || v.equalsIgnoreCase("N")
                 || v.equalsIgnoreCase("아니오") || v.matches("주\\s*0\\s*회.*");
+    }
+
+    private static Gender parseGender(String s) {
+        if (s == null) return null;
+        if ("남".equals(s.trim())) return Gender.MALE;
+        if ("여".equals(s.trim())) return Gender.FEMALE;
+        return Gender.OTHER;
     }
 
     private static int parseAge(String s) {

@@ -1,5 +1,6 @@
 package console.underwriting;
 
+import model.underwriting.UnderwritingHistory;
 import service.underwriting.UnderwritingService;
 
 import static common.ConsoleUtil.*;
@@ -18,13 +19,13 @@ public class UnderwritingConsole {
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
         String name = input("이름");
         input("생년월일 (YYYYMMDD)");
-        input("주민등록번호");
+        String rrn = input("주민등록번호");
         String vehicleNo = input("차량번호");
 
         long insuranceAmount = (long)(rnd.nextInt(20) + 1) * 100_000_000L;
 
         System.out.println("\n[시스템] 자사 DB에서 피보험자 이력을 조회 중...");
-        boolean isNewCustomer = rnd.nextInt(10) < 3;
+        boolean isNewCustomer = UnderwritingService.findInsuredPersonByRrn(rrn) == null;
         System.out.println("[시스템] 조회 결과: " + (isNewCustomer ? "신규 고객 (자사 U/W 이력 및 기존 계약 없음)" : "기존 고객 (이력 및 계약 존재)"));
 
         String age, gender, job, income, pastDisease, medication, surgery, familyHistory, smoking, drinking, bmi, vehicleModel;
@@ -44,44 +45,68 @@ public class UnderwritingConsole {
             bmi           = input("BMI");
             vehicleModel  = input("차량기종");
             System.out.println("[시스템] 신규 고객 정보가 자사 DB에 등록되었습니다.");
+            UnderwritingService.saveInsuredPerson(name, rrn);
         } else {
-            age = "35"; gender = "남"; job = "회사원"; income = "5,000만원";
-            pastDisease = "없음"; medication = "N"; surgery = "없음";
-            familyHistory = "없음"; smoking = "N"; drinking = "주 1회";
-            bmi = "22.4"; vehicleModel = "현대 소나타";
-            String existingPolicyNo = "P2023-004512";
+            UnderwritingHistory latestHistory = UnderwritingService.findLatestHistoryByRrn(rrn);
+            if (latestHistory != null) {
+                age          = latestHistory.getAge() > 0 ? String.valueOf(latestHistory.getAge()) : "";
+                gender       = UnderwritingService.genderToKorean(latestHistory.getGender());
+                job          = orEmpty(latestHistory.getOccupation());
+                income       = "";
+                pastDisease  = orEmpty(latestHistory.getPastMedicalHistory());
+                medication   = latestHistory.isMedicated() ? "Y" : "N";
+                surgery      = orEmpty(latestHistory.getSurgeryHistory());
+                familyHistory= orEmpty(latestHistory.getFamilyHistory());
+                smoking      = latestHistory.isSmoker() ? "Y" : "N";
+                drinking     = orEmpty(latestHistory.getAlcoholConsumption());
+                bmi          = orEmpty(latestHistory.getBMI());
+                vehicleModel = orEmpty(latestHistory.getVehicleModel());
+                if (latestHistory.getVehicleNumber() != null) vehicleNo = latestHistory.getVehicleNumber();
 
-            System.out.println("[시스템] 기존 U/W 이력 및 계약 정보:");
-            System.out.println("  ── 계약 기본정보 ───────────────────────────────────────");
-            System.out.println("  증권번호      : " + existingPolicyNo);
-            System.out.println("  계약상태      : 유효");
-            System.out.println("  피보험자      : " + name);
-            System.out.println("  나이: " + age + " | 성별: " + gender + " | 직업: " + job);
-            System.out.println("  BMI: " + bmi + " | 투약여부: " + medication + " | 흡연여부: " + smoking);
-            System.out.println("  차량기종: " + vehicleModel + " | 차량번호: " + vehicleNo);
+                System.out.println("[시스템] 기존 U/W 이력 및 계약 정보:");
+                System.out.println("  ── U/W 이력 기본정보 ─────────────────────────────────");
+                System.out.println("  피보험자      : " + name);
+                System.out.println("  나이: " + age + " | 성별: " + gender + " | 직업: " + job);
+                System.out.println("  BMI: " + bmi + " | 투약여부: " + medication + " | 흡연여부: " + smoking);
+                System.out.println("  차량기종: " + vehicleModel + " | 차량번호: " + vehicleNo);
 
-            System.out.print("\n[시스템] 갱신이 필요한 정보가 있습니까? (Y/N): ");
-            if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
-                String[] fieldLabels = {"직업", "연소득", "투약여부", "수술이력", "흡연여부", "음주량", "BMI", "차량기종", "차량번호"};
-                String[] fieldValues = {job, income, medication, surgery, smoking, drinking, bmi, vehicleModel, vehicleNo};
-                while (true) {
-                    System.out.println("\n  갱신할 항목을 선택하세요 (0: 완료):");
-                    for (int i = 0; i < fieldLabels.length; i++) {
-                        System.out.printf("    %d. %-10s현재값: %s%n", i + 1, fieldLabels[i], fieldValues[i]);
+                System.out.print("\n[시스템] 갱신이 필요한 정보가 있습니까? (Y/N): ");
+                if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
+                    String[] fieldLabels = {"직업", "연소득", "투약여부", "수술이력", "흡연여부", "음주량", "BMI", "차량기종", "차량번호"};
+                    String[] fieldValues = {job, income, medication, surgery, smoking, drinking, bmi, vehicleModel, vehicleNo};
+                    while (true) {
+                        System.out.println("\n  갱신할 항목을 선택하세요 (0: 완료):");
+                        for (int i = 0; i < fieldLabels.length; i++) {
+                            System.out.printf("    %d. %-10s현재값: %s%n", i + 1, fieldLabels[i], fieldValues[i]);
+                        }
+                        System.out.print("  >> 선택: ");
+                        String sel = sc.nextLine().trim();
+                        if ("0".equals(sel)) break;
+                        int idx;
+                        try { idx = Integer.parseInt(sel) - 1; } catch (NumberFormatException e) { idx = -1; }
+                        if (idx < 0 || idx >= fieldLabels.length) { System.out.println("  [오류] 올바른 번호를 입력하세요."); continue; }
+                        System.out.print("  새로운 " + fieldLabels[idx] + ": ");
+                        fieldValues[idx] = sc.nextLine().trim();
                     }
-                    System.out.print("  >> 선택: ");
-                    String sel = sc.nextLine().trim();
-                    if ("0".equals(sel)) break;
-                    int idx;
-                    try { idx = Integer.parseInt(sel) - 1; } catch (NumberFormatException e) { idx = -1; }
-                    if (idx < 0 || idx >= fieldLabels.length) { System.out.println("  [오류] 올바른 번호를 입력하세요."); continue; }
-                    System.out.print("  새로운 " + fieldLabels[idx] + ": ");
-                    fieldValues[idx] = sc.nextLine().trim();
+                    job = fieldValues[0]; income = fieldValues[1]; medication = fieldValues[2];
+                    surgery = fieldValues[3]; smoking = fieldValues[4]; drinking = fieldValues[5];
+                    bmi = fieldValues[6]; vehicleModel = fieldValues[7]; vehicleNo = fieldValues[8];
+                    System.out.println("[시스템] 수정된 정보가 자사 DB에 반영됩니다.");
                 }
-                job = fieldValues[0]; income = fieldValues[1]; medication = fieldValues[2];
-                surgery = fieldValues[3]; smoking = fieldValues[4]; drinking = fieldValues[5];
-                bmi = fieldValues[6]; vehicleModel = fieldValues[7]; vehicleNo = fieldValues[8];
-                System.out.println("[시스템] 수정된 정보가 자사 DB에 반영되었습니다.");
+            } else {
+                System.out.println("[시스템] 기존 고객이나 U/W 이력이 없습니다. 건강 정보를 새로 입력합니다.");
+                age           = input("나이");
+                gender        = input("성별 (남/여)");
+                job           = input("직업");
+                income        = input("연소득 (만원)");
+                pastDisease   = input("과거질병이력 (없으면 Enter)");
+                medication    = input("투약여부 (Y/N)");
+                surgery       = input("수술이력 (없으면 Enter)");
+                familyHistory = input("가족력 (없으면 Enter)");
+                smoking       = input("흡연여부 (Y/N)");
+                drinking      = input("음주량 (없으면 '없음')");
+                bmi           = input("BMI");
+                vehicleModel  = input("차량기종");
             }
         }
 
@@ -137,6 +162,10 @@ public class UnderwritingConsole {
             return;
         }
 
+        UnderwritingService.saveUnderwritingHistory(rrn, name, age, gender, job,
+                pastDisease, medication, surgery, familyHistory, smoking, drinking, bmi, vehicleModel, vehicleNo);
+        System.out.println("[시스템] 피보험자 U/W 이력이 underwriting_history 테이블에 저장되었습니다.");
+
         System.out.println("[시스템] 사원번호: " + empNo + " | 이름: " + empName + " | 부서: " + empDept);
         System.out.println("[시스템] 최종 심사결과: " + finalResult);
         System.out.println("[시스템] 심사번호: " + underwritingId);
@@ -151,6 +180,10 @@ public class UnderwritingConsole {
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
         policyIssuance(name, finalResult, insuranceAmount);
+    }
+
+    private static String orEmpty(String s) {
+        return s != null ? s : "";
     }
 
     private static int creditInfoInquiry(String name, int[] creditFlags) {
