@@ -59,6 +59,7 @@
         <mapper resource="db/mapper/TransferMapper.xml"/>
         <mapper resource="db/mapper/UnpaidNoticeMapper.xml"/>
         <mapper resource="db/mapper/DocumentMapper.xml"/>
+        <mapper resource="db/mapper/SubrogationMapper.xml"/>
     </mappers>
 
 </configuration>

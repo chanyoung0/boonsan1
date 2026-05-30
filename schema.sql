@@ -356,6 +356,21 @@ CREATE TABLE unpaid_notice (
 );
 
 -- =====================================================
+-- 23-1. 구상 (SubrogationDBO) — Unit 7
+-- =====================================================
+CREATE TABLE subrogation (
+    subrogation_id      VARCHAR(50) NOT NULL,
+    subrogation_status  VARCHAR(30),    -- PENDING | IN_PROGRESS | COMPLETED
+    offender_name       VARCHAR(100),
+    offender_contact    VARCHAR(50),
+    fault_ratio         REAL,
+    payment_amount      NUMERIC(15, 2),
+    deposit_account     VARCHAR(100),
+    payment_deadline    TIMESTAMP,
+    CONSTRAINT pk_subrogation PRIMARY KEY (subrogation_id)
+);
+
+-- =====================================================
 -- 23. 문서 (DocumentDBO) — Unit 6, 단일 테이블 + discriminator
 -- =====================================================
 CREATE TABLE document (

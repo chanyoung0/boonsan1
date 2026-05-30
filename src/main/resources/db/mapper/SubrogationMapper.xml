@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.SubrogationMapper">
+
+    <resultMap id="SubrogationResult" type="Subrogation">
+        <id     property="subrogationId"     column="subrogation_id"/>
+        <result property="subrogationStatus" column="subrogation_status"
+                javaType="enums.SubrogationStatus"/>
+        <result property="offenderName"      column="offender_name"/>
+        <result property="offenderContact"   column="offender_contact"/>
+        <result property="faultRatio"        column="fault_ratio"/>
+        <result property="paymentAmount"     column="payment_amount"/>
+        <result property="depositAccount"    column="deposit_account"/>
+        <result property="paymentDeadline"   column="payment_deadline"/>
+    </resultMap>
+
+    <sql id="columns">
+        subrogation_id, subrogation_status, offender_name, offender_contact,
+        fault_ratio, payment_amount, deposit_account, payment_deadline
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="SubrogationResult">
+        SELECT <include refid="columns"/>
+        FROM subrogation
+        WHERE subrogation_id = #{subrogationId}
+    </select>
+
+    <select id="findAll" resultMap="SubrogationResult">
+        SELECT <include refid="columns"/>
+        FROM subrogation
+        ORDER BY subrogation_id DESC
+    </select>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT subrogation_status
+        FROM subrogation
+        WHERE subrogation_id = #{subrogationId}
+    </select>
+
+    <insert id="insert" parameterType="Subrogation">
+        INSERT INTO subrogation (
+            subrogation_id, subrogation_status, offender_name, offender_contact,
+            fault_ratio, payment_amount, deposit_account, payment_deadline
+        ) VALUES (
+            #{subrogationId}, #{subrogationStatus}, #{offenderName}, #{offenderContact},
+            #{faultRatio}, #{paymentAmount}, #{depositAccount}, #{paymentDeadline}
+        )
+    </insert>
+
+</mapper>
