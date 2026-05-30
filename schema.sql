@@ -354,3 +354,29 @@ CREATE TABLE unpaid_notice (
     CONSTRAINT fk_unpaid_notice_collection FOREIGN KEY (collection_id)
         REFERENCES payment_collection(collection_id)
 );
+
+-- =====================================================
+-- 23. 문서 (DocumentDBO) — Unit 6, 단일 테이블 + discriminator
+-- =====================================================
+CREATE TABLE document (
+    document_id                 VARCHAR(50) NOT NULL,
+    document_type               VARCHAR(30),    -- ACCIDENT | PAYMENT_APPROVAL (discriminator)
+    status                      VARCHAR(30),    -- DocumentStatus enum
+    created_at                  TIMESTAMP,
+    -- AccidentDocument 전용 (nullable)
+    check_due_date              TIMESTAMP,
+    document_name               VARCHAR(50),    -- DocumentName enum
+    accident_document_type      VARCHAR(50),    -- DocumentType enum
+    submission_status           VARCHAR(30),    -- SubmissionStatus enum
+    -- PaymentApprovalDocument 전용 (nullable)
+    approval_status             VARCHAR(30),    -- ApprovalStatus enum
+    approved_at                 TIMESTAMP,
+    approver_employee_no        VARCHAR(50),
+    damage_adequacy_opinion     TEXT,
+    lost_income_amount          NUMERIC(15, 2),
+    medical_expense_amount      NUMERIC(15, 2),
+    remarks                     TEXT,
+    repair_cost_amount          NUMERIC(15, 2),
+    settlement_amount           NUMERIC(15, 2),
+    CONSTRAINT pk_document PRIMARY KEY (document_id)
+);

@@ -1,5 +1,6 @@
 package service.contract;
 
+import db.DocumentMapper;
 import db.PayoutMapper;
 import db.MyBatisSessionFactory;
 import enums.CalculationBasis;
@@ -8,9 +9,11 @@ import enums.PaymentCycle;
 import enums.PaymentType;
 import model.contract.Contract;
 import model.contract.Payout;
+import model.document.PaymentApprovalDocument;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -189,6 +192,25 @@ public class PayoutService {
 
     public static boolean isCancelled(String payoutId) {
         return "CANCELLED".equals(getPayoutStatus(payoutId));
+    }
+
+    public static String savePaymentApprovalDocument(PaymentApprovalDocument document) {
+        if (document == null) {
+            return null;
+        }
+        if (document.getDocumentId() == null) {
+            document.setDocumentId("DOC-P-" + System.currentTimeMillis());
+        }
+        if (document.getCreatedAt() == null) {
+            document.setCreatedAt(LocalDateTime.now());
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(DocumentMapper.class).insertPaymentApprovalDocument(document);
+            return rows > 0 ? document.getDocumentId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 지급 승인 서류 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     private static boolean savePayout(Payout payout, String payoutId, String policyNumber, String payoutStatus) {

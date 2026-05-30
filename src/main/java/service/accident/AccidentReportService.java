@@ -1,8 +1,10 @@
 package service.accident;
 
 import db.AccidentReportMapper;
+import db.DocumentMapper;
 import db.MyBatisSessionFactory;
 import model.accident.AccidentReport;
+import model.document.AccidentDocument;
 import org.apache.ibatis.session.SqlSession;
 
 import java.time.LocalDateTime;
@@ -112,6 +114,25 @@ public class AccidentReportService {
             return accidentStatus;
         }
         return "RECEIVED";
+    }
+
+    public static String saveAccidentDocument(AccidentDocument document) {
+        if (document == null) {
+            return null;
+        }
+        if (document.getDocumentId() == null) {
+            document.setDocumentId("DOC-A-" + System.currentTimeMillis());
+        }
+        if (document.getCreatedAt() == null) {
+            document.setCreatedAt(LocalDateTime.now());
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(DocumentMapper.class).insertAccidentDocument(document);
+            return rows > 0 ? document.getDocumentId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 서류 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static String resolveDocumentSubmissionStatus(String documentSubmissionStatus) {

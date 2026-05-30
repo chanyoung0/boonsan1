@@ -1,6 +1,11 @@
 package console.accident;
 
+import enums.DocumentName;
+import enums.DocumentStatus;
+import enums.DocumentType;
+import enums.SubmissionStatus;
 import model.accident.AccidentReport;
+import model.document.AccidentDocument;
 import service.accident.AccidentReportService;
 
 import static common.ConsoleUtil.*;
@@ -60,6 +65,22 @@ public class AccidentReportConsole {
             enter();
             documentSubmissionStatus = "SUBMITTED";
             accidentStatus = "INVESTIGATION_REQUIRED";
+
+            AccidentDocument accidentDocument = new AccidentDocument(
+                    null,
+                    DocumentStatus.SUBMITTED,
+                    LocalDateTime.now(),
+                    DocumentName.ACCIDENT_REPORT,
+                    DocumentType.ACCIDENT_REPORT,
+                    SubmissionStatus.SUBMITTED,
+                    LocalDateTime.now().plusDays(7)
+            );
+            String savedDocId = AccidentReportService.saveAccidentDocument(accidentDocument);
+            if (savedDocId != null) {
+                System.out.println("[시스템] 사고 서류 저장 완료 | 문서번호: " + savedDocId);
+            } else {
+                System.out.println("[경고] 사고 서류 저장에 실패했습니다.");
+            }
         }
 
         String reportNo = AccidentReportService.generateReportNo();

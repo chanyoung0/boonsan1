@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.DocumentMapper">
+
+    <resultMap id="DocumentBaseResult" type="Document">
+        <id     property="documentId" column="document_id"/>
+        <result property="status"     column="status"
+                javaType="enums.DocumentStatus"/>
+        <result property="createdAt"  column="created_at"/>
+        <discriminator javaType="string" column="document_type">
+            <case value="ACCIDENT" resultMap="AccidentDocumentResult"/>
+            <case value="PAYMENT_APPROVAL" resultMap="PaymentApprovalDocumentResult"/>
+        </discriminator>
+    </resultMap>
+
+    <resultMap id="AccidentDocumentResult" type="AccidentDocument" extends="DocumentBaseResult">
+        <result property="checkDueDate"     column="check_due_date"/>
+        <result property="documentName"     column="document_name"
+                javaType="enums.DocumentName"/>
+        <result property="documentType"     column="accident_document_type"
+                javaType="enums.DocumentType"/>
+        <result property="submissionStatus" column="submission_status"
+                javaType="enums.SubmissionStatus"/>
+    </resultMap>
+
+    <resultMap id="PaymentApprovalDocumentResult" type="PaymentApprovalDocument" extends="DocumentBaseResult">
+        <result property="approvalStatus"        column="approval_status"
+                javaType="enums.ApprovalStatus"/>
+        <result property="approvedAt"            column="approved_at"/>
+        <result property="approverEmployeeNo"    column="approver_employee_no"/>
+        <result property="damageAdequacyOpinion" column="damage_adequacy_opinion"/>
+        <result property="lostIncomeAmount"      column="lost_income_amount"/>
+        <result property="medicalExpenseAmount"  column="medical_expense_amount"/>
+        <result property="remarks"               column="remarks"/>
+        <result property="repairCostAmount"      column="repair_cost_amount"/>
+        <result property="settlementAmount"      column="settlement_amount"/>
+    </resultMap>
+
+    <sql id="allColumns">
+        document_id, document_type, status, created_at,
+        check_due_date, document_name, accident_document_type, submission_status,
+        approval_status, approved_at, approver_employee_no, damage_adequacy_opinion,
+        lost_income_amount, medical_expense_amount, remarks, repair_cost_amount,
+        settlement_amount
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="DocumentBaseResult">
+        SELECT <include refid="allColumns"/>
+        FROM document
+        WHERE document_id = #{documentId}
+    </select>
+
+    <select id="findAll" resultMap="DocumentBaseResult">
+        SELECT <include refid="allColumns"/>
+        FROM document
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insertAccidentDocument" parameterType="AccidentDocument">
+        INSERT INTO document (
+            document_id, document_type, status, created_at,
+            check_due_date, document_name, accident_document_type, submission_status
+        ) VALUES (
+            #{documentId}, 'ACCIDENT', #{status}, #{createdAt},
+            #{checkDueDate}, #{documentName}, #{documentType}, #{submissionStatus}
+        )
+    </insert>
+
+    <insert id="insertPaymentApprovalDocument" parameterType="PaymentApprovalDocument">
+        INSERT INTO document (
+            document_id, document_type, status, created_at,
+            approval_status, approved_at, approver_employee_no, damage_adequacy_opinion,
+            lost_income_amount, medical_expense_amount, remarks, repair_cost_amount,
+            settlement_amount
+        ) VALUES (
+            #{documentId}, 'PAYMENT_APPROVAL', #{status}, #{createdAt},
+            #{approvalStatus}, #{approvedAt}, #{approverEmployeeNo}, #{damageAdequacyOpinion},
+            #{lostIncomeAmount}, #{medicalExpenseAmount}, #{remarks}, #{repairCostAmount},
+            #{settlementAmount}
+        )
+    </insert>
+
+</mapper>
