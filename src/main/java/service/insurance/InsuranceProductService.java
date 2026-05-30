@@ -18,6 +18,23 @@ import java.util.List;
 
 public class InsuranceProductService {
 
+    private static final BigDecimal BASE_RATE = new BigDecimal("0.03");
+    private static final BigDecimal REFUND_RATE = new BigDecimal("0.9");
+
+    public static BigDecimal calculatePremium(BigDecimal insuredAmount) {
+        if (insuredAmount == null) {
+            return BigDecimal.ZERO;
+        }
+        return insuredAmount.multiply(BASE_RATE);
+    }
+
+    public static BigDecimal calculateMaturityRefund(BigDecimal totalPaidPremium) {
+        if (totalPaidPremium == null) {
+            return BigDecimal.ZERO;
+        }
+        return totalPaidPremium.multiply(REFUND_RATE);
+    }
+
     public static AutoInsurance designAutoInsurance(String productCode, String insurancePeriod,
                                                     BigDecimal insuredAmount, BigDecimal premium,
                                                     BigDecimal maturityRefund, int driverAge,

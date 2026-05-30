@@ -15,6 +15,15 @@ import java.util.List;
 // 분납/수금 관리 서비스
 public class PaymentCollectionService {
 
+    private static final BigDecimal LATE_FEE_RATE = new BigDecimal("0.05");
+
+    public static BigDecimal calculateLateFee(BigDecimal unpaidAmount) {
+        if (unpaidAmount == null) {
+            return BigDecimal.ZERO;
+        }
+        return unpaidAmount.multiply(LATE_FEE_RATE);
+    }
+
     private static final LocalDate DEFAULT_DUE_DATE = LocalDate.of(2024, 1, 15);
     private static final String[] TARGET_POLICY_NUMBERS = {
             "P2024-001234", "P2024-005678", "P2024-009012"

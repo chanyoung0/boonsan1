@@ -78,8 +78,10 @@ public class InsuranceProductConsole {
         String expectedInterestRate = input("예정이율");
         String expenseRate = input("사업비율");
         String discountSurchargeRate = input("할인/할증요율");
-        BigDecimal premium = inputAmount("보험료");
-        BigDecimal maturityRefund = inputAmount("만기환급금");
+        BigDecimal premium = InsuranceProductService.calculatePremium(insuredAmount);
+        BigDecimal maturityRefund = InsuranceProductService.calculateMaturityRefund(premium);
+        System.out.println("[시스템] 계산된 보험료: " + premium.toPlainString() + "원 (기본요율 3%)");
+        System.out.println("[시스템] 계산된 만기환급금: " + maturityRefund.toPlainString() + "원 (환급률 90%)");
         String expectedProfit = input("예상 손익");
 
         System.out.println("\n[특약정보 입력]");
