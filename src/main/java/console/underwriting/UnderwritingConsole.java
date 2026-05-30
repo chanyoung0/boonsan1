@@ -1,12 +1,18 @@
 package console.underwriting;
 
+import enums.AccidentType;
 import enums.AccountType;
 import enums.BankName;
+import enums.Gender;
+import model.accident.AccidentHistory;
 import model.person.Account;
 import model.person.InsuredPerson;
+import model.underwriting.UnderwritingHistory;
 import service.underwriting.UnderwritingService;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static common.ConsoleUtil.*;
 
@@ -28,6 +34,7 @@ public class UnderwritingConsole {
         String vehicleNo = input("차량번호");
 
         long insuranceAmount = (long)(rnd.nextInt(20) + 1) * 100_000_000L;
+        String currentHistoryId = null;
 
         System.out.println("\n[시스템] 자사 DB에서 피보험자 이력을 조회 중...");
         InsuredPerson existingPerson = UnderwritingService.findInsuredPersonById(residentRegistrationNumber);
@@ -70,12 +77,35 @@ public class UnderwritingConsole {
             }
             System.out.println("[시스템] 피보험자/계좌 정보가 자사 DB에 등록되었습니다.");
             System.out.println("  주민등록번호: " + residentRegistrationNumber + " | 계좌번호: " + accountNumber);
+
+            UnderwritingHistory history = buildUnderwritingHistory(name, residentRegistrationNumber, insuredPerson,
+                    age, gender, job, income, medication, surgery, familyHistory, smoking, drinking, bmi,
+                    vehicleModel, vehicleNo);
+            if (UnderwritingService.saveUnderwritingHistory(history)) {
+                currentHistoryId = history.getHistoryId();
+                System.out.println("[시스템] 심사 이력 등록 완료 | 이력번호: " + currentHistoryId);
+            } else {
+                System.out.println("[경고] 심사 이력 저장 실패. 이력 없이 진행합니다.");
+            }
         } else {
             age = "35"; gender = "남"; job = "회사원"; income = "5,000만원";
             pastDisease = "없음"; medication = "N"; surgery = "없음";
             familyHistory = "없음"; smoking = "N"; drinking = "주 1회";
             bmi = "22.4"; vehicleModel = "현대 소나타";
             String existingPolicyNo = "P2023-004512";
+
+            List<UnderwritingHistory> pastHistories = UnderwritingService.findHistoryByInsuredPerson(residentRegistrationNumber);
+            if (!pastHistories.isEmpty()) {
+                System.out.println("[시스템] 과거 심사 이력 " + pastHistories.size() + "건:");
+                for (UnderwritingHistory h : pastHistories) {
+                    System.out.println("  이력번호: " + h.getHistoryId()
+                            + " | 조회일시: " + h.getInquiredAt()
+                            + " | 나이: " + h.getAge() + " | 직업: " + h.getOccupation());
+                }
+                currentHistoryId = pastHistories.get(0).getHistoryId();
+            } else {
+                System.out.println("[시스템] 과거 심사 이력이 없습니다.");
+            }
 
             System.out.println("[시스템] 기존 U/W 이력 및 계약 정보:");
             System.out.println("  ── 계약 기본정보 ───────────────────────────────────────");
@@ -116,6 +146,15 @@ public class UnderwritingConsole {
         int[] creditFlags = new int[2];
         int creditDeduction = creditInfoInquiry(name, creditFlags);
         if (creditDeduction == Integer.MIN_VALUE) return;
+
+        if (creditFlags[0] == 1 && currentHistoryId != null) {
+            AccidentHistory accidentHistory = buildSimulatedAccidentHistory(currentHistoryId);
+            if (UnderwritingService.saveAccidentHistory(accidentHistory)) {
+                System.out.println("[시스템] 사고 이력 등록 완료 | 접수번호: " + accidentHistory.getReceiptNumber());
+            } else {
+                System.out.println("[경고] 사고 이력 저장 실패.");
+            }
+        }
 
         int score = UnderwritingService.calculateInputScore(pastDisease, medication, surgery,
                 familyHistory, smoking, drinking, bmi, age, creditFlags[0] == 1, creditFlags[1] == 1);
@@ -267,6 +306,67 @@ public class UnderwritingConsole {
         }
         enter();
         System.out.println("  [시스템] 청약번호 상태: '심사 완료'");
+    }
+
+    private static UnderwritingHistory buildUnderwritingHistory(String name, String rrn, InsuredPerson insuredPerson,
+                                                                String age, String gender, String job, String income,
+                                                                String medication, String surgery, String familyHistory,
+                                                                String smoking, String drinking, String bmi,
+                                                                String vehicleModel, String vehicleNo) {
+        UnderwritingHistory history = new UnderwritingHistory();
+        history.setHistoryId("UWH-" + System.currentTimeMillis());
+        history.setName(name);
+        history.setResidentRegistrationNumber(rrn);
+        history.setInsuredPerson(insuredPerson);
+        history.setAge(parseIntOrZero(age));
+        history.setGender(resolveGender(gender));
+        history.setOccupation(job);
+        history.setAnnualIncome(parseAnnualIncome(income));
+        history.setInquiredAt(LocalDateTime.now());
+        history.setVehicleModel(vehicleModel);
+        history.setVehicleNumber(vehicleNo);
+        history.setBMI(bmi);
+        history.setPastMedicalHistory(surgery);
+        history.setMedicated("Y".equalsIgnoreCase(medication));
+        history.setSurgeryHistory(surgery);
+        history.setFamilyHistory(familyHistory);
+        history.setSmoker("Y".equalsIgnoreCase(smoking));
+        history.setAlcoholConsumption(drinking);
+        return history;
+    }
+
+    private static AccidentHistory buildSimulatedAccidentHistory(String historyId) {
+        AccidentHistory ah = new AccidentHistory();
+        ah.setReceiptNumber("AH-" + System.currentTimeMillis());
+        ah.setHistoryId(historyId);
+        ah.setAccidentType(AccidentType.VEHICLE_ACCIDENT);
+        ah.setLocation("미상");
+        ah.setOccurredAt(LocalDateTime.now().minusYears(1));
+        ah.setReceivedAt(LocalDateTime.now().minusYears(1));
+        ah.setClaimedAmount(BigDecimal.ZERO);
+        ah.setRecognizedAmount(BigDecimal.ZERO);
+        ah.setHasSurgery(false);
+        return ah;
+    }
+
+    private static int parseIntOrZero(String s) {
+        if (s == null) return 0;
+        try { return Integer.parseInt(s.replaceAll("[^0-9]", "")); } catch (NumberFormatException e) { return 0; }
+    }
+
+    private static BigDecimal parseAnnualIncome(String s) {
+        if (s == null || s.trim().isEmpty()) return BigDecimal.ZERO;
+        String digits = s.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) return BigDecimal.ZERO;
+        try { return new BigDecimal(digits); } catch (NumberFormatException e) { return BigDecimal.ZERO; }
+    }
+
+    private static Gender resolveGender(String s) {
+        if (s == null) return Gender.OTHER;
+        String v = s.trim();
+        if (v.equals("남") || v.equalsIgnoreCase("M") || v.equalsIgnoreCase("MALE")) return Gender.MALE;
+        if (v.equals("여") || v.equalsIgnoreCase("F") || v.equalsIgnoreCase("FEMALE")) return Gender.FEMALE;
+        return Gender.OTHER;
     }
 
     private static BankName resolveBankName(String value) {

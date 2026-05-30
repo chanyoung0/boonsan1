@@ -10,6 +10,7 @@ import java.util.List;
 // 사고 이력 도메인 모델 — 피보험자의 과거 사고 및 청구 이력 관리
 public class AccidentHistory {
 
+    private String historyId;
     private AccidentType accidentType;
     private BigDecimal claimedAmount;
     private String diagnosisCode;
@@ -53,6 +54,8 @@ public class AccidentHistory {
     // 사고 이력 목록 조회
     public List<AccidentHistory> getAccidentHistory() { return new ArrayList<>(); }
 
+    public String         getHistoryId()                        { return historyId; }
+    public void           setHistoryId(String v)                { this.historyId = v; }
     public AccidentType   getAccidentType()                     { return accidentType; }
     public void           setAccidentType(AccidentType v)       { this.accidentType = v; }
     public BigDecimal     getClaimedAmount()                    { return claimedAmount; }

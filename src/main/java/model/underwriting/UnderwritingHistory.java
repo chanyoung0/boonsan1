@@ -12,6 +12,7 @@ import java.util.List;
 // 언더라이팅 이력 도메인 모델 — 피보험자 심사 판단 결과 이력 관리
 public class UnderwritingHistory {
 
+    private String historyId;
     private int age;
     private String alcoholConsumption;
     private BigDecimal annualIncome;
@@ -58,6 +59,8 @@ public class UnderwritingHistory {
     // 심사 이력 수정
     public void updateHistory() {}
 
+    public String                 getHistoryId()                       { return historyId; }
+    public void                   setHistoryId(String v)               { this.historyId = v; }
     public int                    getAge()                              { return age; }
     public void                   setAge(int v)                        { this.age = v; }
     public String                 getAlcoholConsumption()              { return alcoholConsumption; }

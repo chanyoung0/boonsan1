@@ -51,6 +51,8 @@
         <mapper resource="db/mapper/PartnerMapper.xml"/>
         <mapper resource="db/mapper/AccountMapper.xml"/>
         <mapper resource="db/mapper/InsuredPersonMapper.xml"/>
+        <mapper resource="db/mapper/UnderwritingHistoryMapper.xml"/>
+        <mapper resource="db/mapper/AccidentHistoryMapper.xml"/>
     </mappers>
 
 </configuration>

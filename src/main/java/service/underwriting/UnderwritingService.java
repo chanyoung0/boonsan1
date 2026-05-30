@@ -1,17 +1,21 @@
 package service.underwriting;
 
+import db.AccidentHistoryMapper;
 import db.AccountMapper;
 import db.InsuranceApplicationMapper;
 import db.InsuredPersonMapper;
+import db.UnderwritingHistoryMapper;
 import db.UnderwritingMapper;
 import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;
+import model.accident.AccidentHistory;
 import model.person.Account;
 import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
+import model.underwriting.UnderwritingHistory;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
@@ -75,6 +79,39 @@ public class UnderwritingService {
         } catch (Exception e) {
             System.out.println("[DB 오류] 피보험자 조회 실패: " + e.getMessage());
             return null;
+        }
+    }
+
+    public static boolean saveUnderwritingHistory(UnderwritingHistory history) {
+        if (history == null) {
+            return false;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(UnderwritingHistoryMapper.class).insert(history) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사이력 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean saveAccidentHistory(AccidentHistory accidentHistory) {
+        if (accidentHistory == null) {
+            return false;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AccidentHistoryMapper.class).insert(accidentHistory) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고이력 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static List<UnderwritingHistory> findHistoryByInsuredPerson(String residentRegistrationNumber) {
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(UnderwritingHistoryMapper.class).findByInsuredPerson(residentRegistrationNumber);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사이력 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 
