@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.UnpaidNoticeMapper">
+
+    <resultMap id="UnpaidNoticeResult" type="UnpaidNotice">
+        <id     property="noticeId"      column="notice_id"/>
+        <result property="collectionId"  column="collection_id"/>
+        <result property="unpaidAmount"  column="unpaid_amount"/>
+        <result property="dueDate"       column="due_date"/>
+        <result property="paymentMethod" column="payment_method"
+                javaType="enums.PaymentMethod"/>
+        <result property="sentAt"        column="sent_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        notice_id, collection_id, unpaid_amount, due_date, payment_method, sent_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="UnpaidNoticeResult">
+        SELECT <include refid="columns"/>
+        FROM unpaid_notice
+        WHERE notice_id = #{noticeId}
+    </select>
+
+    <select id="findAll" resultMap="UnpaidNoticeResult">
+        SELECT <include refid="columns"/>
+        FROM unpaid_notice
+        ORDER BY sent_at DESC
+    </select>
+
+    <insert id="insert" parameterType="UnpaidNotice">
+        INSERT INTO unpaid_notice (notice_id, collection_id, unpaid_amount, due_date, payment_method, sent_at)
+        VALUES (#{noticeId}, #{collectionId}, #{unpaidAmount}, #{dueDate}, #{paymentMethod}, #{sentAt})
+    </insert>
+
+</mapper>

@@ -1,8 +1,15 @@
 package console.contract;
 
+import enums.PaymentMethod;
+import enums.TransferType;
 import model.contract.PaymentCollection;
+import model.contract.Transfer;
+import model.contract.UnpaidNotice;
+import model.person.Manager;
 import service.contract.PaymentCollectionService;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static common.ConsoleUtil.*;
@@ -47,17 +54,56 @@ public class PaymentCollectionConsole {
 
         if (!allSuccess) {
             System.out.println("[시스템] 성공 2건 / 실패 1건 | 미납 계약: P2024-009012 (이철수, 220,000원)");
-            System.out.println(PaymentCollectionService.createUnpaidNoticeSummary(paymentCollection));
-            System.out.println("[시스템] P2024-009012 계약상태는 현재 콘솔 흐름에서 '미납'으로 처리합니다.");
 
             String unpaidCollectionId = PaymentCollectionService.findFirstUnpaidCollectionId(savedCollectionIds);
+            BigDecimal billed = BigDecimal.valueOf(220_000L);
+            BigDecimal collected = BigDecimal.ZERO;
+            BigDecimal unpaidAmount = PaymentCollectionService.calculateUnpaidAmount(billed, collected);
+            System.out.println("[시스템] 미납금액 계산: 청구액 " + billed.toPlainString()
+                    + "원 - 수금액 " + collected.toPlainString()
+                    + "원 = " + unpaidAmount.toPlainString() + "원");
+
+            UnpaidNotice notice = new UnpaidNotice(
+                    unpaidAmount,
+                    LocalDateTime.now().plusDays(15),
+                    PaymentMethod.AUTO_TRANSFER,
+                    LocalDateTime.now()
+            );
+            notice.setCollectionId(unpaidCollectionId);
+            String savedNoticeId = PaymentCollectionService.saveUnpaidNotice(notice);
+            if (savedNoticeId != null) {
+                System.out.println("[시스템] 미납 안내장 저장 완료 | 안내번호: " + savedNoticeId
+                        + " | 미납금액: " + unpaidAmount.toPlainString() + "원");
+            } else {
+                System.out.println("[오류] 미납 안내장 저장에 실패했습니다.");
+            }
+            System.out.println("[시스템] P2024-009012 계약상태는 현재 콘솔 흐름에서 '미납'으로 처리합니다.");
+
             System.out.print("\n[시스템] 미납 지속 계약을 이관 처리하시겠습니까? (Y/N): ");
             if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
                 System.out.println("  1. 방문수금  2. 이관");
                 System.out.print(">> 선택: ");
                 String transferChoice = sc.nextLine().trim();
                 if (PaymentCollectionService.transferUnpaidCollection(unpaidCollectionId, transferChoice)) {
-                    System.out.println(PaymentCollectionService.createTransferSummary(transferChoice));
+                    String managerNo = input("이관 담당자 사원번호 (예: M002)");
+                    Manager assignee = PaymentCollectionService.findManagerByEmployeeNo(managerNo);
+                    if (assignee == null) {
+                        System.out.println("[경고] 사원번호 " + managerNo + " 미존재. 시드 담당자 M002로 대체합니다.");
+                        assignee = PaymentCollectionService.findManagerByEmployeeNo("M002");
+                    }
+                    Transfer transfer = new Transfer(
+                            resolveTransferType(transferChoice),
+                            assignee,
+                            LocalDateTime.now()
+                    );
+                    transfer.setCollectionId(unpaidCollectionId);
+                    String savedTransferId = PaymentCollectionService.saveTransfer(transfer);
+                    if (savedTransferId != null) {
+                        System.out.println("[시스템] 이관 저장 완료 | 이관번호: " + savedTransferId
+                                + " | 담당자: " + (assignee != null ? assignee.getName() + " (" + assignee.getEmployeeNo() + ")" : "미지정"));
+                    } else {
+                        System.out.println("[오류] 이관 저장에 실패했습니다.");
+                    }
                     System.out.println("[시스템] 수금번호 " + unpaidCollectionId + " 상태가 TRANSFERRED로 갱신되었습니다.");
                 } else {
                     System.out.println("[오류] 미납 수금 이관 상태 갱신에 실패했습니다.");
@@ -70,5 +116,9 @@ public class PaymentCollectionConsole {
         enter();
         System.out.println(PaymentCollectionService.createCollectionListSummary());
         System.out.println("[시스템] 수금 처리 결과가 DB에 저장되었습니다.");
+    }
+
+    private static TransferType resolveTransferType(String choice) {
+        return "2".equals(choice) ? TransferType.DEPARTMENT_CHANGE : TransferType.VISIT_COLLECTION;
     }
 }

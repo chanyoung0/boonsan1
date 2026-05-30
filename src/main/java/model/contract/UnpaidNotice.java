@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 // 미납 안내 도메인 모델 — 미납 보험료 안내장 발송 정보 관리
 public class UnpaidNotice {
 
+    private String noticeId;
+    private String collectionId;
     private LocalDateTime dueDate;
     private PaymentMethod paymentMethod;
     private LocalDateTime sentAt;
@@ -26,6 +28,10 @@ public class UnpaidNotice {
     public void calculateUnpaidAmount() {}
     public void sendNotice()            {}
 
+    public String         getNoticeId()                   { return noticeId; }
+    public void           setNoticeId(String v)           { this.noticeId = v; }
+    public String         getCollectionId()               { return collectionId; }
+    public void           setCollectionId(String v)       { this.collectionId = v; }
     public LocalDateTime  getDueDate()                    { return dueDate; }
     public void           setDueDate(LocalDateTime v)     { this.dueDate = v; }
     public PaymentMethod  getPaymentMethod()              { return paymentMethod; }

@@ -323,3 +323,34 @@ CREATE TABLE manager (
 INSERT INTO manager (employee_no, name, department) VALUES ('M001', '김상우', '계약관리1팀') ON CONFLICT (employee_no) DO NOTHING;
 INSERT INTO manager (employee_no, name, department) VALUES ('M002', '박지영', '수금이관팀') ON CONFLICT (employee_no) DO NOTHING;
 INSERT INTO manager (employee_no, name, department) VALUES ('M003', '이태준', '방문수금팀') ON CONFLICT (employee_no) DO NOTHING;
+
+-- =====================================================
+-- 21. 이관 (TransferDBO) — Unit 5
+-- =====================================================
+CREATE TABLE transfer (
+    transfer_id             VARCHAR(50) NOT NULL,
+    collection_id           VARCHAR(50),     -- FK to payment_collection
+    manager_employee_no     VARCHAR(50),     -- FK to manager
+    transfer_type           VARCHAR(30),     -- VISIT_COLLECTION | CANCELLATION | DEPARTMENT_CHANGE
+    transferred_at          TIMESTAMP,
+    CONSTRAINT pk_transfer PRIMARY KEY (transfer_id),
+    CONSTRAINT fk_transfer_collection FOREIGN KEY (collection_id)
+        REFERENCES payment_collection(collection_id),
+    CONSTRAINT fk_transfer_manager FOREIGN KEY (manager_employee_no)
+        REFERENCES manager(employee_no)
+);
+
+-- =====================================================
+-- 22. 미납 안내 (UnpaidNoticeDBO) — Unit 5
+-- =====================================================
+CREATE TABLE unpaid_notice (
+    notice_id           VARCHAR(50) NOT NULL,
+    collection_id       VARCHAR(50),     -- FK to payment_collection
+    unpaid_amount       NUMERIC(15, 2),
+    due_date            TIMESTAMP,
+    payment_method      VARCHAR(30),     -- AUTO_TRANSFER | BANK_TRANSFER | CREDIT_CARD | VISIT_COLLECTION
+    sent_at             TIMESTAMP,
+    CONSTRAINT pk_unpaid_notice PRIMARY KEY (notice_id),
+    CONSTRAINT fk_unpaid_notice_collection FOREIGN KEY (collection_id)
+        REFERENCES payment_collection(collection_id)
+);

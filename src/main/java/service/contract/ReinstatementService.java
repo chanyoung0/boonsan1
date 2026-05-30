@@ -7,6 +7,7 @@ import model.underwriting.UnderwritingRequest;
 import org.apache.ibatis.session.SqlSession;
 import service.underwriting.UnderwritingService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,14 @@ public class ReinstatementService {
     // 부활 흐름에서 발생한 심사 요청을 저장한다.
     public static String recordUnderwritingRequest(UnderwritingRequest request) {
         return UnderwritingService.saveUnderwritingRequest(request);
+    }
+
+    // 미납 보험료 = 미납 회차 × 회당 보험료
+    public static BigDecimal calculateUnpaidPremium(int unpaidInstallmentCount, BigDecimal premiumPerInstallment) {
+        if (unpaidInstallmentCount <= 0 || premiumPerInstallment == null) {
+            return BigDecimal.ZERO;
+        }
+        return premiumPerInstallment.multiply(BigDecimal.valueOf(unpaidInstallmentCount));
     }
 
     // 계약 상태 기준 부활 가능 여부 판단

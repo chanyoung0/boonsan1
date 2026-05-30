@@ -2,9 +2,13 @@ package service.contract;
 
 import db.ManagerMapper;
 import db.PaymentCollectionMapper;
+import db.TransferMapper;
+import db.UnpaidNoticeMapper;
 import db.MyBatisSessionFactory;
 import enums.ProcessingResult;
 import model.contract.PaymentCollection;
+import model.contract.Transfer;
+import model.contract.UnpaidNotice;
 import model.person.Manager;
 import org.apache.ibatis.session.SqlSession;
 
@@ -43,6 +47,45 @@ public class PaymentCollectionService {
             return s.getMapper(ManagerMapper.class).findById(employeeNo);
         } catch (Exception e) {
             System.out.println("[DB 오류] 담당자 조회 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static BigDecimal calculateUnpaidAmount(BigDecimal billedAmount, BigDecimal collectedAmount) {
+        BigDecimal billed = billedAmount == null ? BigDecimal.ZERO : billedAmount;
+        BigDecimal collected = collectedAmount == null ? BigDecimal.ZERO : collectedAmount;
+        BigDecimal diff = billed.subtract(collected);
+        return diff.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : diff;
+    }
+
+    public static String saveTransfer(Transfer transfer) {
+        if (transfer == null) {
+            return null;
+        }
+        if (transfer.getTransferId() == null) {
+            transfer.setTransferId("TR-" + System.currentTimeMillis());
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(TransferMapper.class).insert(transfer);
+            return rows > 0 ? transfer.getTransferId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 이관 저장 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static String saveUnpaidNotice(UnpaidNotice notice) {
+        if (notice == null) {
+            return null;
+        }
+        if (notice.getNoticeId() == null) {
+            notice.setNoticeId("UN-" + System.currentTimeMillis());
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnpaidNoticeMapper.class).insert(notice);
+            return rows > 0 ? notice.getNoticeId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 미납안내 저장 실패: " + e.getMessage());
             return null;
         }
     }
