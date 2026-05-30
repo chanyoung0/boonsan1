@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 // 언더라이팅 결과 도메인 모델 — 심사 최종 결과 정보 관리
 public class UnderwritingResult {
 
+    private String resultId;
+    private String underwritingId;
     private LocalDateTime confirmedAt;
     private String rejectionReason;
     private SurchargeCondition surchargeCondition;
@@ -29,6 +31,10 @@ public class UnderwritingResult {
     // 심사 결과 등록
     public void registerResult() {}
 
+    public String               getResultId()                       { return resultId; }
+    public void                 setResultId(String v)               { this.resultId = v; }
+    public String               getUnderwritingId()                 { return underwritingId; }
+    public void                 setUnderwritingId(String v)         { this.underwritingId = v; }
     public LocalDateTime        getConfirmedAt()                    { return confirmedAt; }
     public void                 setConfirmedAt(LocalDateTime v)     { this.confirmedAt = v; }
     public String               getRejectionReason()                { return rejectionReason; }

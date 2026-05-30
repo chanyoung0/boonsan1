@@ -5,14 +5,19 @@ import enums.RequestStatus;
 import enums.UnderwritingResultType;
 import enums.UnderwritingType;
 import model.underwriting.UnderwritingRequest;
+import model.underwriting.UnderwritingResult;
+import service.contract.EndorsementService;
+import service.contract.ReinstatementService;
+import service.underwriting.UnderwritingService;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 import java.util.Random;
 
 public class ConsoleUtil {
 
-    public static final Scanner sc = new Scanner(System.in);
+    public static final Scanner sc = new Scanner(System.in, StandardCharsets.UTF_8);
     public static final Random rnd = new Random();
 
     public static String input(String label) {
@@ -56,6 +61,15 @@ public class ConsoleUtil {
                 RequestStatus.PENDING
         );
         underwritingRequest.requestUnderwriting();
+
+        String savedRequestId = "부활".equals(type)
+                ? ReinstatementService.recordUnderwritingRequest(underwritingRequest)
+                : EndorsementService.recordUnderwritingRequest(underwritingRequest);
+        if (savedRequestId != null) {
+            System.out.println("  [시스템] UnderwritingRequest 저장 완료 | 요청번호: " + savedRequestId);
+        } else {
+            System.out.println("  [경고] UnderwritingRequest 저장 실패. 흐름은 계속 진행합니다.");
+        }
         System.out.println("  [시스템] UnderwritingRequest 생성 완료 | 상태: "
                 + underwritingRequest.getRequestStatus()
                 + " | 요청사유: " + underwritingRequest.getRequestReason()
@@ -89,7 +103,19 @@ public class ConsoleUtil {
         System.out.println("  [시스템] UnderwritingRequest 상태: "
                 + underwritingRequest.getRequestStatus()
                 + " | 결과유형: " + underwritingRequest.getUnderwritingResult());
-        System.out.println("  [시스템] 심사 요청 내역이 DB에 저장되었습니다.");
+
+        UnderwritingResult underwritingResult = new UnderwritingResult();
+        underwritingResult.setUnderwritingResult(resolveUnderwritingResultType(r));
+        underwritingResult.setConfirmedAt(LocalDateTime.now());
+        if (UnderwritingResultType.REJECTED == underwritingResult.getUnderwritingResult()) {
+            underwritingResult.setRejectionReason("심사 기준 미달");
+        }
+        String savedResultId = UnderwritingService.saveUnderwritingResult(underwritingResult);
+        if (savedResultId != null) {
+            System.out.println("  [시스템] UnderwritingResult 저장 완료 | 결과번호: " + savedResultId);
+        } else {
+            System.out.println("  [경고] UnderwritingResult 저장 실패.");
+        }
         return result;
     }
 

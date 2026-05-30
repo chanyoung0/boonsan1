@@ -6,6 +6,8 @@ import db.InsuranceApplicationMapper;
 import db.InsuredPersonMapper;
 import db.UnderwritingHistoryMapper;
 import db.UnderwritingMapper;
+import db.UnderwritingRequestMapper;
+import db.UnderwritingResultMapper;
 import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
@@ -16,6 +18,8 @@ import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
 import model.underwriting.UnderwritingHistory;
+import model.underwriting.UnderwritingRequest;
+import model.underwriting.UnderwritingResult;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
@@ -112,6 +116,38 @@ public class UnderwritingService {
         } catch (Exception e) {
             System.out.println("[DB 오류] 심사이력 조회 실패: " + e.getMessage());
             return new ArrayList<>();
+        }
+    }
+
+    public static String saveUnderwritingRequest(UnderwritingRequest request) {
+        if (request == null) {
+            return null;
+        }
+        if (request.getRequestId() == null) {
+            request.setRequestId("UWREQ-" + System.currentTimeMillis());
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnderwritingRequestMapper.class).insert(request);
+            return rows > 0 ? request.getRequestId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사요청 저장 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static String saveUnderwritingResult(UnderwritingResult result) {
+        if (result == null) {
+            return null;
+        }
+        if (result.getResultId() == null) {
+            result.setResultId("UWRES-" + System.currentTimeMillis());
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnderwritingResultMapper.class).insert(result);
+            return rows > 0 ? result.getResultId() : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사결과 저장 실패: " + e.getMessage());
+            return null;
         }
     }
 

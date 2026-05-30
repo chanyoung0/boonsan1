@@ -275,3 +275,37 @@ CREATE TABLE accident_history (
     CONSTRAINT fk_accident_history_uw_history FOREIGN KEY (history_id)
         REFERENCES underwriting_history(history_id)
 );
+
+-- =====================================================
+-- 18. 심사 요청 (UnderwritingRequestDBO) — Unit 3
+-- =====================================================
+CREATE TABLE underwriting_request (
+    request_id              VARCHAR(50) NOT NULL,
+    underwriting_id         VARCHAR(50),                -- nullable FK to underwriting
+    applied_at              TIMESTAMP,
+    applied_id              TIMESTAMP,
+    rejection_reason        VARCHAR(50),
+    request_reason          VARCHAR(50),                -- ENDORSEMENT | REINSTATEMENT
+    request_status          VARCHAR(30),                -- PENDING | COMPLETED
+    surcharge_condition     VARCHAR(50),
+    underwriting_result     VARCHAR(30),                -- APPROVED | SURCHARGE | REJECTED
+    underwriting_type       VARCHAR(30),                -- GENERAL | AUTO 등
+    CONSTRAINT pk_underwriting_request PRIMARY KEY (request_id),
+    CONSTRAINT fk_uw_request_uw FOREIGN KEY (underwriting_id)
+        REFERENCES underwriting(underwriting_id)
+);
+
+-- =====================================================
+-- 19. 심사 결과 (UnderwritingResultDBO) — Unit 3
+-- =====================================================
+CREATE TABLE underwriting_result (
+    result_id               VARCHAR(50) NOT NULL,
+    underwriting_id         VARCHAR(50),                -- nullable FK to underwriting
+    confirmed_at            TIMESTAMP,
+    rejection_reason        TEXT,
+    surcharge_condition     VARCHAR(50),
+    underwriting_result     VARCHAR(30),                -- APPROVED | SURCHARGE | REJECTED
+    CONSTRAINT pk_underwriting_result PRIMARY KEY (result_id),
+    CONSTRAINT fk_uw_result_uw FOREIGN KEY (underwriting_id)
+        REFERENCES underwriting(underwriting_id)
+);

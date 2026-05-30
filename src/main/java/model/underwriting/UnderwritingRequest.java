@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 // 언더라이팅 요청 도메인 모델 — 배서/부활 심사 요청 정보 관리
 public class UnderwritingRequest {
 
+    private String requestId;
+    private String underwritingId;
     private LocalDateTime appliedAt;
     private LocalDateTime appliedId;
     private RejectionReason rejectionReason;
@@ -40,6 +42,10 @@ public class UnderwritingRequest {
     // 언더라이팅 요청
     public void requestUnderwriting() {}
 
+    public String               getRequestId()                          { return requestId; }
+    public void                 setRequestId(String v)                  { this.requestId = v; }
+    public String               getUnderwritingId()                     { return underwritingId; }
+    public void                 setUnderwritingId(String v)             { this.underwritingId = v; }
     public LocalDateTime        getAppliedAt()                          { return appliedAt; }
     public void                 setAppliedAt(LocalDateTime v)           { this.appliedAt = v; }
     public LocalDateTime        getAppliedId()                          { return appliedId; }

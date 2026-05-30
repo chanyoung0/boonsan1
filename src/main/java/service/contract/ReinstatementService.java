@@ -3,7 +3,9 @@ package service.contract;
 import db.ReinstatementMapper;
 import db.MyBatisSessionFactory;
 import model.contract.Reinstatement;
+import model.underwriting.UnderwritingRequest;
 import org.apache.ibatis.session.SqlSession;
+import service.underwriting.UnderwritingService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,6 +13,11 @@ import java.util.List;
 
 // 부활 관리 서비스 — 부활 가능 여부 판단, DB 저장 담당
 public class ReinstatementService {
+
+    // 부활 흐름에서 발생한 심사 요청을 저장한다.
+    public static String recordUnderwritingRequest(UnderwritingRequest request) {
+        return UnderwritingService.saveUnderwritingRequest(request);
+    }
 
     // 계약 상태 기준 부활 가능 여부 판단
     public static boolean canReinstate(String contractStatus) {

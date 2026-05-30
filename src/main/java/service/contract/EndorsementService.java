@@ -4,7 +4,9 @@ import db.EndorsementMapper;
 import db.MyBatisSessionFactory;
 import enums.EndorsementType;
 import model.contract.Endorsement;
+import model.underwriting.UnderwritingRequest;
 import org.apache.ibatis.session.SqlSession;
+import service.underwriting.UnderwritingService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +14,11 @@ import java.util.List;
 
 // 배서 관리 서비스 — 배서 심사 필요 여부 판단, DB 저장 담당
 public class EndorsementService {
+
+    // 배서 흐름에서 발생한 심사 요청을 저장한다.
+    public static String recordUnderwritingRequest(UnderwritingRequest request) {
+        return UnderwritingService.saveUnderwritingRequest(request);
+    }
 
     // 배서유형별 심사 필요 여부 판단 (가입금액 변경/특약 추가 → 위험 변동 → 심사 필요)
     public static boolean needsUnderwriting(String endorsementType) {
