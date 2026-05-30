@@ -1,11 +1,15 @@
 package service.underwriting;
 
+import db.AccountMapper;
 import db.InsuranceApplicationMapper;
+import db.InsuredPersonMapper;
 import db.UnderwritingMapper;
 import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;
+import model.person.Account;
+import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
 import org.apache.ibatis.session.SqlSession;
@@ -39,6 +43,39 @@ public class UnderwritingService {
             return BigDecimal.ZERO;
         }
         return premium.multiply(BigDecimal.valueOf(shareRate));
+    }
+
+    public static boolean saveAccount(Account account) {
+        if (account == null) {
+            return false;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AccountMapper.class).insert(account) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 계좌 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean saveInsuredPerson(InsuredPerson insuredPerson) {
+        if (insuredPerson == null) {
+            return false;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuredPersonMapper.class).insert(insuredPerson) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 피보험자 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static InsuredPerson findInsuredPersonById(String residentRegistrationNumber) {
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuredPersonMapper.class).findById(residentRegistrationNumber);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 피보험자 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     // 입력값 기반 심사점수 계산 (기본점수 100점에서 감점 합산)

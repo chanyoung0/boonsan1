@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.InsuredPersonMapper">
+
+    <resultMap id="InsuredPersonResult" type="InsuredPerson">
+        <id     property="residentRegistrationNumber" column="resident_registration_number"/>
+        <result property="name"                       column="name"/>
+        <result property="contact"                    column="contact"/>
+        <association property="accountInfo" javaType="Account">
+            <id     property="accountNumber" column="account_number"/>
+            <result property="accountHolder" column="account_holder"/>
+            <result property="bankName"      column="bank_name"
+                    javaType="enums.BankName"/>
+            <result property="accountType"   column="account_type"
+                    javaType="enums.AccountType"/>
+            <result property="balance"       column="balance"/>
+        </association>
+    </resultMap>
+
+    <select id="findById" parameterType="string" resultMap="InsuredPersonResult">
+        SELECT ip.resident_registration_number,
+               ip.name,
+               ip.contact,
+               ip.account_number,
+               a.account_holder,
+               a.bank_name,
+               a.account_type,
+               a.balance
+        FROM insured_person ip
+        LEFT JOIN account a ON a.account_number = ip.account_number
+        WHERE ip.resident_registration_number = #{residentRegistrationNumber}
+    </select>
+
+    <select id="findAll" resultMap="InsuredPersonResult">
+        SELECT ip.resident_registration_number,
+               ip.name,
+               ip.contact,
+               ip.account_number,
+               a.account_holder,
+               a.bank_name,
+               a.account_type,
+               a.balance
+        FROM insured_person ip
+        LEFT JOIN account a ON a.account_number = ip.account_number
+        ORDER BY ip.resident_registration_number
+    </select>
+
+    <insert id="insert" parameterType="InsuredPerson">
+        INSERT INTO insured_person (resident_registration_number, name, contact, account_number)
+        VALUES (#{residentRegistrationNumber}, #{name}, #{contact}, #{accountInfo.accountNumber})
+    </insert>
+
+</mapper>

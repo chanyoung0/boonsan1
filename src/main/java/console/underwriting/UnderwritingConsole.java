@@ -1,6 +1,12 @@
 package console.underwriting;
 
+import enums.AccountType;
+import enums.BankName;
+import model.person.Account;
+import model.person.InsuredPerson;
 import service.underwriting.UnderwritingService;
+
+import java.math.BigDecimal;
 
 import static common.ConsoleUtil.*;
 
@@ -18,13 +24,14 @@ public class UnderwritingConsole {
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
         String name = input("이름");
         input("생년월일 (YYYYMMDD)");
-        input("주민등록번호");
+        String residentRegistrationNumber = input("주민등록번호");
         String vehicleNo = input("차량번호");
 
         long insuranceAmount = (long)(rnd.nextInt(20) + 1) * 100_000_000L;
 
         System.out.println("\n[시스템] 자사 DB에서 피보험자 이력을 조회 중...");
-        boolean isNewCustomer = rnd.nextInt(10) < 3;
+        InsuredPerson existingPerson = UnderwritingService.findInsuredPersonById(residentRegistrationNumber);
+        boolean isNewCustomer = (existingPerson == null);
         System.out.println("[시스템] 조회 결과: " + (isNewCustomer ? "신규 고객 (자사 U/W 이력 및 기존 계약 없음)" : "기존 고객 (이력 및 계약 존재)"));
 
         String age, gender, job, income, pastDisease, medication, surgery, familyHistory, smoking, drinking, bmi, vehicleModel;
@@ -43,7 +50,26 @@ public class UnderwritingConsole {
             drinking      = input("음주량 (없으면 '없음')");
             bmi           = input("BMI");
             vehicleModel  = input("차량기종");
-            System.out.println("[시스템] 신규 고객 정보가 자사 DB에 등록되었습니다.");
+
+            System.out.println("\n[Step 1-2] 피보험자 신상/계좌 정보 등록");
+            String contact = input("연락처");
+            String accountNumber = input("계좌번호");
+            BankName bankName = resolveBankName(input("은행 (KB/SHINHAN/WOORI/HANA/IBK/NH/KAKAO/TOSS)"));
+            AccountType accountType = resolveAccountType(input("계좌유형 (SAVINGS/CHECKING/AUTO_TRANSFER)"));
+            BigDecimal balance = inputBalance("잔액 (원)");
+
+            Account account = new Account(accountNumber, name, bankName, accountType, balance);
+            if (!UnderwritingService.saveAccount(account)) {
+                System.out.println("[오류] 계좌 저장 실패. 진행을 중단합니다.");
+                return;
+            }
+            InsuredPerson insuredPerson = new InsuredPerson(name, residentRegistrationNumber, contact, account);
+            if (!UnderwritingService.saveInsuredPerson(insuredPerson)) {
+                System.out.println("[오류] 피보험자 저장 실패. 진행을 중단합니다.");
+                return;
+            }
+            System.out.println("[시스템] 피보험자/계좌 정보가 자사 DB에 등록되었습니다.");
+            System.out.println("  주민등록번호: " + residentRegistrationNumber + " | 계좌번호: " + accountNumber);
         } else {
             age = "35"; gender = "남"; job = "회사원"; income = "5,000만원";
             pastDisease = "없음"; medication = "N"; surgery = "없음";
@@ -241,6 +267,38 @@ public class UnderwritingConsole {
         }
         enter();
         System.out.println("  [시스템] 청약번호 상태: '심사 완료'");
+    }
+
+    private static BankName resolveBankName(String value) {
+        if (value == null) return BankName.KB;
+        try {
+            return BankName.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("  [경고] 알 수 없는 은행명. KB로 처리합니다.");
+            return BankName.KB;
+        }
+    }
+
+    private static AccountType resolveAccountType(String value) {
+        if (value == null) return AccountType.AUTO_TRANSFER;
+        try {
+            return AccountType.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("  [경고] 알 수 없는 계좌유형. AUTO_TRANSFER로 처리합니다.");
+            return AccountType.AUTO_TRANSFER;
+        }
+    }
+
+    private static BigDecimal inputBalance(String label) {
+        while (true) {
+            String value = input(label).replace(",", "").trim();
+            if (value.isEmpty()) return BigDecimal.ZERO;
+            try {
+                return new BigDecimal(value);
+            } catch (NumberFormatException e) {
+                System.out.println("  [오류] 숫자로 입력하세요.");
+            }
+        }
     }
 
     private static boolean reinsuranceProcess(String policyNo, long insuranceAmount) {

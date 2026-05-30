@@ -32,6 +32,7 @@ CREATE TABLE insurance_application (
     CONSTRAINT pk_insurance_application PRIMARY KEY (application_id)
 );
 
+
 -- =====================================================
 -- 3. 배서 (EndorsementDBO)
 -- =====================================================
@@ -199,4 +200,29 @@ CREATE TABLE partner (
     responsibility      VARCHAR(200),
     evaluation_grade    VARCHAR(20),    -- EXCELLENT | GOOD | AVERAGE | POOR
     CONSTRAINT pk_partner PRIMARY KEY (id)
+);
+
+-- =====================================================
+-- 14. 계좌 (AccountDBO) — Unit 1
+-- =====================================================
+CREATE TABLE account (
+    account_number  VARCHAR(50)     NOT NULL,
+    account_holder  VARCHAR(100),
+    bank_name       VARCHAR(30),    -- KB | SHINHAN | WOORI | HANA | IBK | NH | KAKAO | TOSS
+    account_type    VARCHAR(30),    -- SAVINGS | CHECKING | AUTO_TRANSFER
+    balance         NUMERIC(15, 2),
+    CONSTRAINT pk_account PRIMARY KEY (account_number)
+);
+
+-- =====================================================
+-- 15. 피보험자 (InsuredPersonDBO) — Unit 1
+-- =====================================================
+CREATE TABLE insured_person (
+    resident_registration_number    VARCHAR(20) NOT NULL,
+    name                            VARCHAR(100),
+    contact                         VARCHAR(50),
+    account_number                  VARCHAR(50),
+    CONSTRAINT pk_insured_person PRIMARY KEY (resident_registration_number),
+    CONSTRAINT fk_insured_person_account FOREIGN KEY (account_number)
+        REFERENCES account(account_number)
 );
