@@ -18,6 +18,21 @@ import java.util.List;
 
 public class InsuranceProductService {
 
+    private static final BigDecimal BASE_RATE = new BigDecimal("0.03");
+    private static final BigDecimal REFUND_RATE = new BigDecimal("0.9");
+
+    // 보험료 = 보험가입금액 × 기본요율(3%)
+    public static BigDecimal calculatePremium(BigDecimal insuredAmount) {
+        if (insuredAmount == null) return BigDecimal.ZERO;
+        return insuredAmount.multiply(BASE_RATE);
+    }
+
+    // 만기환급금 = 납입보험료 합계 × 환급률(90%)
+    public static BigDecimal calculateMaturityRefund(BigDecimal totalPaidPremium) {
+        if (totalPaidPremium == null) return BigDecimal.ZERO;
+        return totalPaidPremium.multiply(REFUND_RATE);
+    }
+
     public static AutoInsurance designAutoInsurance(String productCode, String insurancePeriod,
                                                     BigDecimal insuredAmount, BigDecimal premium,
                                                     BigDecimal maturityRefund, int driverAge,

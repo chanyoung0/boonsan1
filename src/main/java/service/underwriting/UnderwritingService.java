@@ -10,6 +10,7 @@ import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
 import org.apache.ibatis.session.SqlSession;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,24 @@ import java.util.List;
 public class UnderwritingService {
 
     private static final long REINSURANCE_THRESHOLD = 500_000_000L;
+
+    // 재보험료 = 보험가입금액 × 출재비율(cessionRate)
+    public static BigDecimal calculateReinsurancePremium(BigDecimal insuredAmount, float cessionRate) {
+        if (insuredAmount == null) return BigDecimal.ZERO;
+        return insuredAmount.multiply(BigDecimal.valueOf(cessionRate));
+    }
+
+    // 자사 보유액 = 보험가입금액 × 자사 보유 지분율
+    public static BigDecimal calculateRetainedAmount(BigDecimal insuredAmount, float retainedShareRate) {
+        if (insuredAmount == null) return BigDecimal.ZERO;
+        return insuredAmount.multiply(BigDecimal.valueOf(retainedShareRate));
+    }
+
+    // 각 사 배분 보험료 = 보험료 × 각 사 지분율
+    public static BigDecimal allocatePremium(BigDecimal premium, float shareRate) {
+        if (premium == null) return BigDecimal.ZERO;
+        return premium.multiply(BigDecimal.valueOf(shareRate));
+    }
 
     // 입력값 기반 심사점수 계산 (기본점수 100점에서 감점 합산)
     public static int calculateInputScore(String pastDisease, String medication, String surgery,
