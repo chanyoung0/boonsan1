@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.AccountMapper">
+
+    <resultMap id="AccountResult" type="Account">
+        <id     property="accountNumber"  column="account_number"/>
+        <result property="accountHolder"  column="account_holder"/>
+        <result property="bankName"       column="bank_name"
+                javaType="enums.BankName"/>
+        <result property="accountType"    column="account_type"
+                javaType="enums.AccountType"/>
+        <result property="balance"        column="balance"/>
+    </resultMap>
+
+    <sql id="columns">
+        account_number, account_holder, bank_name, account_type, balance
+    </sql>
+
+    <select id="findByAccountNumber" parameterType="string" resultMap="AccountResult">
+        SELECT <include refid="columns"/>
+        FROM account
+        WHERE account_number = #{accountNumber}
+    </select>
+
+    <insert id="insert" parameterType="Account">
+        INSERT INTO account (account_number, account_holder, bank_name, account_type, balance)
+        VALUES (#{accountNumber}, #{accountHolder}, #{bankName}, #{accountType}, #{balance})
+    </insert>
+
+</mapper>

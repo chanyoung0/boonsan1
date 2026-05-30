@@ -49,6 +49,8 @@
         <mapper resource="db/mapper/PayoutMapper.xml"/>
         <mapper resource="db/mapper/CompensationEvaluationMapper.xml"/>
         <mapper resource="db/mapper/PartnerMapper.xml"/>
+        <mapper resource="db/mapper/AccountMapper.xml"/>
+        <mapper resource="db/mapper/InsuredPersonMapper.xml"/>
     </mappers>
 
 </configuration>

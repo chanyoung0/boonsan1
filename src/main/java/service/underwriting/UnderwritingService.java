@@ -1,11 +1,15 @@
 package service.underwriting;
 
+import db.AccountMapper;
 import db.InsuranceApplicationMapper;
+import db.InsuredPersonMapper;
 import db.UnderwritingMapper;
 import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;
+import model.person.Account;
+import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
 import org.apache.ibatis.session.SqlSession;
@@ -115,6 +119,38 @@ public class UnderwritingService {
             return rows > 0 ? underwritingId : null;
         } catch (Exception e) {
             System.out.println("[DB 오류] 심사 저장 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // 계좌 정보를 DB에 저장하고 성공 여부를 반환한다
+    public static boolean saveAccount(Account account) {
+        if (account == null || account.getAccountNumber() == null) return false;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AccountMapper.class).insert(account) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 계좌 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 피보험자 정보를 DB에 저장하고 성공 여부를 반환한다
+    public static boolean saveInsuredPerson(InsuredPerson insuredPerson) {
+        if (insuredPerson == null || insuredPerson.getResidentRegistrationNumber() == null) return false;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuredPersonMapper.class).insert(insuredPerson) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 피보험자 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 주민등록번호로 피보험자 조회
+    public static InsuredPerson findInsuredPersonById(String residentRegistrationNumber) {
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(InsuredPersonMapper.class).findById(residentRegistrationNumber);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 피보험자 조회 실패: " + e.getMessage());
             return null;
         }
     }

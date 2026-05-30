@@ -1,6 +1,12 @@
 package console.underwriting;
 
+import enums.AccountType;
+import enums.BankName;
+import model.person.Account;
+import model.person.InsuredPerson;
 import service.underwriting.UnderwritingService;
+
+import java.math.BigDecimal;
 
 import static common.ConsoleUtil.*;
 
@@ -18,7 +24,7 @@ public class UnderwritingConsole {
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
         String name = input("이름");
         input("생년월일 (YYYYMMDD)");
-        input("주민등록번호");
+        String residentRegistrationNumber = input("주민등록번호");
         String vehicleNo = input("차량번호");
 
         long insuranceAmount = (long)(rnd.nextInt(20) + 1) * 100_000_000L;
@@ -43,13 +49,33 @@ public class UnderwritingConsole {
             drinking      = input("음주량 (없으면 '없음')");
             bmi           = input("BMI");
             vehicleModel  = input("차량기종");
-            System.out.println("[시스템] 신규 고객 정보가 자사 DB에 등록되었습니다.");
+
+            String contact = input("연락처");
+            String bankInput = input("은행 (KB/SHINHAN/WOORI/HANA/IBK/NH/KAKAO/TOSS)");
+            String accountNumber = input("계좌번호");
+            String accountTypeInput = input("계좌 유형 (SAVINGS/CHECKING/AUTO_TRANSFER)");
+            Account account = new Account(accountNumber, name,
+                    parseBank(bankInput), parseAccountType(accountTypeInput), BigDecimal.ZERO);
+            InsuredPerson insuredPerson = new InsuredPerson(name, residentRegistrationNumber, contact, account);
+            boolean accSaved = UnderwritingService.saveAccount(account);
+            boolean ipSaved = UnderwritingService.saveInsuredPerson(insuredPerson);
+            if (accSaved && ipSaved) {
+                System.out.println("[시스템] 신규 고객 정보가 자사 DB에 등록되었습니다. (계좌·피보험자 저장 완료)");
+            } else {
+                System.out.println("[시스템] 신규 고객 정보 일부 저장 실패. 진행은 계속합니다.");
+            }
         } else {
             age = "35"; gender = "남"; job = "회사원"; income = "5,000만원";
             pastDisease = "없음"; medication = "N"; surgery = "없음";
             familyHistory = "없음"; smoking = "N"; drinking = "주 1회";
             bmi = "22.4"; vehicleModel = "현대 소나타";
             String existingPolicyNo = "P2023-004512";
+
+            InsuredPerson existingPerson = UnderwritingService.findInsuredPersonById(residentRegistrationNumber);
+            if (existingPerson != null) {
+                System.out.println("[시스템] 자사 DB 피보험자 조회 결과: "
+                        + existingPerson.getName() + " | 연락처: " + existingPerson.getContact());
+            }
 
             System.out.println("[시스템] 기존 U/W 이력 및 계약 정보:");
             System.out.println("  ── 계약 기본정보 ───────────────────────────────────────");
@@ -151,6 +177,22 @@ public class UnderwritingConsole {
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
         policyIssuance(name, finalResult, insuranceAmount);
+    }
+
+    private static BankName parseBank(String input) {
+        try {
+            return BankName.valueOf(input.trim().toUpperCase());
+        } catch (Exception e) {
+            return BankName.KB;
+        }
+    }
+
+    private static AccountType parseAccountType(String input) {
+        try {
+            return AccountType.valueOf(input.trim().toUpperCase());
+        } catch (Exception e) {
+            return AccountType.AUTO_TRANSFER;
+        }
     }
 
     private static int creditInfoInquiry(String name, int[] creditFlags) {
