@@ -1,9 +1,11 @@
 package service.contract;
 
+import db.ManagerMapper;
 import db.PaymentCollectionMapper;
 import db.MyBatisSessionFactory;
 import enums.ProcessingResult;
 import model.contract.PaymentCollection;
+import model.person.Manager;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
@@ -22,6 +24,27 @@ public class PaymentCollectionService {
             return BigDecimal.ZERO;
         }
         return unpaidAmount.multiply(LATE_FEE_RATE);
+    }
+
+    public static boolean saveManager(Manager manager) {
+        if (manager == null) {
+            return false;
+        }
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(ManagerMapper.class).insert(manager) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 담당자 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static Manager findManagerByEmployeeNo(String employeeNo) {
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(ManagerMapper.class).findById(employeeNo);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 담당자 조회 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     private static final LocalDate DEFAULT_DUE_DATE = LocalDate.of(2024, 1, 15);

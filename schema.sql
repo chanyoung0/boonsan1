@@ -309,3 +309,17 @@ CREATE TABLE underwriting_result (
     CONSTRAINT fk_uw_result_uw FOREIGN KEY (underwriting_id)
         REFERENCES underwriting(underwriting_id)
 );
+
+-- =====================================================
+-- 20. 담당자 (ManagerDBO) — Unit 4
+-- =====================================================
+CREATE TABLE manager (
+    employee_no     VARCHAR(50) NOT NULL,
+    name            VARCHAR(100),
+    department      VARCHAR(100),
+    CONSTRAINT pk_manager PRIMARY KEY (employee_no)
+);
+
+INSERT INTO manager (employee_no, name, department) VALUES ('M001', '김상우', '계약관리1팀') ON CONFLICT (employee_no) DO NOTHING;
+INSERT INTO manager (employee_no, name, department) VALUES ('M002', '박지영', '수금이관팀') ON CONFLICT (employee_no) DO NOTHING;
+INSERT INTO manager (employee_no, name, department) VALUES ('M003', '이태준', '방문수금팀') ON CONFLICT (employee_no) DO NOTHING;
