@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.AccidentHistoryMapper">
+
+    <resultMap id="AccidentHistoryResult" type="AccidentHistory">
+        <id     property="receiptNumber"          column="receipt_number"/>
+        <result property="accidentType"           column="accident_type" javaType="enums.AccidentType"/>
+        <result property="location"               column="location"/>
+        <result property="occurredAt"             column="occurred_at"/>
+        <result property="receivedAt"             column="received_at"/>
+        <result property="claimedAmount"          column="claimed_amount"/>
+        <result property="recognizedAmount"       column="recognized_amount"/>
+        <result property="diagnosisCode"          column="diagnosis_code"/>
+        <result property="diagnosisName"          column="diagnosis_name"/>
+        <result property="treatmentDetails"       column="treatment_details"/>
+        <result property="hospitalizationPeriod"  column="hospitalization_period"/>
+        <result property="hasSurgery"             column="has_surgery"/>
+        <result property="paidAt"                 column="paid_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        receipt_number, accident_type, location, occurred_at, received_at,
+        claimed_amount, recognized_amount, diagnosis_code, diagnosis_name,
+        treatment_details, hospitalization_period, has_surgery, paid_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="AccidentHistoryResult">
+        SELECT <include refid="columns"/>
+        FROM accident_history
+        WHERE receipt_number = #{receiptNumber}
+    </select>
+
+    <select id="findByHistoryId" parameterType="string" resultMap="AccidentHistoryResult">
+        SELECT <include refid="columns"/>
+        FROM accident_history
+        WHERE history_id = #{historyId}
+        ORDER BY occurred_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO accident_history
+        (receipt_number, history_id, accident_type, location, occurred_at, received_at,
+         claimed_amount, recognized_amount, diagnosis_code, diagnosis_name,
+         treatment_details, hospitalization_period, has_surgery, paid_at)
+        VALUES (#{ah.receiptNumber}, #{historyId}, #{ah.accidentType}, #{ah.location},
+                #{ah.occurredAt}, #{ah.receivedAt}, #{ah.claimedAmount}, #{ah.recognizedAmount},
+                #{ah.diagnosisCode}, #{ah.diagnosisName}, #{ah.treatmentDetails},
+                #{ah.hospitalizationPeriod}, #{ah.hasSurgery}, #{ah.paidAt})
+    </insert>
+
+</mapper>

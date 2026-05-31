@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.UnderwritingHistoryMapper">
+
+    <resultMap id="UnderwritingHistoryResult" type="UnderwritingHistory">
+        <id     property="historyId"                  column="history_id"/>
+        <result property="residentRegistrationNumber" column="resident_registration_number"/>
+        <result property="name"                       column="name"/>
+        <result property="age"                        column="age"/>
+        <result property="gender"                     column="gender" javaType="enums.Gender"/>
+        <result property="occupation"                 column="occupation"/>
+        <result property="annualIncome"               column="annual_income"/>
+        <result property="BMI"                        column="bmi"/>
+        <result property="smoker"                     column="is_smoker"/>
+        <result property="medicated"                  column="is_medicated"/>
+        <result property="alcoholConsumption"         column="alcohol_consumption"/>
+        <result property="pastMedicalHistory"         column="past_medical_history"/>
+        <result property="surgeryHistory"             column="surgery_history"/>
+        <result property="familyHistory"              column="family_history"/>
+        <result property="vehicleNumber"              column="vehicle_number"/>
+        <result property="vehicleModel"               column="vehicle_model"/>
+        <result property="inquiredAt"                 column="inquired_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        history_id, resident_registration_number, name, age, gender, occupation,
+        annual_income, bmi, is_smoker, is_medicated, alcohol_consumption,
+        past_medical_history, surgery_history, family_history,
+        vehicle_number, vehicle_model, inquired_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="UnderwritingHistoryResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting_history
+        WHERE history_id = #{historyId}
+    </select>
+
+    <select id="findByInsuredPersonId" parameterType="string" resultMap="UnderwritingHistoryResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting_history
+        WHERE resident_registration_number = #{residentRegistrationNumber}
+        ORDER BY inquired_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO underwriting_history
+        (history_id, resident_registration_number, name, age, gender, occupation,
+         annual_income, bmi, is_smoker, is_medicated, alcohol_consumption,
+         past_medical_history, surgery_history, family_history,
+         vehicle_number, vehicle_model, inquired_at)
+        VALUES (#{historyId}, #{uwh.residentRegistrationNumber}, #{uwh.name},
+                #{uwh.age}, #{uwh.gender}, #{uwh.occupation}, #{uwh.annualIncome},
+                #{uwh.BMI}, #{uwh.smoker}, #{uwh.medicated}, #{uwh.alcoholConsumption},
+                #{uwh.pastMedicalHistory}, #{uwh.surgeryHistory}, #{uwh.familyHistory},
+                #{uwh.vehicleNumber}, #{uwh.vehicleModel}, #{uwh.inquiredAt})
+    </insert>
+
+</mapper>

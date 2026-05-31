@@ -1,12 +1,18 @@
 package console.underwriting;
 
+import enums.AccidentType;
 import enums.AccountType;
 import enums.BankName;
+import enums.Gender;
+import model.accident.AccidentHistory;
 import model.person.Account;
 import model.person.InsuredPerson;
+import model.underwriting.UnderwritingHistory;
 import service.underwriting.UnderwritingService;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static common.ConsoleUtil.*;
 
@@ -21,6 +27,7 @@ public class UnderwritingConsole {
         System.out.println("액터: 언더라이터");
         line();
 
+        String historyId = null;
         System.out.println("\n[Step 1] 피보험자 기본 정보 입력");
         String name = input("이름");
         input("생년월일 (YYYYMMDD)");
@@ -64,6 +71,28 @@ public class UnderwritingConsole {
             } else {
                 System.out.println("[시스템] 신규 고객 정보 일부 저장 실패. 진행은 계속합니다.");
             }
+
+            UnderwritingHistory history = new UnderwritingHistory();
+            history.setResidentRegistrationNumber(residentRegistrationNumber);
+            history.setName(name);
+            history.setAge(parseAgeInt(age));
+            history.setGender(parseGender(gender));
+            history.setOccupation(job);
+            history.setAnnualIncome(parseIncome(income));
+            history.setPastMedicalHistory(pastDisease);
+            history.setSurgeryHistory(surgery);
+            history.setFamilyHistory(familyHistory);
+            history.setMedicated("Y".equalsIgnoreCase(medication));
+            history.setSmoker("Y".equalsIgnoreCase(smoking));
+            history.setAlcoholConsumption(drinking);
+            history.setBMI(bmi);
+            history.setVehicleModel(vehicleModel);
+            history.setVehicleNumber(vehicleNo);
+            history.setInquiredAt(LocalDateTime.now());
+            historyId = UnderwritingService.saveUnderwritingHistory(history);
+            if (historyId != null) {
+                System.out.println("[시스템] 심사이력 저장 완료 (ID: " + historyId + ")");
+            }
         } else {
             age = "35"; gender = "남"; job = "회사원"; income = "5,000만원";
             pastDisease = "없음"; medication = "N"; surgery = "없음";
@@ -75,6 +104,11 @@ public class UnderwritingConsole {
             if (existingPerson != null) {
                 System.out.println("[시스템] 자사 DB 피보험자 조회 결과: "
                         + existingPerson.getName() + " | 연락처: " + existingPerson.getContact());
+            }
+            List<UnderwritingHistory> previousHistory = UnderwritingService.findHistoryByInsuredPerson(residentRegistrationNumber);
+            if (!previousHistory.isEmpty()) {
+                System.out.println("[시스템] 자사 DB 심사이력: " + previousHistory.size() + "건 (최근: "
+                        + previousHistory.get(0).getInquiredAt() + ")");
             }
 
             System.out.println("[시스템] 기존 U/W 이력 및 계약 정보:");
@@ -116,6 +150,18 @@ public class UnderwritingConsole {
         int[] creditFlags = new int[2];
         int creditDeduction = creditInfoInquiry(name, creditFlags);
         if (creditDeduction == Integer.MIN_VALUE) return;
+
+        if (creditFlags[0] == 1 && historyId != null) {
+            AccidentHistory accidentHistory = new AccidentHistory();
+            accidentHistory.setReceiptNumber("AH-" + System.currentTimeMillis());
+            accidentHistory.setAccidentType(AccidentType.VEHICLE_ACCIDENT);
+            accidentHistory.setLocation("미상");
+            accidentHistory.setOccurredAt(LocalDateTime.now().minusYears(1));
+            accidentHistory.setReceivedAt(LocalDateTime.now().minusYears(1).plusDays(1));
+            if (UnderwritingService.saveAccidentHistory(accidentHistory, historyId)) {
+                System.out.println("  [시스템] 사고이력 1건 DB 저장 완료 (영수번호: " + accidentHistory.getReceiptNumber() + ")");
+            }
+        }
 
         int score = UnderwritingService.calculateInputScore(pastDisease, medication, surgery,
                 familyHistory, smoking, drinking, bmi, age, creditFlags[0] == 1, creditFlags[1] == 1);
@@ -177,6 +223,33 @@ public class UnderwritingConsole {
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
         policyIssuance(name, finalResult, insuranceAmount);
+    }
+
+    private static int parseAgeInt(String input) {
+        try {
+            return Integer.parseInt(input.replaceAll("[^0-9]", ""));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private static Gender parseGender(String input) {
+        if (input == null) return Gender.OTHER;
+        String v = input.trim().toUpperCase();
+        if (v.equals("M") || v.equals("MALE") || v.equals("남")) return Gender.MALE;
+        if (v.equals("F") || v.equals("FEMALE") || v.equals("여")) return Gender.FEMALE;
+        return Gender.OTHER;
+    }
+
+    private static BigDecimal parseIncome(String input) {
+        if (input == null) return BigDecimal.ZERO;
+        String digits = input.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) return BigDecimal.ZERO;
+        try {
+            return new BigDecimal(digits);
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
     }
 
     private static BankName parseBank(String input) {

@@ -1,17 +1,21 @@
 package service.underwriting;
 
+import db.AccidentHistoryMapper;
 import db.AccountMapper;
 import db.InsuranceApplicationMapper;
 import db.InsuredPersonMapper;
+import db.UnderwritingHistoryMapper;
 import db.UnderwritingMapper;
 import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
 import enums.UnderwritingType;
+import model.accident.AccidentHistory;
 import model.person.Account;
 import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
+import model.underwriting.UnderwritingHistory;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
@@ -152,6 +156,42 @@ public class UnderwritingService {
         } catch (Exception e) {
             System.out.println("[DB 오류] 피보험자 조회 실패: " + e.getMessage());
             return null;
+        }
+    }
+
+    // 심사이력을 DB에 저장하고 생성된 historyId를 반환한다
+    public static String saveUnderwritingHistory(UnderwritingHistory history) {
+        if (history == null) return null;
+        String historyId = "UWH-" + System.currentTimeMillis();
+        history.setHistoryId(historyId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnderwritingHistoryMapper.class).insert(history, historyId);
+            return rows > 0 ? historyId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사이력 저장 실패: " + e);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 사고이력을 DB에 저장한다 (historyId로 심사이력과 연결)
+    public static boolean saveAccidentHistory(AccidentHistory accidentHistory, String historyId) {
+        if (accidentHistory == null || historyId == null) return false;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(AccidentHistoryMapper.class).insert(accidentHistory, historyId) > 0;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고이력 저장 실패: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 주민등록번호로 피보험자의 심사이력 목록 조회
+    public static List<UnderwritingHistory> findHistoryByInsuredPerson(String residentRegistrationNumber) {
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            return s.getMapper(UnderwritingHistoryMapper.class).findByInsuredPersonId(residentRegistrationNumber);
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사이력 조회 실패: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 

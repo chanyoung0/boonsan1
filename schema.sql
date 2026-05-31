@@ -225,3 +225,53 @@ CREATE TABLE insured_person (
     CONSTRAINT fk_insured_person_account FOREIGN KEY (account_number)
         REFERENCES account(account_number)
 );
+
+-- =====================================================
+-- 16. 심사이력 (UnderwritingHistory)
+-- =====================================================
+CREATE TABLE underwriting_history (
+    history_id                   VARCHAR(50)     NOT NULL,
+    underwriting_id              VARCHAR(50),    -- nullable, Unit 3에서 FK→underwriting로 활용
+    resident_registration_number VARCHAR(20),    -- FK → insured_person
+    name                         VARCHAR(100),
+    age                          INTEGER,
+    gender                       VARCHAR(20),    -- MALE | FEMALE | OTHER
+    occupation                   VARCHAR(100),
+    annual_income                NUMERIC(15, 2),
+    bmi                          VARCHAR(20),
+    is_smoker                    BOOLEAN,
+    is_medicated                 BOOLEAN,
+    alcohol_consumption          VARCHAR(50),
+    past_medical_history         TEXT,
+    surgery_history              TEXT,
+    family_history               TEXT,
+    vehicle_number               VARCHAR(50),
+    vehicle_model                VARCHAR(100),
+    inquired_at                  TIMESTAMP,
+    CONSTRAINT pk_underwriting_history PRIMARY KEY (history_id),
+    CONSTRAINT fk_underwriting_history_insured_person FOREIGN KEY (resident_registration_number)
+        REFERENCES insured_person(resident_registration_number)
+);
+
+-- =====================================================
+-- 17. 사고이력 (AccidentHistory)
+-- =====================================================
+CREATE TABLE accident_history (
+    receipt_number               VARCHAR(50)     NOT NULL,
+    history_id                   VARCHAR(50),    -- FK → underwriting_history (1:N)
+    accident_type                VARCHAR(30),    -- VEHICLE_ACCIDENT | PROPERTY_DAMAGE | INJURY | FIRE | NATURAL_DISASTER
+    location                     VARCHAR(200),
+    occurred_at                  TIMESTAMP,
+    received_at                  TIMESTAMP,
+    claimed_amount               NUMERIC(15, 2),
+    recognized_amount            NUMERIC(15, 2),
+    diagnosis_code               VARCHAR(50),
+    diagnosis_name               VARCHAR(100),
+    treatment_details            TEXT,
+    hospitalization_period       TIMESTAMP,
+    has_surgery                  BOOLEAN,
+    paid_at                      TIMESTAMP,
+    CONSTRAINT pk_accident_history PRIMARY KEY (receipt_number),
+    CONSTRAINT fk_accident_history_underwriting_history FOREIGN KEY (history_id)
+        REFERENCES underwriting_history(history_id)
+);
