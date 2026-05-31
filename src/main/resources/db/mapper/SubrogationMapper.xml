@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.SubrogationMapper">
+
+    <resultMap id="SubrogationResult" type="Subrogation">
+        <id     property="subrogationId"     column="subrogation_id"/>
+        <result property="offenderName"      column="offender_name"/>
+        <result property="offenderContact"   column="offender_contact"/>
+        <result property="faultRatio"        column="fault_ratio"/>
+        <result property="paymentAmount"     column="payment_amount"/>
+        <result property="paymentDeadline"   column="payment_deadline"/>
+        <result property="depositAccount"    column="deposit_account"/>
+        <result property="subrogationStatus" column="subrogation_status"
+                javaType="enums.SubrogationStatus"/>
+    </resultMap>
+
+    <sql id="columns">
+        subrogation_id, offender_name, offender_contact, fault_ratio,
+        payment_amount, payment_deadline, deposit_account, subrogation_status
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="SubrogationResult">
+        SELECT <include refid="columns"/>
+        FROM subrogation
+        WHERE subrogation_id = #{subrogationId}
+    </select>
+
+    <select id="findAll" resultMap="SubrogationResult">
+        SELECT <include refid="columns"/>
+        FROM subrogation
+        ORDER BY subrogation_id
+    </select>
+
+    <select id="findStatusById" parameterType="string" resultType="string">
+        SELECT subrogation_status FROM subrogation
+        WHERE subrogation_id = #{subrogationId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO subrogation
+        (subrogation_id, offender_name, offender_contact, fault_ratio,
+         payment_amount, payment_deadline, deposit_account, subrogation_status)
+        VALUES (#{sub.subrogationId}, #{sub.offenderName}, #{sub.offenderContact},
+                #{sub.faultRatio}, #{sub.paymentAmount}, #{sub.paymentDeadline},
+                #{sub.depositAccount}, #{sub.subrogationStatus})
+    </insert>
+
+</mapper>

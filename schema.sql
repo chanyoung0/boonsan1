@@ -356,7 +356,22 @@ CREATE TABLE unpaid_notice (
 );
 
 -- =====================================================
--- 23. 문서 (Document) — single-table 상속, document_kind로 ACCIDENT/PAYMENT_APPROVAL 분기
+-- 23. 구상 (Subrogation) — 보험금 지급 후 제3자 구상 처리
+-- =====================================================
+CREATE TABLE subrogation (
+    subrogation_id     VARCHAR(50)     NOT NULL,
+    offender_name      VARCHAR(100),
+    offender_contact   VARCHAR(50),
+    fault_ratio        REAL,
+    payment_amount     NUMERIC(15, 2),
+    payment_deadline   TIMESTAMP,
+    deposit_account    VARCHAR(50),
+    subrogation_status VARCHAR(30),    -- PENDING | IN_PROGRESS | COMPLETED | OBJECTED | CLOSED
+    CONSTRAINT pk_subrogation PRIMARY KEY (subrogation_id)
+);
+
+-- =====================================================
+-- 24. 문서 (Document) — single-table 상속, document_kind로 ACCIDENT/PAYMENT_APPROVAL 분기
 -- =====================================================
 CREATE TABLE document (
     document_id             VARCHAR(50)     NOT NULL,

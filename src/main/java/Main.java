@@ -7,6 +7,7 @@ import console.contract.PayoutConsole;
 import console.contract.CompensationEvaluationConsole;
 import console.accident.AccidentReportConsole;
 import console.accident.DamageInvestigationConsole;
+import console.accident.SubrogationConsole;
 import console.insurance.InsuranceProductConsole;
 import console.partner.PartnerConsole;
 
@@ -33,7 +34,8 @@ public class Main {
             System.out.println("  9. 제지급금 관리");
             System.out.println("  10. 보상평가 관리");
             System.out.println("  11. 협력업체 관리");
-            System.out.println("  12. 종료");
+            System.out.println("  12. 구상 처리");
+            System.out.println("  13. 종료");
             System.out.println("=======================================");
             System.out.print(">> 선택: ");
             String choice = sc.nextLine().trim();
@@ -50,7 +52,8 @@ public class Main {
                 case "9": PayoutConsole.run();            break;
                 case "10": CompensationEvaluationConsole.run(); break;
                 case "11": PartnerConsole.run();          break;
-                case "12":
+                case "12": SubrogationConsole.run();      break;
+                case "13":
                     System.out.println("\n시스템을 종료합니다.");
                     sc.close();
                     return;
