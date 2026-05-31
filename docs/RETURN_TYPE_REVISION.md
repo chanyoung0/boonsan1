@@ -25,6 +25,16 @@
 | 8 | `InsuranceApplication` | `receiveApplication()` | `void` | `String` |
 | 9 | `Account` | `checkBalance()` | `void` | `boolean` |
 | 10 | `UnderwritingHistory` | `getHistory()` | `void` | `List<UnderwritingHistory>` |
+| 11 | `DamageInvestigation` | `requestFraudInvestigation()` | `void` | `RequestStatus` |
+
+## 확인 필요 후보
+
+아래 항목은 수정 클래스 다이어그램에서 반환형 보정 가능성이 확인되었으나, 아직 확정 항목으로 취급하지 않는다.
+구현 전에 사용자 확인 또는 설계 자료 재확인이 필요하다.
+
+| No. | Class | Method | 현재 코드 반환형 | 확인 필요 반환형 후보 |
+| --- | --- | --- | --- | --- |
+| 1 | `InsurancePayment` | `transfer()` | `void` | `PaymentStatus` |
 
 ## 구현 시 주의사항
 
