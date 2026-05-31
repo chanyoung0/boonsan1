@@ -23,13 +23,14 @@ export function FinalPaymentApprovalCard({ document }: FinalPaymentApprovalCardP
         <AmountItem label="문서 유형" value={document.documentType} />
         <AmountItem label="제출 상태" value={document.submissionStatus} />
         <AmountItem label="총 손해액" value={document.totalDamageAmount} strong />
-        <AmountItem label="과실비율" value={`${document.faultRatio}%`} />
+        <AmountItem label="지급 인정 비율(%)" value={`${document.faultRatio}%`} />
+        <AmountItem label="산정 지급액" value={document.calculatedPaymentAmount} strong />
         <AmountItem label="결재 사원번호" value={document.employeeNo || '미입력'} />
         <AmountItem label="사고 상태" value={getAccidentStatusLabel(document.accidentStatus)} strong />
       </dl>
 
       <div className="text-detail-blocks approval-opinions">
-        <TextBlock title="과실비율 소견" value={document.faultRatioOpinion || '미입력'} />
+        <TextBlock title="지급 인정 비율 소견" value={document.faultRatioOpinion || '미입력'} />
         <TextBlock title="손해사정인 소견" value={document.adjusterOpinion || '미입력'} />
       </div>
     </section>

@@ -108,6 +108,7 @@ export interface PaymentApprovalDocumentResponse {
   submissionStatus: string;
   totalDamageAmount: number;
   faultRatio: number;
+  calculatedPaymentAmount: number;
   faultRatioOpinion: string | null;
   adjusterOpinion: string | null;
   employeeNo: string | null;

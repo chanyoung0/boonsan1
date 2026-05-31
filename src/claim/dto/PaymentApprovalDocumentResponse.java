@@ -14,6 +14,7 @@ public class PaymentApprovalDocumentResponse {
     private String submissionStatus;
     private BigDecimal totalDamageAmount;
     private Float faultRatio;
+    private BigDecimal calculatedPaymentAmount;
     private String faultRatioOpinion;
     private String adjusterOpinion;
     private String employeeNo;
@@ -48,6 +49,12 @@ public class PaymentApprovalDocumentResponse {
     public Float getFaultRatio() { return faultRatio; }
 
     public void setFaultRatio(Float faultRatio) { this.faultRatio = faultRatio; }
+
+    public BigDecimal getCalculatedPaymentAmount() { return calculatedPaymentAmount; }
+
+    public void setCalculatedPaymentAmount(BigDecimal calculatedPaymentAmount) {
+        this.calculatedPaymentAmount = calculatedPaymentAmount;
+    }
 
     public String getFaultRatioOpinion() { return faultRatioOpinion; }
 

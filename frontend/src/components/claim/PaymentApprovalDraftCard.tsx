@@ -21,7 +21,7 @@ export function PaymentApprovalDraftCard({ draft }: PaymentApprovalDraftCardProp
         <AmountItem label="휴업손해" value={draft.lostIncome} />
         <AmountItem label="수리비" value={draft.repairCost} />
         <AmountItem label="총 손해액" value={draft.totalDamageAmount} strong />
-        <AmountItem label="과실비율" value={`${draft.faultRatio}%`} />
+        <AmountItem label="지급 인정 비율(%)" value={`${draft.faultRatio}%`} />
         <AmountItem label="합의금" value={draft.settlementAmount} />
         <AmountItem label="산정 지급액" value={draft.calculatedPaymentAmount} strong />
       </dl>

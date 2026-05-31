@@ -50,7 +50,7 @@ export function DamageAssessmentForm({
       <div className="panel-header compact">
         <div>
           <h2>손해액 정보 입력</h2>
-          <p>손해사정인이 조사한 손해액과 과실비율을 입력합니다.</p>
+          <p>손해사정인이 조사한 손해액과 지급 인정 비율을 입력합니다.</p>
         </div>
         <Calculator aria-hidden="true" size={22} />
       </div>
@@ -101,7 +101,7 @@ export function DamageAssessmentForm({
           disabled={disabled || isSubmitting}
         />
         <label className="field">
-          <span>과실비율</span>
+          <span>지급 인정 비율(%)</span>
           <input
             required
             min="0"

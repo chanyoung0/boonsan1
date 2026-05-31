@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.NoSuchElementException;
@@ -62,6 +63,7 @@ public class DamageInvestigationApplicationService {
         String investigationId = generateId("INV");
         String documentId = generateId("PAD");
         BigDecimal totalDamageAmount = calculateTotalDamageAmount(request);
+        BigDecimal calculatedPaymentAmount = calculatePaymentAmount(totalDamageAmount, request.getFaultRatio());
 
         damageInvestigationMapper.insertDamageInvestigation(investigationId, request, createdAt);
         damageInvestigationMapper.insertPaymentApprovalDocument(
@@ -79,7 +81,7 @@ public class DamageInvestigationApplicationService {
                 normalizedAccidentNumber,
                 totalDamageAmount,
                 request.getFaultRatio(),
-                request.getSettlementAmount(),
+                calculatedPaymentAmount,
                 request.getMedicalExpense(),
                 request.getLostIncome(),
                 request.getRepairCost(),
@@ -170,7 +172,14 @@ public class DamageInvestigationApplicationService {
     private BigDecimal calculateTotalDamageAmount(DamageAssessmentRequest request) {
         return request.getMedicalExpense()
                 .add(request.getLostIncome())
-                .add(request.getRepairCost());
+                .add(request.getRepairCost())
+                .add(request.getSettlementAmount());
+    }
+
+    private BigDecimal calculatePaymentAmount(BigDecimal totalDamageAmount, Float faultRatio) {
+        return totalDamageAmount
+                .multiply(BigDecimal.valueOf(faultRatio))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
     }
 
     private String generateId(String prefix) {

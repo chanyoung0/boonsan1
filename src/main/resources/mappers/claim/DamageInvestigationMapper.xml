@@ -26,6 +26,7 @@
         <result property="submissionStatus" column="submission_status"/>
         <result property="totalDamageAmount" column="damage_amount"/>
         <result property="faultRatio" column="fault_ratio"/>
+        <result property="calculatedPaymentAmount" column="calculated_payment_amount"/>
         <result property="faultRatioOpinion" column="fault_ratio_opinion"/>
         <result property="adjusterOpinion" column="adjuster_opinion"/>
         <result property="employeeNo" column="employee_no"/>
@@ -138,6 +139,7 @@
             pad.submission_status,
             pad.damage_amount,
             pad.fault_ratio,
+            ROUND((pad.damage_amount * pad.fault_ratio::numeric / 100), 2) AS calculated_payment_amount,
             pad.fault_ratio_opinion,
             pad.adjuster_opinion,
             pad.employee_no,

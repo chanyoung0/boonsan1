@@ -32,20 +32,20 @@ export function AdjusterOpinionForm({
       <div className="panel-header compact">
         <div>
           <h2>손해사정인 소견</h2>
-          <p>과실비율 소견과 최종 지급품의서에 반영할 소견을 작성합니다.</p>
+          <p>지급 인정 비율 소견과 최종 지급품의서에 반영할 소견을 작성합니다.</p>
         </div>
         <MessageSquareText aria-hidden="true" size={22} />
       </div>
 
       <div className="field-grid">
         <label className="field">
-          <span>과실비율 소견</span>
+          <span>지급 인정 비율 소견</span>
           <textarea
             required
             value={faultRatioOpinion}
             onChange={(event) => setFaultRatioOpinion(event.target.value)}
             disabled={disabled || isSubmitting}
-            placeholder="과실비율 판단 근거를 입력하세요."
+            placeholder="지급 인정 비율 판단 근거를 입력하세요."
           />
         </label>
         <label className="field">
