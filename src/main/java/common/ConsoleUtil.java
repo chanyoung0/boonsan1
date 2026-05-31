@@ -5,6 +5,7 @@ import enums.RequestStatus;
 import enums.UnderwritingResultType;
 import enums.UnderwritingType;
 import model.underwriting.UnderwritingRequest;
+import service.underwriting.UnderwritingService;
 
 import java.time.LocalDateTime;
 import java.util.Scanner;
@@ -89,7 +90,13 @@ public class ConsoleUtil {
         System.out.println("  [시스템] UnderwritingRequest 상태: "
                 + underwritingRequest.getRequestStatus()
                 + " | 결과유형: " + underwritingRequest.getUnderwritingResult());
-        System.out.println("  [시스템] 심사 요청 내역이 DB에 저장되었습니다.");
+
+        String requestId = UnderwritingService.saveUnderwritingRequest(underwritingRequest);
+        if (requestId != null) {
+            System.out.println("  [시스템] 심사 요청 내역이 DB에 저장되었습니다. (요청번호: " + requestId + ")");
+        } else {
+            System.out.println("  [시스템] 심사 요청 DB 저장에 실패했습니다.");
+        }
         return result;
     }
 

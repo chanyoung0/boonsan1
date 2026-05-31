@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.UnderwritingRequestMapper">
+
+    <resultMap id="UnderwritingRequestResult" type="UnderwritingRequest">
+        <id     property="requestId"           column="request_id"/>
+        <result property="underwritingId"      column="underwriting_id"/>
+        <result property="requestReason"       column="request_reason"
+                javaType="enums.RequestReason"/>
+        <result property="requestStatus"       column="request_status"
+                javaType="enums.RequestStatus"/>
+        <result property="underwritingType"    column="underwriting_type"
+                javaType="enums.UnderwritingType"/>
+        <result property="underwritingResult"  column="underwriting_result"
+                javaType="enums.UnderwritingResultType"/>
+        <result property="rejectionReason"     column="rejection_reason"
+                javaType="enums.RejectionReason"/>
+        <result property="surchargeCondition"  column="surcharge_condition"
+                javaType="enums.SurchargeCondition"/>
+        <result property="appliedAt"           column="applied_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        request_id, underwriting_id, request_reason, request_status, underwriting_type,
+        underwriting_result, rejection_reason, surcharge_condition, applied_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="UnderwritingRequestResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting_request
+        WHERE request_id = #{requestId}
+    </select>
+
+    <select id="findByUnderwritingId" parameterType="string" resultMap="UnderwritingRequestResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting_request
+        WHERE underwriting_id = #{underwritingId}
+        ORDER BY applied_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO underwriting_request
+        (request_id, underwriting_id, request_reason, request_status, underwriting_type,
+         underwriting_result, rejection_reason, surcharge_condition, applied_at)
+        VALUES (#{uwr.requestId}, #{uwr.underwritingId}, #{uwr.requestReason},
+                #{uwr.requestStatus}, #{uwr.underwritingType}, #{uwr.underwritingResult},
+                #{uwr.rejectionReason}, #{uwr.surchargeCondition}, #{uwr.appliedAt})
+    </insert>
+
+</mapper>

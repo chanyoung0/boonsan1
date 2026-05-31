@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.UnderwritingResultMapper">
+
+    <resultMap id="UnderwritingResultRowResult" type="UnderwritingResult">
+        <id     property="resultId"            column="result_id"/>
+        <result property="underwritingId"      column="underwriting_id"/>
+        <result property="underwritingResult"  column="underwriting_result"
+                javaType="enums.UnderwritingResultType"/>
+        <result property="rejectionReason"     column="rejection_reason"/>
+        <result property="surchargeCondition"  column="surcharge_condition"
+                javaType="enums.SurchargeCondition"/>
+        <result property="confirmedAt"         column="confirmed_at"/>
+    </resultMap>
+
+    <sql id="columns">
+        result_id, underwriting_id, underwriting_result,
+        rejection_reason, surcharge_condition, confirmed_at
+    </sql>
+
+    <select id="findById" parameterType="string" resultMap="UnderwritingResultRowResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting_result
+        WHERE result_id = #{resultId}
+    </select>
+
+    <select id="findByUnderwritingId" parameterType="string" resultMap="UnderwritingResultRowResult">
+        SELECT <include refid="columns"/>
+        FROM underwriting_result
+        WHERE underwriting_id = #{underwritingId}
+        ORDER BY confirmed_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO underwriting_result
+        (result_id, underwriting_id, underwriting_result, rejection_reason,
+         surcharge_condition, confirmed_at)
+        VALUES (#{uwr.resultId}, #{uwr.underwritingId}, #{uwr.underwritingResult},
+                #{uwr.rejectionReason}, #{uwr.surchargeCondition}, #{uwr.confirmedAt})
+    </insert>
+
+</mapper>

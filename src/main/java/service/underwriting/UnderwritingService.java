@@ -6,6 +6,8 @@ import db.InsuranceApplicationMapper;
 import db.InsuredPersonMapper;
 import db.UnderwritingHistoryMapper;
 import db.UnderwritingMapper;
+import db.UnderwritingRequestMapper;
+import db.UnderwritingResultMapper;
 import db.MyBatisSessionFactory;
 import enums.ApplicationStatus;
 import enums.UnderwritingStatus;
@@ -16,6 +18,8 @@ import model.person.InsuredPerson;
 import model.underwriting.InsuranceApplication;
 import model.underwriting.Underwriting;
 import model.underwriting.UnderwritingHistory;
+import model.underwriting.UnderwritingRequest;
+import model.underwriting.UnderwritingResult;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
@@ -102,9 +106,9 @@ public class UnderwritingService {
         return insuranceAmount > REINSURANCE_THRESHOLD;
     }
 
-    // 심사결과를 DB에 저장하고 생성된 심사번호를 반환한다
-    public static String saveUnderwritingResult(String empNo, String empName, String empDept,
-                                                int score, String finalResult, boolean wasManual) {
+    // 심사(Underwriting) 본체를 DB에 저장하고 생성된 심사번호를 반환한다
+    public static String saveUnderwriting(String empNo, String empName, String empDept,
+                                          int score, String finalResult, boolean wasManual) {
         String underwritingId = "UW-" + System.currentTimeMillis();
         Underwriting underwriting = new Underwriting();
         underwriting.setUnderwriter(empName);
@@ -123,6 +127,35 @@ public class UnderwritingService {
             return rows > 0 ? underwritingId : null;
         } catch (Exception e) {
             System.out.println("[DB 오류] 심사 저장 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // 심사 요청(UnderwritingRequest)을 DB에 저장하고 생성된 요청번호를 반환한다
+    public static String saveUnderwritingRequest(UnderwritingRequest request) {
+        if (request == null) return null;
+        String requestId = "REQ-" + System.currentTimeMillis();
+        request.setRequestId(requestId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnderwritingRequestMapper.class).insert(request);
+            return rows > 0 ? requestId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사요청 저장 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // 심사 결과(UnderwritingResult)를 DB에 저장하고 생성된 결과번호를 반환한다
+    public static String saveUnderwritingResult(UnderwritingResult result, String underwritingId) {
+        if (result == null) return null;
+        String resultId = "RES-" + System.currentTimeMillis();
+        result.setResultId(resultId);
+        result.setUnderwritingId(underwritingId);
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnderwritingResultMapper.class).insert(result);
+            return rows > 0 ? resultId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 심사결과 저장 실패: " + e.getMessage());
             return null;
         }
     }

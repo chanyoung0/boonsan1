@@ -275,3 +275,36 @@ CREATE TABLE accident_history (
     CONSTRAINT fk_accident_history_underwriting_history FOREIGN KEY (history_id)
         REFERENCES underwriting_history(history_id)
 );
+
+-- =====================================================
+-- 18. 심사요청 (UnderwritingRequest) — 배서/부활이 발생시키는 심사 요청 기록
+-- =====================================================
+CREATE TABLE underwriting_request (
+    request_id          VARCHAR(50)     NOT NULL,
+    underwriting_id     VARCHAR(50),    -- nullable, FK → underwriting (배서/부활은 별도 underwriting row 없을 수 있음)
+    request_reason      VARCHAR(30),    -- ENDORSEMENT | REINSTATEMENT | NEW_APPLICATION
+    request_status      VARCHAR(30),    -- PENDING | COMPLETED | REJECTED
+    underwriting_type   VARCHAR(30),    -- AUTO | GENERAL | MANUAL
+    underwriting_result VARCHAR(30),    -- APPROVED | SURCHARGE | REJECTED
+    rejection_reason    VARCHAR(200),
+    surcharge_condition VARCHAR(50),
+    applied_at          TIMESTAMP,
+    CONSTRAINT pk_underwriting_request PRIMARY KEY (request_id),
+    CONSTRAINT fk_underwriting_request_underwriting FOREIGN KEY (underwriting_id)
+        REFERENCES underwriting(underwriting_id)
+);
+
+-- =====================================================
+-- 19. 심사결과 (UnderwritingResult) — Underwriting에서 결과만 분리한 기록
+-- =====================================================
+CREATE TABLE underwriting_result (
+    result_id           VARCHAR(50)     NOT NULL,
+    underwriting_id     VARCHAR(50),    -- nullable, FK → underwriting
+    underwriting_result VARCHAR(30),    -- APPROVED | SURCHARGE | REJECTED
+    rejection_reason    VARCHAR(200),
+    surcharge_condition VARCHAR(50),
+    confirmed_at        TIMESTAMP,
+    CONSTRAINT pk_underwriting_result PRIMARY KEY (result_id),
+    CONSTRAINT fk_underwriting_result_underwriting FOREIGN KEY (underwriting_id)
+        REFERENCES underwriting(underwriting_id)
+);

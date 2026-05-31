@@ -4,10 +4,13 @@ import enums.AccidentType;
 import enums.AccountType;
 import enums.BankName;
 import enums.Gender;
+import enums.SurchargeCondition;
+import enums.UnderwritingResultType;
 import model.accident.AccidentHistory;
 import model.person.Account;
 import model.person.InsuredPerson;
 import model.underwriting.UnderwritingHistory;
+import model.underwriting.UnderwritingResult;
 import service.underwriting.UnderwritingService;
 
 import java.math.BigDecimal;
@@ -202,11 +205,22 @@ public class UnderwritingConsole {
         String finalResult = "2".equals(finalChoice) ? "할증" : "3".equals(finalChoice) ? "거절" : "승인";
 
         System.out.println("\n[시스템] 심사결과를 DB에 저장 중...");
-        String underwritingId = UnderwritingService.saveUnderwritingResult(
+        String underwritingId = UnderwritingService.saveUnderwriting(
                 empNo, empName, empDept, score, finalResult, !canAutoReview);
         if (underwritingId == null) {
             System.out.println("[오류] 저장 실패. 관리자에게 오류를 통보하고 시스템을 종료합니다.");
             return;
+        }
+
+        UnderwritingResult resultRow = new UnderwritingResult();
+        resultRow.setUnderwritingResult(resolveResultType(finalResult));
+        resultRow.setRejectionReason("거절".equals(finalResult)
+                ? "위험도 기준 초과 (총점 " + score + "점)" : null);
+        resultRow.setSurchargeCondition(SurchargeCondition.NONE);
+        resultRow.setConfirmedAt(LocalDateTime.now());
+        String resultId = UnderwritingService.saveUnderwritingResult(resultRow, underwritingId);
+        if (resultId != null) {
+            System.out.println("[시스템] 심사결과 레코드 저장 완료 (결과번호: " + resultId + ")");
         }
 
         System.out.println("[시스템] 사원번호: " + empNo + " | 이름: " + empName + " | 부서: " + empDept);
@@ -223,6 +237,12 @@ public class UnderwritingConsole {
 
         System.out.println("\n  >> <<include>> [청약서 및 증권발행을 한다] 시나리오 시작");
         policyIssuance(name, finalResult, insuranceAmount);
+    }
+
+    private static UnderwritingResultType resolveResultType(String finalResult) {
+        if ("할증".equals(finalResult)) return UnderwritingResultType.SURCHARGE;
+        if ("거절".equals(finalResult)) return UnderwritingResultType.REJECTED;
+        return UnderwritingResultType.APPROVED;
     }
 
     private static int parseAgeInt(String input) {
