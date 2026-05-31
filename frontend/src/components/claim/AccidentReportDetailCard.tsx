@@ -32,11 +32,14 @@ export function AccidentReportDetailCard({ data }: AccidentReportDetailCardProps
       </div>
 
       <section className="document-section">
-        <h3>
-          <Paperclip aria-hidden="true" size={18} />
-          첨부 서류
-        </h3>
-        <div className="document-grid">
+        <div className="document-section-heading">
+          <h3>
+            <Paperclip aria-hidden="true" size={18} />
+            첨부 서류
+          </h3>
+          <p>저장된 첨부 서류 파일명입니다. 실제 파일 열람은 아직 지원하지 않습니다.</p>
+        </div>
+        <div className="document-list">
           <DocumentItem label="사고경위서" value={data.accidentReportDocumentName} />
           <DocumentItem label="진단서" value={data.medicalCertificateFileName} />
           <DocumentItem label="청구서류" value={data.claimDocumentName} />
@@ -80,16 +83,18 @@ function TextBox({ title, value }: { title: string; value: string }) {
 }
 
 function DocumentItem({ label, value }: { label: string; value: string | null }) {
-  const displayValue = value?.trim() ? value : '미등록';
+  const hasFileName = Boolean(value?.trim());
+  const displayValue = hasFileName ? value!.trim() : '미등록';
 
   return (
     <div className="document-item">
-      <FileText aria-hidden="true" size={18} />
+      <FileText aria-hidden="true" size={22} />
       <div>
         <span>{label}</span>
-        <strong className={!value?.trim() ? 'empty-value' : ''} title={displayValue}>
+        <strong className={`document-file-name ${!hasFileName ? 'empty-value' : ''}`} title={displayValue}>
           {displayValue}
         </strong>
+        {hasFileName && <em>파일명 등록됨</em>}
       </div>
     </div>
   );
