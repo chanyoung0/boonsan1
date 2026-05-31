@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.ManagerMapper">
+
+    <resultMap id="ManagerResult" type="Manager">
+        <id     property="employeeNo"  column="employee_no"/>
+        <result property="name"        column="name"/>
+        <result property="department"  column="department"/>
+    </resultMap>
+
+    <sql id="columns">
+        employee_no, name, department
+    </sql>
+
+    <select id="findByEmployeeNo" parameterType="string" resultMap="ManagerResult">
+        SELECT <include refid="columns"/>
+        FROM manager
+        WHERE employee_no = #{employeeNo}
+    </select>
+
+    <select id="findAll" resultMap="ManagerResult">
+        SELECT <include refid="columns"/>
+        FROM manager
+        ORDER BY employee_no
+    </select>
+
+    <insert id="insert">
+        INSERT INTO manager (employee_no, name, department)
+        VALUES (#{mgr.employeeNo}, #{mgr.name}, #{mgr.department})
+    </insert>
+
+</mapper>

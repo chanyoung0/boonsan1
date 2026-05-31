@@ -308,3 +308,18 @@ CREATE TABLE underwriting_result (
     CONSTRAINT fk_underwriting_result_underwriting FOREIGN KEY (underwriting_id)
         REFERENCES underwriting(underwriting_id)
 );
+
+-- =====================================================
+-- 20. 담당자 (Manager) — Transfer가 assignee로 참조하는 마스터 데이터
+-- =====================================================
+CREATE TABLE manager (
+    employee_no VARCHAR(50)     NOT NULL,
+    name        VARCHAR(100),
+    department  VARCHAR(100),
+    CONSTRAINT pk_manager PRIMARY KEY (employee_no)
+);
+
+INSERT INTO manager (employee_no, name, department) VALUES
+    ('MGR-001', '김관리', '계약관리1팀'),
+    ('MGR-002', '이수금', '수금관리팀'),
+    ('MGR-003', '박이관', '미수관리팀');
