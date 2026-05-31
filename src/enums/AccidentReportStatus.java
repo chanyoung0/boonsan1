@@ -1,0 +1,10 @@
+package enums;
+
+public enum AccidentReportStatus {
+    RECEIVED,
+    DOCUMENT_PENDING,
+    FIELD_INVESTIGATION_REQUIRED,
+    APPROVAL_REQUIRED,
+    REJECTED,
+    FRAUD_INVESTIGATION
+}
