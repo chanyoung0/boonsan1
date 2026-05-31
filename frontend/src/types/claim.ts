@@ -117,6 +117,15 @@ export interface PaymentApprovalDocumentResponse {
   submittedAt: string | null;
 }
 
+export interface DamageInvestigationResultResponse extends PaymentApprovalDocumentResponse {
+  adjusterId: string;
+  investigationAt: string;
+  medicalExpense: number;
+  lostIncome: number;
+  repairCost: number;
+  settlementAmount: number;
+}
+
 export const ACCIDENT_TYPE_LABELS: Record<AccidentType, string> = {
   VEHICLE: '차량 사고',
   INJURY: '상해 사고',

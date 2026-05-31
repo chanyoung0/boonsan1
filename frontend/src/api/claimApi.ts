@@ -4,6 +4,7 @@ import type {
   AccidentReportResponse,
   AdjusterOpinionRequest,
   DamageAssessmentRequest,
+  DamageInvestigationResultResponse,
   DamageInvestigationStartResponse,
   FieldInvestigationMaterialResponse,
   InvestigationApprovalRequest,
@@ -33,6 +34,12 @@ export function getAccidentReportForInvestigation(accidentNumber: string) {
 export function getFieldInvestigationMaterials(accidentNumber: string) {
   return apiRequest<FieldInvestigationMaterialResponse>(
     `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/field-materials`
+  );
+}
+
+export function getDamageInvestigationResult(accidentNumber: string) {
+  return apiRequest<DamageInvestigationResultResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/damage-investigations/result`
   );
 }
 

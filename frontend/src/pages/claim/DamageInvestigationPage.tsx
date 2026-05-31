@@ -3,14 +3,17 @@ import { Search } from 'lucide-react';
 import {
   createPaymentApprovalDraft,
   getAccidentReportForInvestigation,
+  getDamageInvestigationResult,
   getFieldInvestigationMaterials,
   requestInvestigationApproval,
   saveAdjusterOpinion
 } from '../../api/claimApi';
+import { ApiError } from '../../api/apiClient';
 import { AccidentReportInvestigationSummary } from '../../components/claim/AccidentReportInvestigationSummary';
 import { AdjusterOpinionForm } from '../../components/claim/AdjusterOpinionForm';
 import { AlertMessage } from '../../components/claim/AlertMessage';
 import { DamageAssessmentForm } from '../../components/claim/DamageAssessmentForm';
+import { DamageInvestigationResultCard } from '../../components/claim/DamageInvestigationResultCard';
 import { FieldInvestigationMaterialCard } from '../../components/claim/FieldInvestigationMaterialCard';
 import { FinalPaymentApprovalCard } from '../../components/claim/FinalPaymentApprovalCard';
 import { InvestigationApprovalPanel } from '../../components/claim/InvestigationApprovalPanel';
@@ -20,6 +23,7 @@ import { AppLayout } from '../../components/layout/AppLayout';
 import type {
   AdjusterOpinionRequest,
   DamageAssessmentRequest,
+  DamageInvestigationResultResponse,
   DamageInvestigationStartResponse,
   FieldInvestigationMaterialResponse,
   InvestigationApprovalRequest,
@@ -34,6 +38,7 @@ export function DamageInvestigationPage() {
   const [accident, setAccident] = useState<DamageInvestigationStartResponse | null>(null);
   const [materials, setMaterials] = useState<FieldInvestigationMaterialResponse | null>(null);
   const [draft, setDraft] = useState<PaymentApprovalDraftResponse | null>(null);
+  const [existingResult, setExistingResult] = useState<DamageInvestigationResultResponse | null>(null);
   const [finalDocument, setFinalDocument] = useState<PaymentApprovalDocumentResponse | null>(null);
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,12 +46,13 @@ export function DamageInvestigationPage() {
 
   const activeStep = useMemo(() => {
     if (!accident) return 1;
+    if (existingResult) return 7;
     if (!materials) return 2;
     if (!draft) return 3;
     if (!finalDocument) return 5;
     if (finalDocument.accidentStatus !== 'APPROVAL_REQUIRED') return 7;
     return 7;
-  }, [accident, materials, draft, finalDocument]);
+  }, [accident, existingResult, materials, draft, finalDocument]);
 
   const normalizedAccidentNumber = accident?.accidentNumber ?? accidentNumberInput.trim();
 
@@ -63,16 +69,40 @@ export function DamageInvestigationPage() {
     setAccident(null);
     setMaterials(null);
     setDraft(null);
+    setExistingResult(null);
     setFinalDocument(null);
     try {
       const response = await getAccidentReportForInvestigation(accidentNumber);
       setAccident(response);
       setAccidentNumberInput(response.accidentNumber);
-      setSuccess('사고 접수 내용을 조회했습니다.');
+      await loadExistingResult(response.accidentNumber);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '사고 접수 내용을 조회할 수 없습니다.');
     } finally {
       setLoadingAction(null);
+    }
+  };
+
+  const loadExistingResult = async (accidentNumber: string) => {
+    try {
+      const [result, fieldMaterials] = await Promise.all([
+        getDamageInvestigationResult(accidentNumber),
+        getFieldInvestigationMaterials(accidentNumber)
+      ]);
+      setExistingResult(result);
+      setFinalDocument(result);
+      setMaterials(fieldMaterials);
+      setSuccess(
+        result.accidentStatus === 'APPROVAL_REQUIRED'
+          ? '이미 결재 요청된 손해조사입니다.'
+          : '저장된 손해조사 결과를 불러왔습니다.'
+      );
+    } catch (caught) {
+      if (caught instanceof ApiError && caught.status === 404) {
+        setSuccess('사고 접수 내용을 조회했습니다. 기존 손해조사 결과가 없어 새 손해조사를 진행할 수 있습니다.');
+        return;
+      }
+      throw caught;
     }
   };
 
@@ -99,6 +129,11 @@ export function DamageInvestigationPage() {
     setError(null);
     setSuccess(null);
     setFinalDocument(null);
+    if (existingResult) {
+      setError('이미 저장된 손해조사 결과가 있어 초안을 중복 작성할 수 없습니다.');
+      setLoadingAction(null);
+      return;
+    }
     try {
       setDraft(await createPaymentApprovalDraft(accident.accidentNumber, request));
       setSuccess('지급품의서 초안을 작성했습니다.');
@@ -204,7 +239,9 @@ export function DamageInvestigationPage() {
           onLoad={handleLoadMaterials}
         />
 
-        {accident && materials && (
+        {existingResult && <DamageInvestigationResultCard result={existingResult} />}
+
+        {accident && materials && !existingResult && (
           <DamageAssessmentForm
             accidentNumber={normalizedAccidentNumber}
             disabled={!materials}
@@ -213,9 +250,9 @@ export function DamageInvestigationPage() {
           />
         )}
 
-        {draft && <PaymentApprovalDraftCard draft={draft} />}
+        {draft && !existingResult && <PaymentApprovalDraftCard draft={draft} />}
 
-        {draft && (
+        {draft && !existingResult && (
           <AdjusterOpinionForm
             accidentNumber={normalizedAccidentNumber}
             disabled={!draft}
@@ -226,7 +263,7 @@ export function DamageInvestigationPage() {
 
         {finalDocument && <FinalPaymentApprovalCard document={finalDocument} />}
 
-        {finalDocument && finalDocument.accidentStatus !== 'APPROVAL_REQUIRED' && (
+        {finalDocument && !existingResult && finalDocument.accidentStatus !== 'APPROVAL_REQUIRED' && (
           <InvestigationApprovalPanel
             accidentNumber={normalizedAccidentNumber}
             disabled={!finalDocument}
@@ -237,7 +274,7 @@ export function DamageInvestigationPage() {
 
         {finalDocument?.accidentStatus === 'APPROVAL_REQUIRED' && (
           <aside className="work-panel empty-result next-step-panel">
-            <strong>다음 단계 가능</strong>
+            <strong>{existingResult ? '이미 결재 요청된 손해조사입니다.' : '다음 단계 가능'}</strong>
             <p>손해조사가 완료되어 결재 필요 상태가 되었습니다. 보험금 지급 단계로 자동 이동하지 않습니다.</p>
           </aside>
         )}

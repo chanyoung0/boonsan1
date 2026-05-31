@@ -1,6 +1,7 @@
 package claim.mapper;
 
 import claim.dto.DamageAssessmentRequest;
+import claim.dto.DamageInvestigationResultResponse;
 import claim.dto.PaymentApprovalDocumentResponse;
 import model.accident.AccidentReport;
 import org.apache.ibatis.annotations.Param;
@@ -44,6 +45,10 @@ public interface DamageInvestigationMapper {
     );
 
     PaymentApprovalDocumentResponse findPaymentApprovalDocumentByAccidentNumber(
+            @Param("accidentNumber") String accidentNumber
+    );
+
+    DamageInvestigationResultResponse findDamageInvestigationResultByAccidentNumber(
             @Param("accidentNumber") String accidentNumber
     );
 

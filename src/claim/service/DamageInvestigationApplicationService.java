@@ -2,6 +2,7 @@ package claim.service;
 
 import claim.dto.AdjusterOpinionRequest;
 import claim.dto.DamageAssessmentRequest;
+import claim.dto.DamageInvestigationResultResponse;
 import claim.dto.DamageInvestigationStartResponse;
 import claim.dto.FieldInvestigationMaterialResponse;
 import claim.dto.InvestigationApprovalRequest;
@@ -50,6 +51,17 @@ public class DamageInvestigationApplicationService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public DamageInvestigationResultResponse getDamageInvestigationResult(String accidentNumber) {
+        String normalizedAccidentNumber = requireAccidentReport(accidentNumber).getReportNo();
+        DamageInvestigationResultResponse response =
+                damageInvestigationMapper.findDamageInvestigationResultByAccidentNumber(normalizedAccidentNumber);
+        if (response == null) {
+            throw new NoSuchElementException("Damage investigation result not found: " + normalizedAccidentNumber);
+        }
+        return response;
+    }
+
     @Transactional
     public PaymentApprovalDraftResponse createPaymentApprovalDraft(
             String accidentNumber,
@@ -57,6 +69,7 @@ public class DamageInvestigationApplicationService {
     ) {
         String normalizedAccidentNumber = requireMatchingAccidentNumber(accidentNumber, request.getAccidentNumber());
         requireAccidentReport(normalizedAccidentNumber);
+        rejectDuplicatePaymentApprovalDocument(normalizedAccidentNumber);
         request.setAccidentNumber(normalizedAccidentNumber);
 
         LocalDateTime createdAt = LocalDateTime.now();
@@ -97,6 +110,7 @@ public class DamageInvestigationApplicationService {
     ) {
         String normalizedAccidentNumber = requireMatchingAccidentNumber(accidentNumber, request.getAccidentNumber());
         requireAccidentReport(normalizedAccidentNumber);
+        rejectAlreadyApprovalRequested(normalizedAccidentNumber);
 
         int updated = damageInvestigationMapper.updateLatestPaymentApprovalOpinion(
                 normalizedAccidentNumber,
@@ -123,6 +137,7 @@ public class DamageInvestigationApplicationService {
     ) {
         String normalizedAccidentNumber = requireMatchingAccidentNumber(accidentNumber, request.getAccidentNumber());
         requireAccidentReport(normalizedAccidentNumber);
+        rejectAlreadyApprovalRequested(normalizedAccidentNumber);
 
         LocalDateTime submittedAt = LocalDateTime.now();
         int submitted = damageInvestigationMapper.submitLatestPaymentApprovalDocument(
@@ -180,6 +195,28 @@ public class DamageInvestigationApplicationService {
         return totalDamageAmount
                 .multiply(BigDecimal.valueOf(faultRatio))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+    }
+
+    private void rejectDuplicatePaymentApprovalDocument(String accidentNumber) {
+        DamageInvestigationResultResponse existingResult =
+                damageInvestigationMapper.findDamageInvestigationResultByAccidentNumber(accidentNumber);
+        if (existingResult != null) {
+            throw new IllegalArgumentException("Damage investigation result already exists: " + accidentNumber);
+        }
+
+        PaymentApprovalDocumentResponse existing =
+                damageInvestigationMapper.findPaymentApprovalDocumentByAccidentNumber(accidentNumber);
+        if (existing != null) {
+            throw new IllegalArgumentException("Payment approval document already exists: " + accidentNumber);
+        }
+    }
+
+    private void rejectAlreadyApprovalRequested(String accidentNumber) {
+        PaymentApprovalDocumentResponse existing =
+                damageInvestigationMapper.findPaymentApprovalDocumentByAccidentNumber(accidentNumber);
+        if (existing != null && APPROVAL_REQUESTED_STATUS.equals(existing.getSubmissionStatus())) {
+            throw new IllegalArgumentException("Damage investigation is already approval requested: " + accidentNumber);
+        }
     }
 
     private String generateId(String prefix) {

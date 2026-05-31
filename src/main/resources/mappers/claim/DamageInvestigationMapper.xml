@@ -35,6 +35,29 @@
         <result property="submittedAt" column="submitted_at"/>
     </resultMap>
 
+    <resultMap id="DamageInvestigationResultResponseResultMap" type="claim.dto.DamageInvestigationResultResponse">
+        <id property="investigationId" column="investigation_id"/>
+        <result property="accidentNumber" column="report_no"/>
+        <result property="adjusterId" column="adjuster_id"/>
+        <result property="investigationAt" column="investigation_at"/>
+        <result property="medicalExpense" column="medical_expense"/>
+        <result property="lostIncome" column="lost_income"/>
+        <result property="repairCost" column="repair_cost"/>
+        <result property="settlementAmount" column="settlement_amount"/>
+        <result property="faultRatio" column="fault_ratio"/>
+        <result property="totalDamageAmount" column="total_damage_amount"/>
+        <result property="calculatedPaymentAmount" column="calculated_payment_amount"/>
+        <result property="documentId" column="document_id"/>
+        <result property="documentType" column="document_type"/>
+        <result property="submissionStatus" column="submission_status"/>
+        <result property="faultRatioOpinion" column="fault_ratio_opinion"/>
+        <result property="adjusterOpinion" column="adjuster_opinion"/>
+        <result property="employeeNo" column="employee_no"/>
+        <result property="accidentStatus" column="accident_status" javaType="enums.AccidentReportStatus"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="submittedAt" column="submitted_at"/>
+    </resultMap>
+
     <select id="findAccidentReportForInvestigation" resultMap="AccidentReportForInvestigationResultMap">
         SELECT
             report_no,
@@ -150,6 +173,59 @@
         JOIN accident_report ar ON ar.report_no = pad.report_no
         WHERE pad.report_no = #{accidentNumber}
         ORDER BY pad.created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="findDamageInvestigationResultByAccidentNumber" resultMap="DamageInvestigationResultResponseResultMap">
+        SELECT
+            di.investigation_id,
+            di.report_no,
+            di.adjuster_id,
+            di.investigation_at,
+            di.medical_expense,
+            di.lost_income,
+            di.repair_cost,
+            di.settlement_amount,
+            di.fault_ratio,
+            COALESCE(
+                pad.damage_amount,
+                di.medical_expense + di.lost_income + di.repair_cost + di.settlement_amount
+            ) AS total_damage_amount,
+            ROUND((
+                COALESCE(
+                    pad.damage_amount,
+                    di.medical_expense + di.lost_income + di.repair_cost + di.settlement_amount
+                ) * di.fault_ratio::numeric / 100
+            ), 2) AS calculated_payment_amount,
+            pad.document_id,
+            pad.document_type,
+            pad.submission_status,
+            pad.fault_ratio_opinion,
+            pad.adjuster_opinion,
+            pad.employee_no,
+            ar.accident_status,
+            COALESCE(pad.created_at, di.created_at) AS created_at,
+            pad.submitted_at
+        FROM damage_investigation di
+        JOIN accident_report ar ON ar.report_no = di.report_no
+        LEFT JOIN LATERAL (
+            SELECT
+                document_id,
+                document_type,
+                submission_status,
+                damage_amount,
+                fault_ratio_opinion,
+                adjuster_opinion,
+                employee_no,
+                created_at,
+                submitted_at
+            FROM payment_approval_document
+            WHERE report_no = di.report_no
+            ORDER BY created_at DESC
+            LIMIT 1
+        ) pad ON true
+        WHERE di.report_no = #{accidentNumber}
+        ORDER BY di.created_at DESC
         LIMIT 1
     </select>
 

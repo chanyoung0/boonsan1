@@ -2,6 +2,7 @@ package claim.controller;
 
 import claim.dto.AdjusterOpinionRequest;
 import claim.dto.DamageAssessmentRequest;
+import claim.dto.DamageInvestigationResultResponse;
 import claim.dto.DamageInvestigationStartResponse;
 import claim.dto.FieldInvestigationMaterialResponse;
 import claim.dto.InvestigationApprovalRequest;
@@ -45,6 +46,15 @@ public class DamageInvestigationController {
         FieldInvestigationMaterialResponse response =
                 damageInvestigationApplicationService.getFieldInvestigationMaterials(accidentNumber);
         return ApiResponse.success(response, "Field investigation materials loaded");
+    }
+
+    @GetMapping("/damage-investigations/result")
+    public ApiResponse<DamageInvestigationResultResponse> getDamageInvestigationResult(
+            @PathVariable String accidentNumber
+    ) {
+        DamageInvestigationResultResponse response =
+                damageInvestigationApplicationService.getDamageInvestigationResult(accidentNumber);
+        return ApiResponse.success(response, "Damage investigation result found");
     }
 
     @PostMapping("/damage-investigations/draft")
