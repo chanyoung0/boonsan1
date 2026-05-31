@@ -1,6 +1,11 @@
 package console.accident;
 
+import enums.DocumentName;
+import enums.DocumentStatus;
+import enums.DocumentType;
+import enums.SubmissionStatus;
 import model.accident.AccidentReport;
+import model.document.AccidentDocument;
 import service.accident.AccidentReportService;
 
 import static common.ConsoleUtil.*;
@@ -47,6 +52,7 @@ public class AccidentReportConsole {
 
         String documentSubmissionStatus;
         String accidentStatus;
+        boolean submittedNow = false;
         if (AccidentReportService.isDocumentDeferred(docChoice)) {
             accidentReport.deferSubmission();
             accidentReport.saveAsDocumentPending();
@@ -60,6 +66,7 @@ public class AccidentReportConsole {
             enter();
             documentSubmissionStatus = "SUBMITTED";
             accidentStatus = "INVESTIGATION_REQUIRED";
+            submittedNow = true;
         }
 
         String reportNo = AccidentReportService.generateReportNo();
@@ -79,6 +86,21 @@ public class AccidentReportConsole {
             System.out.println("[오류] \"저장 실패\" - 관리자에게 오류를 통보합니다.");
             return;
         }
+
+        if (submittedNow) {
+            AccidentDocument accidentDocument = new AccidentDocument();
+            accidentDocument.setStatus(DocumentStatus.SUBMITTED);
+            accidentDocument.setCreatedAt(LocalDateTime.now());
+            accidentDocument.setDocumentName(DocumentName.ACCIDENT_REPORT);
+            accidentDocument.setDocumentType(DocumentType.ACCIDENT_REPORT);
+            accidentDocument.setSubmissionStatus(SubmissionStatus.SUBMITTED);
+            accidentDocument.setCheckDueDate(LocalDateTime.now().plusDays(7));
+            String docId = AccidentReportService.saveAccidentDocument(accidentDocument, reportNo);
+            if (docId != null) {
+                System.out.println("[시스템] 사고 서류 저장 완료 (문서번호: " + docId + ")");
+            }
+        }
+
         System.out.println("[시스템] 사고 접수 번호: " + reportNo);
         System.out.println("[시스템] \"정상적으로 접수되었습니다.\" | 사고 상태: '현장 조사 필요'");
         System.out.println("[시스템] AccidentReport 객체 생성 완료 | reportNo: " + accidentReport.getReportNo());

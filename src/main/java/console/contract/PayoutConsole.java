@@ -1,11 +1,15 @@
 package console.contract;
 
+import enums.ApprovalStatus;
 import enums.CalculationBasis;
+import enums.DocumentStatus;
 import enums.PaymentType;
 import model.contract.Payout;
+import model.document.PaymentApprovalDocument;
 import service.contract.PayoutService;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static common.ConsoleUtil.*;
@@ -117,6 +121,24 @@ public class PayoutConsole {
         if (payout == null) {
             System.out.println("[오류] 해당 지급번호를 승인할 수 없는 상태입니다.");
             return;
+        }
+
+        String approverEmpNo = input("결재자 사원번호");
+        String opinion = input("손해 적정성 의견");
+        String approvalRemarks = input("비고");
+
+        PaymentApprovalDocument approvalDoc = new PaymentApprovalDocument();
+        approvalDoc.setStatus(DocumentStatus.APPROVED);
+        approvalDoc.setCreatedAt(LocalDateTime.now());
+        approvalDoc.setApprovalStatus(ApprovalStatus.APPROVED);
+        approvalDoc.setApprovedAt(payout.getApprovedAt() != null ? payout.getApprovedAt() : LocalDateTime.now());
+        approvalDoc.setApproverEmployeeNo(approverEmpNo);
+        approvalDoc.setDamageAdequacyOpinion(opinion);
+        approvalDoc.setSettlementAmount(payout.getFinalPaymentAmount());
+        approvalDoc.setRemarks(approvalRemarks);
+        String docId = PayoutService.savePaymentApprovalDocument(approvalDoc, payoutId);
+        if (docId != null) {
+            System.out.println("[시스템] 지급 승인 서류 저장 완료 (문서번호: " + docId + ")");
         }
 
         System.out.println("[시스템] 제지급금 승인 완료");

@@ -354,3 +354,30 @@ CREATE TABLE unpaid_notice (
     CONSTRAINT fk_unpaid_notice_collection FOREIGN KEY (collection_id)
         REFERENCES payment_collection(collection_id)
 );
+
+-- =====================================================
+-- 23. 문서 (Document) — single-table 상속, document_kind로 ACCIDENT/PAYMENT_APPROVAL 분기
+-- =====================================================
+CREATE TABLE document (
+    document_id             VARCHAR(50)     NOT NULL,
+    document_kind           VARCHAR(30)     NOT NULL, -- ACCIDENT | PAYMENT_APPROVAL (discriminator)
+    status                  VARCHAR(30),              -- DocumentStatus enum
+    created_at              TIMESTAMP,
+    parent_id               VARCHAR(50),              -- 추적용 (AccidentReport.reportNo 또는 Payout.payoutId)
+    -- AccidentDocument 전용 (nullable)
+    check_due_date          TIMESTAMP,
+    document_name           VARCHAR(30),              -- DocumentName enum
+    document_type           VARCHAR(30),              -- DocumentType enum (서류 종류)
+    submission_status       VARCHAR(30),              -- SubmissionStatus enum
+    -- PaymentApprovalDocument 전용 (nullable)
+    approval_status         VARCHAR(30),              -- ApprovalStatus enum
+    approved_at             TIMESTAMP,
+    approver_employee_no    VARCHAR(50),
+    damage_adequacy_opinion TEXT,
+    lost_income_amount      NUMERIC(15, 2),
+    medical_expense_amount  NUMERIC(15, 2),
+    remarks                 TEXT,
+    repair_cost_amount      NUMERIC(15, 2),
+    settlement_amount       NUMERIC(15, 2),
+    CONSTRAINT pk_document PRIMARY KEY (document_id)
+);

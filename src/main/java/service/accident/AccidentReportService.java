@@ -1,8 +1,10 @@
 package service.accident;
 
 import db.AccidentReportMapper;
+import db.DocumentMapper;
 import db.MyBatisSessionFactory;
 import model.accident.AccidentReport;
+import model.document.AccidentDocument;
 import org.apache.ibatis.session.SqlSession;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,22 @@ public class AccidentReportService {
     // 사고 접수 번호 생성
     public static String generateReportNo() {
         return "ACC-2024-" + String.format("%06d", rnd.nextInt(999999) + 1);
+    }
+
+    // 사고 서류(AccidentDocument)를 DB에 저장하고 생성된 문서번호를 반환한다
+    public static String saveAccidentDocument(AccidentDocument document, String reportNo) {
+        if (document == null) return null;
+        String documentId = "DOC-A-" + System.currentTimeMillis();
+        document.setDocumentId(documentId);
+        if (document.getCreatedAt() == null) document.setCreatedAt(LocalDateTime.now());
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(DocumentMapper.class)
+                    .insertAccidentDocument(document, documentId, reportNo);
+            return rows > 0 ? documentId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 사고 서류 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     // 서류 나중 제출 여부 판단

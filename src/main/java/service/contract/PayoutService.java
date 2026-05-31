@@ -1,5 +1,6 @@
 package service.contract;
 
+import db.DocumentMapper;
 import db.PayoutMapper;
 import db.MyBatisSessionFactory;
 import enums.CalculationBasis;
@@ -8,9 +9,11 @@ import enums.PaymentCycle;
 import enums.PaymentType;
 import model.contract.Contract;
 import model.contract.Payout;
+import model.document.PaymentApprovalDocument;
 import org.apache.ibatis.session.SqlSession;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,22 @@ public class PayoutService {
 
     public static boolean isPayableContractStatus(String contractStatus) {
         return "유효".equals(contractStatus) || "만기".equals(contractStatus);
+    }
+
+    // 지급 승인 서류(PaymentApprovalDocument)를 DB에 저장하고 생성된 문서번호를 반환한다
+    public static String savePaymentApprovalDocument(PaymentApprovalDocument document, String payoutId) {
+        if (document == null) return null;
+        String documentId = "DOC-P-" + System.currentTimeMillis();
+        document.setDocumentId(documentId);
+        if (document.getCreatedAt() == null) document.setCreatedAt(LocalDateTime.now());
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(DocumentMapper.class)
+                    .insertPaymentApprovalDocument(document, documentId, payoutId);
+            return rows > 0 ? documentId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 지급승인 서류 저장 실패: " + e.getMessage());
+            return null;
+        }
     }
 
     public static Payout approvePayout(String payoutId) {
