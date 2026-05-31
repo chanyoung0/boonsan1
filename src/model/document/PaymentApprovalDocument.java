@@ -12,6 +12,7 @@ public class PaymentApprovalDocument extends Document {
     private LocalDateTime approvedAt;
     private String approverEmployeeNo;
     private String damageAdequacyOpinion;
+    private String faultRatioOpinion;
     private BigDecimal lostIncomeAmount;
     private BigDecimal medicalExpenseAmount;
     private String remarks;

@@ -1,5 +1,7 @@
 package model.accident;
 
+import enums.RequestStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -25,5 +27,7 @@ public class DamageInvestigation {
     public void rejectClaim() {}
 
     // 보험사기 조사 요청
-    public void requestFraudInvestigation() {}
+    public RequestStatus requestFraudInvestigation() {
+        return RequestStatus.PENDING;
+    }
 }

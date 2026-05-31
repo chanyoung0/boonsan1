@@ -5,7 +5,15 @@ export type AccidentStatus =
   | 'INVESTIGATING'
   | 'PAYMENT_REVIEW'
   | 'COMPLETED'
-  | 'REJECTED';
+  | 'DOCUMENT_PENDING'
+  | 'FIELD_INVESTIGATION_REQUIRED'
+  | 'APPROVAL_REQUIRED'
+  | 'REJECTED'
+  | 'FRAUD_INVESTIGATION'
+  | 'REINVESTIGATION_REQUIRED'
+  | 'TRANSFERRED_TO_LEGAL'
+  | 'OUTSOURCED_INVESTIGATION'
+  | 'TEMP_SAVED';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -52,7 +60,15 @@ export const ACCIDENT_STATUS_LABELS: Record<AccidentStatus, string> = {
   INVESTIGATING: '손해조사 중',
   PAYMENT_REVIEW: '지급 심사 중',
   COMPLETED: '종결',
-  REJECTED: '반려'
+  DOCUMENT_PENDING: '서류 보완 필요',
+  FIELD_INVESTIGATION_REQUIRED: '현장 조사 필요',
+  APPROVAL_REQUIRED: '결재 필요',
+  REJECTED: '반려',
+  FRAUD_INVESTIGATION: '보험 사기 조사',
+  REINVESTIGATION_REQUIRED: '재조사 필요',
+  TRANSFERRED_TO_LEGAL: '법률과 이관',
+  OUTSOURCED_INVESTIGATION: '위탁 조사',
+  TEMP_SAVED: '임시저장'
 };
 
 export function getAccidentTypeLabel(type: AccidentType) {
