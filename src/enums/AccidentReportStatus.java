@@ -2,6 +2,9 @@ package enums;
 
 public enum AccidentReportStatus {
     RECEIVED,
+    INVESTIGATING,
+    PAYMENT_REVIEW,
+    COMPLETED,
     DOCUMENT_PENDING,
     FIELD_INVESTIGATION_REQUIRED,
     APPROVAL_REQUIRED,

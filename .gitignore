@@ -7,6 +7,16 @@ out/
 ### Maven ###
 target/
 
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
 ### Eclipse ###
 .apt_generated
 .classpath
