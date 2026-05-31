@@ -13,7 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://boonsan-frontend.vercel.app"
+        "https://boonsan-frontend.vercel.app",
+"https://mjusw.site",
+"https://www.mjusw.site"
 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
