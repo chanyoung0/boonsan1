@@ -1,8 +1,14 @@
 package console.contract;
 
+import enums.PaymentMethod;
+import enums.TransferType;
 import model.contract.PaymentCollection;
+import model.contract.Transfer;
+import model.contract.UnpaidNotice;
+import model.person.Manager;
 import service.contract.PaymentCollectionService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static common.ConsoleUtil.*;
@@ -47,20 +53,49 @@ public class PaymentCollectionConsole {
 
         if (!allSuccess) {
             System.out.println("[시스템] 성공 2건 / 실패 1건 | 미납 계약: P2024-009012 (이철수, 220,000원)");
-            System.out.println(PaymentCollectionService.createUnpaidNoticeSummary(paymentCollection));
-            System.out.println("[시스템] P2024-009012 계약상태는 현재 콘솔 흐름에서 '미납'으로 처리합니다.");
 
             String unpaidCollectionId = PaymentCollectionService.findFirstUnpaidCollectionId(savedCollectionIds);
+            PaymentCollection unpaidCollection = unpaidCollectionId != null
+                    ? PaymentCollectionService.findCollectionById(unpaidCollectionId) : paymentCollection;
+            UnpaidNotice notice = new UnpaidNotice();
+            notice.setUnpaidAmount(unpaidCollection != null ? unpaidCollection.getUnpaidAmount() : paymentCollection.getUnpaidAmount());
+            notice.setDueDate(LocalDateTime.now().plusDays(15));
+            notice.setPaymentMethod(PaymentMethod.VISIT_COLLECTION);
+            notice.setSentAt(LocalDateTime.now());
+            String noticeId = PaymentCollectionService.saveUnpaidNotice(notice, unpaidCollectionId);
+            if (noticeId != null) {
+                System.out.println("[시스템] 미납 안내장 발송 완료 (안내번호: " + noticeId
+                        + ", 미납액: " + notice.getUnpaidAmount() + "원, 납입방법: " + notice.getPaymentMethod() + ")");
+            } else {
+                System.out.println("[시스템] 미납 안내장 DB 저장에 실패했습니다.");
+            }
+            System.out.println("[시스템] P2024-009012 계약상태는 현재 콘솔 흐름에서 '미납'으로 처리합니다.");
+
             System.out.print("\n[시스템] 미납 지속 계약을 이관 처리하시겠습니까? (Y/N): ");
             if ("Y".equalsIgnoreCase(sc.nextLine().trim())) {
-                System.out.println("  1. 방문수금  2. 이관");
+                System.out.println("  1. 방문수금  2. 이관 (담당자 변경)");
                 System.out.print(">> 선택: ");
                 String transferChoice = sc.nextLine().trim();
-                if (PaymentCollectionService.transferUnpaidCollection(unpaidCollectionId, transferChoice)) {
-                    System.out.println(PaymentCollectionService.createTransferSummary(transferChoice));
-                    System.out.println("[시스템] 수금번호 " + unpaidCollectionId + " 상태가 TRANSFERRED로 갱신되었습니다.");
-                } else {
+                String assigneeEmpNo = input("이관 담당자 사원번호 (예: MGR-002)");
+                Manager assignee = PaymentCollectionService.findManagerByEmployeeNo(assigneeEmpNo);
+                if (assignee == null) {
+                    System.out.println("[시스템] 입력한 사원번호가 존재하지 않아 기본 담당자(MGR-002)로 처리합니다.");
+                    assignee = PaymentCollectionService.findManagerByEmployeeNo("MGR-002");
+                }
+                Transfer transfer = new Transfer();
+                transfer.setAssignee(assignee);
+                transfer.setTransferType("2".equals(transferChoice) ? TransferType.DEPARTMENT_CHANGE : TransferType.VISIT_COLLECTION);
+                transfer.setTransferredAt(LocalDateTime.now());
+                String transferId = PaymentCollectionService.saveTransfer(transfer, unpaidCollectionId);
+                if (transferId == null) {
+                    System.out.println("[오류] 이관 DB 저장에 실패했습니다.");
+                } else if (!PaymentCollectionService.transferUnpaidCollection(unpaidCollectionId, transferChoice)) {
                     System.out.println("[오류] 미납 수금 이관 상태 갱신에 실패했습니다.");
+                } else {
+                    System.out.println("[시스템] 이관 처리 완료 (이관번호: " + transferId
+                            + ", 유형: " + transfer.getTransferType()
+                            + ", 담당자: " + (assignee != null ? assignee.getName() + "/" + assignee.getDepartment() : "미지정") + ")");
+                    System.out.println("[시스템] 수금번호 " + unpaidCollectionId + " 상태가 TRANSFERRED로 갱신되었습니다.");
                 }
             }
         } else {

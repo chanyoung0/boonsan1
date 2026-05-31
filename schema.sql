@@ -323,3 +323,34 @@ INSERT INTO manager (employee_no, name, department) VALUES
     ('MGR-001', '김관리', '계약관리1팀'),
     ('MGR-002', '이수금', '수금관리팀'),
     ('MGR-003', '박이관', '미수관리팀');
+
+-- =====================================================
+-- 21. 이관 (Transfer) — 미납 계약 이관 + 담당자 변경 기록
+-- =====================================================
+CREATE TABLE transfer (
+    transfer_id         VARCHAR(50)     NOT NULL,
+    collection_id       VARCHAR(50),    -- nullable, FK → payment_collection
+    manager_employee_no VARCHAR(50),    -- nullable, FK → manager (assignee)
+    transfer_type       VARCHAR(30),    -- VISIT_COLLECTION | CANCELLATION | DEPARTMENT_CHANGE
+    transferred_at      TIMESTAMP,
+    CONSTRAINT pk_transfer PRIMARY KEY (transfer_id),
+    CONSTRAINT fk_transfer_collection FOREIGN KEY (collection_id)
+        REFERENCES payment_collection(collection_id),
+    CONSTRAINT fk_transfer_manager FOREIGN KEY (manager_employee_no)
+        REFERENCES manager(employee_no)
+);
+
+-- =====================================================
+-- 22. 미납안내 (UnpaidNotice) — 미납 보험료 안내장 발송 기록
+-- =====================================================
+CREATE TABLE unpaid_notice (
+    notice_id      VARCHAR(50)     NOT NULL,
+    collection_id  VARCHAR(50),    -- nullable, FK → payment_collection
+    unpaid_amount  NUMERIC(15, 2),
+    due_date       TIMESTAMP,
+    payment_method VARCHAR(30),    -- AUTO_TRANSFER | BANK_TRANSFER | CREDIT_CARD | VISIT_COLLECTION
+    sent_at        TIMESTAMP,
+    CONSTRAINT pk_unpaid_notice PRIMARY KEY (notice_id),
+    CONSTRAINT fk_unpaid_notice_collection FOREIGN KEY (collection_id)
+        REFERENCES payment_collection(collection_id)
+);

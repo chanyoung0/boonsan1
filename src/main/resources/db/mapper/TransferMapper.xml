@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="db.TransferMapper">
+
+    <resultMap id="TransferResult" type="Transfer">
+        <result property="transferType"   column="transfer_type"
+                javaType="enums.TransferType"/>
+        <result property="transferredAt"  column="transferred_at"/>
+        <association property="assignee" javaType="Manager">
+            <id     property="employeeNo" column="employee_no"/>
+            <result property="name"       column="name"/>
+            <result property="department" column="department"/>
+        </association>
+    </resultMap>
+
+    <select id="findById" parameterType="string" resultMap="TransferResult">
+        SELECT t.transfer_id, t.transfer_type, t.transferred_at,
+               m.employee_no, m.name, m.department
+        FROM transfer t
+        LEFT JOIN manager m ON m.employee_no = t.manager_employee_no
+        WHERE t.transfer_id = #{transferId}
+    </select>
+
+    <select id="findByCollectionId" parameterType="string" resultMap="TransferResult">
+        SELECT t.transfer_id, t.transfer_type, t.transferred_at,
+               m.employee_no, m.name, m.department
+        FROM transfer t
+        LEFT JOIN manager m ON m.employee_no = t.manager_employee_no
+        WHERE t.collection_id = #{collectionId}
+        ORDER BY t.transferred_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO transfer
+        (transfer_id, collection_id, manager_employee_no, transfer_type, transferred_at)
+        VALUES (#{transferId}, #{collectionId}, #{employeeNo},
+                #{tr.transferType}, #{tr.transferredAt})
+    </insert>
+
+</mapper>

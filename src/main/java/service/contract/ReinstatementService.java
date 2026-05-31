@@ -5,6 +5,7 @@ import db.MyBatisSessionFactory;
 import model.contract.Reinstatement;
 import org.apache.ibatis.session.SqlSession;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,12 @@ public class ReinstatementService {
     // 계약 상태 기준 부활 가능 여부 판단
     public static boolean canReinstate(String contractStatus) {
         return "실효".equals(contractStatus);
+    }
+
+    // 미납 보험료 = 미납 회차 × 회당 보험료
+    public static BigDecimal calculateUnpaidPremium(int unpaidInstallments, BigDecimal perInstallmentPremium) {
+        if (unpaidInstallments <= 0 || perInstallmentPremium == null) return BigDecimal.ZERO;
+        return perInstallmentPremium.multiply(BigDecimal.valueOf(unpaidInstallments));
     }
 
     // 부활 처리 결과를 DB에 저장하고 생성된 부활번호를 반환한다

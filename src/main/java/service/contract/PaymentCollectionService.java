@@ -2,9 +2,13 @@ package service.contract;
 
 import db.ManagerMapper;
 import db.PaymentCollectionMapper;
+import db.TransferMapper;
+import db.UnpaidNoticeMapper;
 import db.MyBatisSessionFactory;
 import enums.ProcessingResult;
 import model.contract.PaymentCollection;
+import model.contract.Transfer;
+import model.contract.UnpaidNotice;
 import model.person.Manager;
 import org.apache.ibatis.session.SqlSession;
 
@@ -43,6 +47,41 @@ public class PaymentCollectionService {
             return s.getMapper(ManagerMapper.class).findByEmployeeNo(employeeNo);
         } catch (Exception e) {
             System.out.println("[DB 오류] 담당자 조회 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // 미납액 계산 = 청구액 − 수금액 (음수면 0으로)
+    public static BigDecimal calculateUnpaidAmount(BigDecimal claimedAmount, BigDecimal collectedAmount) {
+        BigDecimal c = claimedAmount == null ? BigDecimal.ZERO : claimedAmount;
+        BigDecimal r = collectedAmount == null ? BigDecimal.ZERO : collectedAmount;
+        BigDecimal diff = c.subtract(r);
+        return diff.signum() < 0 ? BigDecimal.ZERO : diff;
+    }
+
+    // 이관(Transfer) 정보를 DB에 저장하고 생성된 이관번호를 반환한다
+    public static String saveTransfer(Transfer transfer, String collectionId) {
+        if (transfer == null) return null;
+        String transferId = "TRF-" + System.currentTimeMillis();
+        String employeeNo = transfer.getAssignee() != null ? transfer.getAssignee().getEmployeeNo() : null;
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(TransferMapper.class).insert(transfer, transferId, collectionId, employeeNo);
+            return rows > 0 ? transferId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 이관 저장 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // 미납안내(UnpaidNotice)를 DB에 저장하고 생성된 안내번호를 반환한다
+    public static String saveUnpaidNotice(UnpaidNotice notice, String collectionId) {
+        if (notice == null) return null;
+        String noticeId = "UNP-" + System.currentTimeMillis();
+        try (SqlSession s = MyBatisSessionFactory.openSession()) {
+            int rows = s.getMapper(UnpaidNoticeMapper.class).insert(notice, noticeId, collectionId);
+            return rows > 0 ? noticeId : null;
+        } catch (Exception e) {
+            System.out.println("[DB 오류] 미납안내 저장 실패: " + e.getMessage());
             return null;
         }
     }
