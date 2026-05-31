@@ -67,7 +67,13 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
                   <a
                     key={item.id}
                     className={`menu-item ${item.id === activeMenuId ? 'active' : ''}`}
-                    href={item.id === 'claim-accident' ? '/claims/accident' : '#'}
+                    href={
+                      item.id === 'claim-accident'
+                        ? '/claims/accident'
+                        : item.id === 'claim-investigation'
+                          ? '/claims/investigation'
+                          : '#'
+                    }
                   >
                     {item.label}
                   </a>

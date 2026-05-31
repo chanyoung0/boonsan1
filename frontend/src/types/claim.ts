@@ -47,6 +47,75 @@ export interface AccidentReportResponse {
   createdAt?: string;
 }
 
+export interface DamageInvestigationStartResponse {
+  accidentNumber: string;
+  policyNumber: string;
+  accidentAt: string;
+  accidentDescription: string;
+  damageDetails: string;
+  accidentType: AccidentType;
+  accidentStatus: AccidentStatus;
+  accidentReportDocumentName: string | null;
+  medicalCertificateFileName: string | null;
+  claimDocumentName: string | null;
+}
+
+export interface FieldInvestigationMaterialResponse {
+  accidentScenePhotoName: string;
+  blackBoxVideoName: string;
+  repairEstimateFileName: string;
+}
+
+export interface DamageAssessmentRequest {
+  accidentNumber: string;
+  adjusterId: string;
+  investigationAt: string;
+  medicalExpense: number;
+  lostIncome: number;
+  repairCost: number;
+  settlementAmount: number;
+  faultRatio: number;
+}
+
+export interface PaymentApprovalDraftResponse {
+  accidentNumber: string;
+  totalDamageAmount: number;
+  faultRatio: number;
+  calculatedPaymentAmount: number;
+  medicalExpense: number;
+  lostIncome: number;
+  repairCost: number;
+  settlementAmount: number;
+  draftMessage: string;
+}
+
+export interface AdjusterOpinionRequest {
+  accidentNumber: string;
+  faultRatioOpinion: string;
+  adjusterOpinion: string;
+}
+
+export interface InvestigationApprovalRequest {
+  accidentNumber: string;
+  employeeNo: string;
+}
+
+export interface PaymentApprovalDocumentResponse {
+  documentId: string;
+  accidentNumber: string;
+  investigationId: string;
+  documentType: string;
+  submissionStatus: string;
+  totalDamageAmount: number;
+  faultRatio: number;
+  faultRatioOpinion: string | null;
+  adjusterOpinion: string | null;
+  employeeNo: string | null;
+  accidentStatus: AccidentStatus;
+  createdAt: string;
+  submittedAt: string | null;
+}
+
 export const ACCIDENT_TYPE_LABELS: Record<AccidentType, string> = {
   VEHICLE: '차량 사고',
   INJURY: '상해 사고',

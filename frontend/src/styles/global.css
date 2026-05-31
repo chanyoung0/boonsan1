@@ -265,6 +265,49 @@ a {
   color: var(--primary-dark);
 }
 
+.investigation-steps {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 12px;
+  list-style: none;
+}
+
+.investigation-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 0;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.investigation-step span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.investigation-step.current {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.investigation-step.done {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
 .workflow-icon {
   display: inline-flex;
   align-items: center;
@@ -677,6 +720,34 @@ a {
   color: var(--warning);
 }
 
+.status-document_pending,
+.status-temp_saved {
+  border-color: #d5dce6;
+  background: var(--surface-soft);
+  color: #475569;
+}
+
+.status-field_investigation_required,
+.status-outsourced_investigation {
+  border-color: #b8d3dc;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.status-approval_required,
+.status-reinvestigation_required {
+  border-color: #ead19c;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.status-fraud_investigation,
+.status-transferred_to_legal {
+  border-color: #efc2c2;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .status-completed {
   background: var(--surface-soft);
   color: #475569;
@@ -697,6 +768,81 @@ a {
 
 .empty-result strong {
   color: var(--text);
+}
+
+.empty-inline {
+  border: 1px dashed var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 14px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.investigation-lookup-panel {
+  max-width: 760px;
+}
+
+.investigation-summary-grid {
+  margin-bottom: 18px;
+}
+
+.approval-card {
+  display: grid;
+  gap: 14px;
+}
+
+.amount-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.amount-item {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 12px;
+}
+
+.amount-item.strong {
+  border-color: rgba(17, 109, 122, 0.26);
+  background: var(--primary-soft);
+}
+
+.amount-item dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.amount-item dd {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: keep-all;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.approval-opinions {
+  margin-top: 2px;
+}
+
+.investigation-note {
+  margin-top: 12px;
+}
+
+.next-step-panel {
+  border-color: #bbdec9;
+  background: var(--success-soft);
 }
 
 .search-panel {
@@ -872,10 +1018,12 @@ a {
   }
 
   .workflow-steps,
+  .investigation-steps,
   .detail-grid,
   .field-grid.two,
   .field-grid.three,
   .side-stack,
+  .amount-grid,
   .document-grid {
     grid-template-columns: 1fr;
   }

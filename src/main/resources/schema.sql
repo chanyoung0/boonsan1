@@ -28,3 +28,61 @@ UPDATE accident_report
 SET accident_status = 'RECEIVED'
 WHERE accident_status IS NULL
    OR accident_status IN ('VEHICLE', 'PROPERTY', 'PERSONAL_INJURY', 'NATURAL_DISASTER');
+
+CREATE TABLE IF NOT EXISTS damage_investigation (
+    investigation_id VARCHAR(50) PRIMARY KEY,
+    report_no VARCHAR(50) NOT NULL,
+    adjuster_id VARCHAR(50) NOT NULL,
+    investigation_at TIMESTAMP NOT NULL,
+    medical_expense NUMERIC(15,2) NOT NULL,
+    lost_income NUMERIC(15,2) NOT NULL,
+    repair_cost NUMERIC(15,2) NOT NULL,
+    settlement_amount NUMERIC(15,2) NOT NULL,
+    fault_ratio REAL NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS investigation_id VARCHAR(50);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS report_no VARCHAR(50);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS adjuster_id VARCHAR(50);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS investigation_at TIMESTAMP;
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS medical_expense NUMERIC(15,2);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS lost_income NUMERIC(15,2);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS repair_cost NUMERIC(15,2);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS settlement_amount NUMERIC(15,2);
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS fault_ratio REAL;
+ALTER TABLE damage_investigation ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+
+CREATE TABLE IF NOT EXISTS payment_approval_document (
+    document_id VARCHAR(50) PRIMARY KEY,
+    report_no VARCHAR(50) NOT NULL,
+    investigation_id VARCHAR(50) NOT NULL,
+    document_type VARCHAR(50) NOT NULL,
+    submission_status VARCHAR(50) NOT NULL,
+    damage_amount NUMERIC(15,2),
+    fault_ratio REAL,
+    fault_ratio_opinion TEXT,
+    adjuster_opinion TEXT,
+    employee_no VARCHAR(50),
+    created_at TIMESTAMP NOT NULL,
+    submitted_at TIMESTAMP
+);
+
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS document_id VARCHAR(50);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS report_no VARCHAR(50);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS investigation_id VARCHAR(50);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS document_type VARCHAR(50);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS submission_status VARCHAR(50);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS damage_amount NUMERIC(15,2);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS fault_ratio REAL;
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS fault_ratio_opinion TEXT;
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS adjuster_opinion TEXT;
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS employee_no VARCHAR(50);
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+ALTER TABLE payment_approval_document ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_damage_investigation_report_no
+    ON damage_investigation (report_no);
+
+CREATE INDEX IF NOT EXISTS idx_payment_approval_document_report_no
+    ON payment_approval_document (report_no);
