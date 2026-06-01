@@ -72,7 +72,9 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
                         ? '/claims/accident'
                         : item.id === 'claim-investigation'
                           ? '/claims/investigation'
-                          : '#'
+                          : item.id === 'claim-payment'
+                            ? '/claims/payment'
+                            : '#'
                     }
                   >
                     {item.label}

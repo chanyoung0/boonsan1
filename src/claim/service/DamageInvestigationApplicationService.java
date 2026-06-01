@@ -62,6 +62,17 @@ public class DamageInvestigationApplicationService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public PaymentApprovalDocumentResponse getPaymentApprovalDocument(String accidentNumber) {
+        String normalizedAccidentNumber = requireAccidentReport(accidentNumber).getReportNo();
+        PaymentApprovalDocumentResponse response =
+                damageInvestigationMapper.findPaymentApprovalDocumentByAccidentNumber(normalizedAccidentNumber);
+        if (response == null) {
+            throw new NoSuchElementException("Payment approval document not found: " + normalizedAccidentNumber);
+        }
+        return response;
+    }
+
     @Transactional
     public PaymentApprovalDraftResponse createPaymentApprovalDraft(
             String accidentNumber,

@@ -57,6 +57,15 @@ public class DamageInvestigationController {
         return ApiResponse.success(response, "Damage investigation result found");
     }
 
+    @GetMapping("/payment-approval-document")
+    public ApiResponse<PaymentApprovalDocumentResponse> getPaymentApprovalDocument(
+            @PathVariable String accidentNumber
+    ) {
+        PaymentApprovalDocumentResponse response =
+                damageInvestigationApplicationService.getPaymentApprovalDocument(accidentNumber);
+        return ApiResponse.success(response, "Payment approval document found");
+    }
+
     @PostMapping("/damage-investigations/draft")
     public ApiResponse<PaymentApprovalDraftResponse> createPaymentApprovalDraft(
             @PathVariable String accidentNumber,

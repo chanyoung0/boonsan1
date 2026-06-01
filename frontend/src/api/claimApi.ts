@@ -43,6 +43,12 @@ export function getDamageInvestigationResult(accidentNumber: string) {
   );
 }
 
+export function getPaymentApprovalDocument(accidentNumber: string) {
+  return apiRequest<PaymentApprovalDocumentResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/payment-approval-document`
+  );
+}
+
 export function createPaymentApprovalDraft(accidentNumber: string, request: DamageAssessmentRequest) {
   return apiRequest<PaymentApprovalDraftResponse>(
     `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/damage-investigations/draft`,
