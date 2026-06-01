@@ -126,6 +126,49 @@ export interface DamageInvestigationResultResponse extends PaymentApprovalDocume
   settlementAmount: number;
 }
 
+export type SubrogationStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'OBJECTED' | 'CLOSED';
+
+export interface SubrogationEligibilityResponse {
+  accidentNumber: string;
+  documentId: string | null;
+  investigationId: string | null;
+  paidAmount: number | null;
+  paymentStatus: string | null;
+  accidentStatus: AccidentStatus | null;
+  eligible: boolean;
+  message: string;
+}
+
+export interface SubrogationCreateRequest {
+  targetName: string;
+  subrogationReason: string;
+  subrogationAmount: number;
+  employeeNo: string;
+}
+
+export interface SubrogationCompleteRequest {
+  recoveredAmount: number;
+}
+
+export interface SubrogationResponse {
+  subrogationId: string;
+  accidentNumber: string;
+  documentId: string;
+  investigationId: string;
+  targetName: string;
+  subrogationReason: string;
+  subrogationAmount: number;
+  employeeNo: string;
+  subrogationStatus: SubrogationStatus;
+  paidAmount: number;
+  paymentStatus: string;
+  accidentStatus: AccidentStatus;
+  recoveredAmount: number | null;
+  recoveredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const ACCIDENT_TYPE_LABELS: Record<AccidentType, string> = {
   VEHICLE: '차량 사고',
   INJURY: '상해 사고',

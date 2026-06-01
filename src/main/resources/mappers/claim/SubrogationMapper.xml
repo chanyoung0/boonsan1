@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="claim.mapper.SubrogationMapper">
+
+    <resultMap id="SubrogationEligibilityResultMap" type="claim.dto.SubrogationEligibilityResponse">
+        <id property="accidentNumber" column="report_no"/>
+        <result property="documentId" column="document_id"/>
+        <result property="investigationId" column="investigation_id"/>
+        <result property="paidAmount" column="paid_amount"/>
+        <result property="paymentStatus" column="submission_status"/>
+        <result property="accidentStatus" column="accident_status"/>
+    </resultMap>
+
+    <resultMap id="SubrogationResponseResultMap" type="claim.dto.SubrogationResponse">
+        <id property="subrogationId" column="subrogation_id"/>
+        <result property="accidentNumber" column="report_no"/>
+        <result property="documentId" column="document_id"/>
+        <result property="investigationId" column="investigation_id"/>
+        <result property="targetName" column="offender_name"/>
+        <result property="subrogationReason" column="subrogation_reason"/>
+        <result property="subrogationAmount" column="subrogation_amount"/>
+        <result property="employeeNo" column="employee_no"/>
+        <result property="subrogationStatus" column="subrogation_status"/>
+        <result property="paidAmount" column="paid_amount"/>
+        <result property="paymentStatus" column="submission_status"/>
+        <result property="accidentStatus" column="accident_status"/>
+        <result property="recoveredAmount" column="recovered_amount"/>
+        <result property="recoveredAt" column="recovered_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findEligibilityByAccidentNumber" resultMap="SubrogationEligibilityResultMap">
+        SELECT
+            pad.report_no,
+            pad.document_id,
+            pad.investigation_id,
+            ROUND((pad.damage_amount * pad.fault_ratio::numeric / 100), 2) AS paid_amount,
+            pad.submission_status,
+            ar.accident_status
+        FROM payment_approval_document pad
+        JOIN accident_report ar ON ar.report_no = pad.report_no
+        WHERE pad.report_no = #{accidentNumber}
+        ORDER BY pad.created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="findAccidentStatusByAccidentNumber" resultType="string">
+        SELECT accident_status
+        FROM accident_report
+        WHERE report_no = #{accidentNumber}
+    </select>
+
+    <select id="findSubrogationByAccidentNumber" resultMap="SubrogationResponseResultMap">
+        SELECT
+            s.subrogation_id,
+            s.report_no,
+            s.document_id,
+            s.investigation_id,
+            s.offender_name,
+            s.subrogation_reason,
+            s.subrogation_amount,
+            s.employee_no,
+            s.subrogation_status,
+            ROUND((pad.damage_amount * pad.fault_ratio::numeric / 100), 2) AS paid_amount,
+            pad.submission_status,
+            ar.accident_status,
+            s.recovered_amount,
+            s.recovered_at,
+            s.created_at,
+            s.updated_at
+        FROM subrogation s
+        JOIN payment_approval_document pad ON pad.document_id = s.document_id
+        JOIN accident_report ar ON ar.report_no = s.report_no
+        WHERE s.report_no = #{accidentNumber}
+        ORDER BY s.created_at DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insertSubrogation">
+        INSERT INTO subrogation (
+            subrogation_id,
+            report_no,
+            document_id,
+            investigation_id,
+            offender_name,
+            subrogation_reason,
+            subrogation_amount,
+            employee_no,
+            subrogation_status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{subrogationId},
+            #{accidentNumber},
+            #{documentId},
+            #{investigationId},
+            #{targetName},
+            #{subrogationReason},
+            #{subrogationAmount},
+            #{employeeNo},
+            #{subrogationStatus},
+            #{createdAt},
+            #{createdAt}
+        )
+    </insert>
+
+    <update id="completeSubrogation">
+        UPDATE subrogation
+        SET
+            subrogation_status = #{completedStatus},
+            recovered_amount = #{recoveredAmount},
+            recovered_at = #{recoveredAt},
+            updated_at = #{recoveredAt}
+        WHERE report_no = #{accidentNumber}
+          AND subrogation_status = #{currentStatus}
+    </update>
+</mapper>

@@ -9,7 +9,11 @@ import type {
   FieldInvestigationMaterialResponse,
   InvestigationApprovalRequest,
   PaymentApprovalDocumentResponse,
-  PaymentApprovalDraftResponse
+  PaymentApprovalDraftResponse,
+  SubrogationCompleteRequest,
+  SubrogationCreateRequest,
+  SubrogationEligibilityResponse,
+  SubrogationResponse
 } from '../types/claim';
 
 export function createAccidentReport(request: AccidentReportCreateRequest) {
@@ -101,6 +105,38 @@ export function requestInvestigationApproval(accidentNumber: string, request: In
     `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/damage-investigations/approval-request`,
     {
       method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function getSubrogationEligibility(accidentNumber: string) {
+  return apiRequest<SubrogationEligibilityResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/subrogation/eligibility`
+  );
+}
+
+export function getSubrogation(accidentNumber: string) {
+  return apiRequest<SubrogationResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/subrogation`
+  );
+}
+
+export function createSubrogation(accidentNumber: string, request: SubrogationCreateRequest) {
+  return apiRequest<SubrogationResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/subrogation`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function completeSubrogation(accidentNumber: string, request: SubrogationCompleteRequest) {
+  return apiRequest<SubrogationResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/subrogation/complete`,
+    {
+      method: 'PATCH',
       body: JSON.stringify(request)
     }
   );

@@ -24,7 +24,7 @@ public class Subrogation {
     public void generateSubrogationDocument() {}
 
     // 지급 상세 조회
-    public void retrievePaymentDetails() {}
+    public InsurancePayment retrievePaymentDetails() { return null; }
 
     // 구상 청구 발송
     public void sendClaim() {}

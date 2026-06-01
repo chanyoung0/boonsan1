@@ -86,3 +86,36 @@ CREATE INDEX IF NOT EXISTS idx_damage_investigation_report_no
 
 CREATE INDEX IF NOT EXISTS idx_payment_approval_document_report_no
     ON payment_approval_document (report_no);
+
+CREATE TABLE IF NOT EXISTS subrogation (
+    subrogation_id VARCHAR(50) PRIMARY KEY,
+    report_no VARCHAR(50) NOT NULL,
+    document_id VARCHAR(50) NOT NULL,
+    investigation_id VARCHAR(50) NOT NULL,
+    offender_name VARCHAR(255) NOT NULL,
+    subrogation_reason TEXT NOT NULL,
+    subrogation_amount NUMERIC(15,2) NOT NULL,
+    employee_no VARCHAR(50) NOT NULL,
+    subrogation_status VARCHAR(50) NOT NULL,
+    recovered_amount NUMERIC(15,2),
+    recovered_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS subrogation_id VARCHAR(50);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS report_no VARCHAR(50);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS document_id VARCHAR(50);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS investigation_id VARCHAR(50);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS offender_name VARCHAR(255);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS subrogation_reason TEXT;
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS subrogation_amount NUMERIC(15,2);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS employee_no VARCHAR(50);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS subrogation_status VARCHAR(50);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS recovered_amount NUMERIC(15,2);
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS recovered_at TIMESTAMP;
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subrogation_report_no
+    ON subrogation (report_no);
