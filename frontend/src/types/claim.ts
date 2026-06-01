@@ -169,6 +169,50 @@ export interface SubrogationResponse {
   updatedAt: string;
 }
 
+export type ObjectionStatus =
+  | 'RECEIVED'
+  | 'REINVESTIGATION_REQUIRED'
+  | 'REJECTED'
+  | 'TRANSFERRED_TO_LEGAL'
+  | 'COMPLETED';
+
+export interface ObjectionEligibilityResponse {
+  accidentNumber: string;
+  accidentStatus: AccidentStatus;
+  documentId: string | null;
+  paymentStatus: string | null;
+  finalPaymentAmount: number | null;
+  eligible: boolean;
+  unavailableReason: string | null;
+}
+
+export interface ObjectionCreateRequest {
+  claimantName: string;
+  claimantPhone: string;
+  objectionReason: string;
+  requestedAction: string;
+  employeeNo: string;
+}
+
+export interface ObjectionResponse {
+  objectionId: string;
+  accidentNumber: string;
+  accidentStatus: AccidentStatus;
+  documentId: string | null;
+  paymentStatus: string | null;
+  finalPaymentAmount: number | null;
+  claimantName: string;
+  claimantPhone: string;
+  objectionReason: string;
+  requestedAction: string;
+  employeeNo: string;
+  objectionStatus: ObjectionStatus;
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt: string | null;
+  completedAt: string | null;
+}
+
 export const ACCIDENT_TYPE_LABELS: Record<AccidentType, string> = {
   VEHICLE: '차량 사고',
   INJURY: '상해 사고',

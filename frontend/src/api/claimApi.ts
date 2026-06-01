@@ -10,6 +10,9 @@ import type {
   InvestigationApprovalRequest,
   PaymentApprovalDocumentResponse,
   PaymentApprovalDraftResponse,
+  ObjectionCreateRequest,
+  ObjectionEligibilityResponse,
+  ObjectionResponse,
   SubrogationCompleteRequest,
   SubrogationCreateRequest,
   SubrogationEligibilityResponse,
@@ -138,6 +141,64 @@ export function completeSubrogation(accidentNumber: string, request: Subrogation
     {
       method: 'PATCH',
       body: JSON.stringify(request)
+    }
+  );
+}
+
+export function getObjectionEligibility(accidentNumber: string) {
+  return apiRequest<ObjectionEligibilityResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection/eligibility`
+  );
+}
+
+export function getObjection(accidentNumber: string) {
+  return apiRequest<ObjectionResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection`
+  );
+}
+
+export function createObjection(accidentNumber: string, request: ObjectionCreateRequest) {
+  return apiRequest<ObjectionResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function markObjectionReinvestigationRequired(accidentNumber: string) {
+  return apiRequest<ObjectionResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection/reinvestigation`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
+export function rejectObjection(accidentNumber: string) {
+  return apiRequest<ObjectionResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection/reject`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
+export function transferObjectionToLegal(accidentNumber: string) {
+  return apiRequest<ObjectionResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection/legal-transfer`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
+export function completeObjection(accidentNumber: string) {
+  return apiRequest<ObjectionResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/objection/complete`,
+    {
+      method: 'PATCH'
     }
   );
 }

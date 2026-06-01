@@ -119,3 +119,34 @@ ALTER TABLE subrogation ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_subrogation_report_no
     ON subrogation (report_no);
+
+CREATE TABLE IF NOT EXISTS objection (
+    objection_id VARCHAR(50) PRIMARY KEY,
+    accident_number VARCHAR(50) NOT NULL,
+    claimant_name VARCHAR(100) NOT NULL,
+    claimant_phone VARCHAR(50) NOT NULL,
+    objection_reason TEXT NOT NULL,
+    requested_action TEXT NOT NULL,
+    employee_no VARCHAR(50) NOT NULL,
+    objection_status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    reviewed_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS objection_id VARCHAR(50);
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS accident_number VARCHAR(50);
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS claimant_name VARCHAR(100);
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS claimant_phone VARCHAR(50);
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS objection_reason TEXT;
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS requested_action TEXT;
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS employee_no VARCHAR(50);
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS objection_status VARCHAR(50);
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP;
+ALTER TABLE objection ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_objection_accident_number
+    ON objection (accident_number);

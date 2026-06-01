@@ -76,7 +76,9 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
                             ? '/claims/payment'
                             : item.id === 'claim-subrogation'
                               ? '/claims/subrogation'
-                              : '#'
+                              : item.id === 'claim-objection'
+                                ? '/claims/objection'
+                                : '#'
                     }
                   >
                     {item.label}
