@@ -27,6 +27,10 @@ public class DamageInvestigationApplicationService {
     private static final String DRAFT_STATUS = "DRAFT";
     private static final String OPINION_SAVED_STATUS = "OPINION_SAVED";
     private static final String APPROVAL_REQUESTED_STATUS = "APPROVAL_REQUESTED";
+    private static final String APPROVED_STATUS = "APPROVED";
+    private static final String REJECTED_STATUS = "REJECTED";
+    private static final String PAID_STATUS = "PAID";
+    private static final String COMPLETED_ACCIDENT_STATUS = "COMPLETED";
 
     private final DamageInvestigationMapper damageInvestigationMapper;
 
@@ -71,6 +75,43 @@ public class DamageInvestigationApplicationService {
             throw new NoSuchElementException("Payment approval document not found: " + normalizedAccidentNumber);
         }
         return response;
+    }
+
+    @Transactional
+    public PaymentApprovalDocumentResponse approvePaymentApprovalDocument(String accidentNumber) {
+        String normalizedAccidentNumber = requireAccidentReport(accidentNumber).getReportNo();
+        updatePaymentApprovalStatus(
+                normalizedAccidentNumber,
+                APPROVAL_REQUESTED_STATUS,
+                APPROVED_STATUS,
+                "Payment approval document can only be approved from APPROVAL_REQUESTED status."
+        );
+        return requirePaymentApprovalDocument(normalizedAccidentNumber);
+    }
+
+    @Transactional
+    public PaymentApprovalDocumentResponse rejectPaymentApprovalDocument(String accidentNumber) {
+        String normalizedAccidentNumber = requireAccidentReport(accidentNumber).getReportNo();
+        updatePaymentApprovalStatus(
+                normalizedAccidentNumber,
+                APPROVAL_REQUESTED_STATUS,
+                REJECTED_STATUS,
+                "Payment approval document can only be rejected from APPROVAL_REQUESTED status."
+        );
+        return requirePaymentApprovalDocument(normalizedAccidentNumber);
+    }
+
+    @Transactional
+    public PaymentApprovalDocumentResponse payPaymentApprovalDocument(String accidentNumber) {
+        String normalizedAccidentNumber = requireAccidentReport(accidentNumber).getReportNo();
+        updatePaymentApprovalStatus(
+                normalizedAccidentNumber,
+                APPROVED_STATUS,
+                PAID_STATUS,
+                "Payment approval document can only be paid from APPROVED status."
+        );
+        damageInvestigationMapper.updateAccidentStatus(normalizedAccidentNumber, COMPLETED_ACCIDENT_STATUS);
+        return requirePaymentApprovalDocument(normalizedAccidentNumber);
     }
 
     @Transactional
@@ -168,6 +209,36 @@ public class DamageInvestigationApplicationService {
             throw new NoSuchElementException("Payment approval document not found: " + normalizedAccidentNumber);
         }
         return response;
+    }
+
+    private PaymentApprovalDocumentResponse requirePaymentApprovalDocument(String accidentNumber) {
+        PaymentApprovalDocumentResponse response =
+                damageInvestigationMapper.findPaymentApprovalDocumentByAccidentNumber(accidentNumber);
+        if (response == null) {
+            throw new NoSuchElementException("Payment approval document not found: " + accidentNumber);
+        }
+        return response;
+    }
+
+    private void updatePaymentApprovalStatus(
+            String accidentNumber,
+            String currentStatus,
+            String submissionStatus,
+            String invalidTransitionMessage
+    ) {
+        PaymentApprovalDocumentResponse existing = requirePaymentApprovalDocument(accidentNumber);
+        if (!currentStatus.equals(existing.getSubmissionStatus())) {
+            throw new IllegalArgumentException(invalidTransitionMessage);
+        }
+
+        int updated = damageInvestigationMapper.updateLatestPaymentApprovalStatus(
+                accidentNumber,
+                currentStatus,
+                submissionStatus
+        );
+        if (updated == 0) {
+            throw new IllegalArgumentException(invalidTransitionMessage);
+        }
     }
 
     private AccidentReport requireAccidentReport(String accidentNumber) {

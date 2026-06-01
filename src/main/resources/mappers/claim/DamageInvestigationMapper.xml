@@ -153,6 +153,19 @@
         )
     </update>
 
+    <update id="updateLatestPaymentApprovalStatus">
+        UPDATE payment_approval_document
+        SET submission_status = #{submissionStatus}
+        WHERE document_id = (
+            SELECT document_id
+            FROM payment_approval_document
+            WHERE report_no = #{accidentNumber}
+            ORDER BY created_at DESC
+            LIMIT 1
+        )
+        AND submission_status = #{currentStatus}
+    </update>
+
     <select id="findPaymentApprovalDocumentByAccidentNumber" resultMap="PaymentApprovalDocumentResponseResultMap">
         SELECT
             pad.document_id,
@@ -232,6 +245,12 @@
     <update id="updateAccidentStatusToApprovalRequired">
         UPDATE accident_report
         SET accident_status = 'APPROVAL_REQUIRED'
+        WHERE report_no = #{accidentNumber}
+    </update>
+
+    <update id="updateAccidentStatus">
+        UPDATE accident_report
+        SET accident_status = #{accidentStatus}
         WHERE report_no = #{accidentNumber}
     </update>
 </mapper>

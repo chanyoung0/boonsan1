@@ -12,6 +12,7 @@ import claim.service.DamageInvestigationApplicationService;
 import common.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,6 +65,33 @@ public class DamageInvestigationController {
         PaymentApprovalDocumentResponse response =
                 damageInvestigationApplicationService.getPaymentApprovalDocument(accidentNumber);
         return ApiResponse.success(response, "Payment approval document found");
+    }
+
+    @PatchMapping("/payment-approval-document/approve")
+    public ApiResponse<PaymentApprovalDocumentResponse> approvePaymentApprovalDocument(
+            @PathVariable String accidentNumber
+    ) {
+        PaymentApprovalDocumentResponse response =
+                damageInvestigationApplicationService.approvePaymentApprovalDocument(accidentNumber);
+        return ApiResponse.success(response, "Payment approval document approved");
+    }
+
+    @PatchMapping("/payment-approval-document/reject")
+    public ApiResponse<PaymentApprovalDocumentResponse> rejectPaymentApprovalDocument(
+            @PathVariable String accidentNumber
+    ) {
+        PaymentApprovalDocumentResponse response =
+                damageInvestigationApplicationService.rejectPaymentApprovalDocument(accidentNumber);
+        return ApiResponse.success(response, "Payment approval document rejected");
+    }
+
+    @PatchMapping("/payment-approval-document/pay")
+    public ApiResponse<PaymentApprovalDocumentResponse> payPaymentApprovalDocument(
+            @PathVariable String accidentNumber
+    ) {
+        PaymentApprovalDocumentResponse response =
+                damageInvestigationApplicationService.payPaymentApprovalDocument(accidentNumber);
+        return ApiResponse.success(response, "Insurance payment completed");
     }
 
     @PostMapping("/damage-investigations/draft")

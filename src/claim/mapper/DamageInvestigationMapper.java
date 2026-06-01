@@ -44,6 +44,12 @@ public interface DamageInvestigationMapper {
             @Param("submittedAt") LocalDateTime submittedAt
     );
 
+    int updateLatestPaymentApprovalStatus(
+            @Param("accidentNumber") String accidentNumber,
+            @Param("currentStatus") String currentStatus,
+            @Param("submissionStatus") String submissionStatus
+    );
+
     PaymentApprovalDocumentResponse findPaymentApprovalDocumentByAccidentNumber(
             @Param("accidentNumber") String accidentNumber
     );
@@ -53,4 +59,9 @@ public interface DamageInvestigationMapper {
     );
 
     int updateAccidentStatusToApprovalRequired(@Param("accidentNumber") String accidentNumber);
+
+    int updateAccidentStatus(
+            @Param("accidentNumber") String accidentNumber,
+            @Param("accidentStatus") String accidentStatus
+    );
 }

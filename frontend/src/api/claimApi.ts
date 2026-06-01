@@ -49,6 +49,33 @@ export function getPaymentApprovalDocument(accidentNumber: string) {
   );
 }
 
+export function approvePaymentApprovalDocument(accidentNumber: string) {
+  return apiRequest<PaymentApprovalDocumentResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/payment-approval-document/approve`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
+export function rejectPaymentApprovalDocument(accidentNumber: string) {
+  return apiRequest<PaymentApprovalDocumentResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/payment-approval-document/reject`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
+export function payPaymentApprovalDocument(accidentNumber: string) {
+  return apiRequest<PaymentApprovalDocumentResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/payment-approval-document/pay`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
 export function createPaymentApprovalDraft(accidentNumber: string, request: DamageAssessmentRequest) {
   return apiRequest<PaymentApprovalDraftResponse>(
     `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/damage-investigations/draft`,
