@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="product.mapper.ProductMapper">
+
+    <resultMap id="ProductBaseResultMap" type="model.insurance.Insurance">
+        <id property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="insuranceTypeCode" column="insurance_type"/>
+        <result property="targetCustomer" column="target_customer"/>
+        <result property="salesChannel" column="sales_channel"/>
+        <result property="insurancePeriod" column="insurance_period"/>
+        <result property="paymentPeriod" column="payment_period"/>
+        <result property="insuredAmount" column="insured_amount"/>
+        <result property="premium" column="premium"/>
+        <result property="maturityRefund" column="maturity_refund"/>
+        <result property="mainCoverage" column="main_coverage"/>
+        <result property="subscriptionConditions" column="subscription_conditions"/>
+        <result property="rateInformation" column="rate_information"/>
+        <result property="specialContractInfo" column="special_contract_info"/>
+        <result property="productStatus" column="product_status" javaType="enums.ProductStatus"/>
+        <result property="createdAt" column="created_at"/>
+        <discriminator javaType="string" column="insurance_type">
+            <case value="AUTO" resultMap="AutoInsuranceResultMap"/>
+            <case value="FIRE" resultMap="FireInsuranceResultMap"/>
+            <case value="MARINE" resultMap="MarineInsuranceResultMap"/>
+        </discriminator>
+    </resultMap>
+
+    <resultMap id="AutoInsuranceResultMap" type="model.insurance.AutoInsurance" extends="ProductBaseResultMap">
+        <result property="driverAge" column="driver_age"/>
+        <result property="vehicleType" column="vehicle_type"/>
+    </resultMap>
+
+    <resultMap id="FireInsuranceResultMap" type="model.insurance.FireInsurance" extends="ProductBaseResultMap">
+        <result property="buildingType" column="building_type"/>
+        <result property="location" column="location"/>
+    </resultMap>
+
+    <resultMap id="MarineInsuranceResultMap" type="model.insurance.MarineInsurance" extends="ProductBaseResultMap">
+        <result property="shippingRoute" column="shipping_route"/>
+        <result property="vesselType" column="vessel_type"/>
+    </resultMap>
+
+    <insert id="insertProduct" parameterType="model.insurance.Insurance">
+        INSERT INTO product (
+            product_code,
+            product_name,
+            insurance_type,
+            target_customer,
+            sales_channel,
+            insurance_period,
+            payment_period,
+            insured_amount,
+            premium,
+            maturity_refund,
+            main_coverage,
+            subscription_conditions,
+            rate_information,
+            special_contract_info,
+            product_status,
+            driver_age,
+            vehicle_type,
+            building_type,
+            location,
+            shipping_route,
+            vessel_type,
+            created_at
+        ) VALUES (
+            #{productCode},
+            #{productName},
+            #{insuranceTypeCode},
+            #{targetCustomer},
+            #{salesChannel},
+            #{insurancePeriod},
+            #{paymentPeriod},
+            #{insuredAmount},
+            #{premium},
+            #{maturityRefund},
+            #{mainCoverage},
+            #{subscriptionConditions},
+            #{rateInformation},
+            #{specialContractInfo},
+            #{productStatus},
+            <choose>
+                <when test="_parameter instanceof model.insurance.AutoInsurance">#{driverAge}</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            <choose>
+                <when test="_parameter instanceof model.insurance.AutoInsurance">#{vehicleType}</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            <choose>
+                <when test="_parameter instanceof model.insurance.FireInsurance">#{buildingType}</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            <choose>
+                <when test="_parameter instanceof model.insurance.FireInsurance">#{location}</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            <choose>
+                <when test="_parameter instanceof model.insurance.MarineInsurance">#{shippingRoute}</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            <choose>
+                <when test="_parameter instanceof model.insurance.MarineInsurance">#{vesselType}</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            #{createdAt}
+        )
+    </insert>
+
+    <select id="findByProductCode" resultMap="ProductBaseResultMap">
+        SELECT
+            product_code,
+            product_name,
+            insurance_type,
+            target_customer,
+            sales_channel,
+            insurance_period,
+            payment_period,
+            insured_amount,
+            premium,
+            maturity_refund,
+            main_coverage,
+            subscription_conditions,
+            rate_information,
+            special_contract_info,
+            product_status,
+            driver_age,
+            vehicle_type,
+            building_type,
+            location,
+            shipping_route,
+            vessel_type,
+            created_at
+        FROM product
+        WHERE product_code = #{productCode}
+    </select>
+
+    <select id="findAll" resultMap="ProductBaseResultMap">
+        SELECT
+            product_code,
+            product_name,
+            insurance_type,
+            target_customer,
+            sales_channel,
+            insurance_period,
+            payment_period,
+            insured_amount,
+            premium,
+            maturity_refund,
+            main_coverage,
+            subscription_conditions,
+            rate_information,
+            special_contract_info,
+            product_status,
+            driver_age,
+            vehicle_type,
+            building_type,
+            location,
+            shipping_route,
+            vessel_type,
+            created_at
+        FROM product
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="updateProductStatus">
+        UPDATE product
+        SET product_status = #{productStatus}
+        WHERE product_code = #{productCode}
+    </update>
+</mapper>

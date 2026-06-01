@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="product.mapper.AuthorizationMapper">
+
+    <resultMap id="AuthorizationResultMap" type="model.insurance.Authorization">
+        <id property="requestId" column="request_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="requestedAt" column="requested_at"/>
+        <result property="approvedAt" column="approved_at"/>
+        <result property="isApproved" column="is_approved"/>
+        <result property="requestReason" column="request_reason"/>
+        <result property="submissionAgencyName" column="submission_agency_name"/>
+        <result property="authorizationStatus" column="authorization_status" javaType="enums.AuthorizationStatus"/>
+        <result property="productDescriptionFileName" column="product_description_file_name"/>
+        <result property="termsAndConditionsFileName" column="terms_and_conditions_file_name"/>
+        <result property="rateScheduleFileName" column="rate_schedule_file_name"/>
+        <result property="productEvidenceFileName" column="product_evidence_file_name"/>
+        <result property="revisionRequest" column="revision_request"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="AuthorizationEligibilityResultMap" type="product.dto.AuthorizationEligibilityResponse">
+        <id property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="insuranceTypeCode" column="insurance_type"/>
+        <result property="productStatus" column="product_status" javaType="enums.ProductStatus"/>
+    </resultMap>
+
+    <select id="findEligibilityByProductCode" resultMap="AuthorizationEligibilityResultMap">
+        SELECT
+            product_code,
+            product_name,
+            insurance_type,
+            product_status
+        FROM product
+        WHERE product_code = #{productCode}
+    </select>
+
+    <select id="findLatestByProductCode" resultMap="AuthorizationResultMap">
+        SELECT
+            request_id,
+            product_code,
+            requested_at,
+            approved_at,
+            is_approved,
+            request_reason,
+            submission_agency_name,
+            authorization_status,
+            product_description_file_name,
+            terms_and_conditions_file_name,
+            rate_schedule_file_name,
+            product_evidence_file_name,
+            revision_request,
+            updated_at
+        FROM product_authorization
+        WHERE product_code = #{productCode}
+        ORDER BY requested_at DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insertAuthorization" parameterType="model.insurance.Authorization">
+        INSERT INTO product_authorization (
+            request_id,
+            product_code,
+            requested_at,
+            approved_at,
+            is_approved,
+            request_reason,
+            submission_agency_name,
+            authorization_status,
+            product_description_file_name,
+            terms_and_conditions_file_name,
+            rate_schedule_file_name,
+            product_evidence_file_name,
+            revision_request,
+            updated_at
+        ) VALUES (
+            #{requestId},
+            #{productCode},
+            #{requestedAt},
+            #{approvedAt},
+            #{isApproved},
+            #{requestReason},
+            #{submissionAgencyName},
+            #{authorizationStatus},
+            #{productDescriptionFileName},
+            #{termsAndConditionsFileName},
+            #{rateScheduleFileName},
+            #{productEvidenceFileName},
+            #{revisionRequest},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateAuthorizationStatus">
+        UPDATE product_authorization
+        SET authorization_status = #{authorizationStatus},
+            is_approved = #{isApproved},
+            approved_at = #{approvedAt},
+            revision_request = #{revisionRequest},
+            updated_at = #{updatedAt}
+        WHERE request_id = #{requestId}
+    </update>
+</mapper>

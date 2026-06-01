@@ -97,6 +97,8 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
 }
 
 function getMenuHref(itemId: string) {
+  if (itemId === 'product-design') return '/products/design';
+  if (itemId === 'product-approval') return '/products/authorization';
   if (itemId === 'claim-accident') return '/claims/accident';
   if (itemId === 'claim-investigation') return '/claims/investigation';
   if (itemId === 'claim-payment') return '/claims/payment';
