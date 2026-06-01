@@ -1,5 +1,27 @@
 # Boonsan1 LLM WIKI
 
+## 0. Current Working Notes
+
+현재 1차 배포 구조는 Nginx/VPS가 아니라 Cloudflare + Vercel + Render + Supabase 구조이다.
+
+- Frontend: Vercel React/Vite
+- Backend: Render Spring Boot
+- DB: Supabase PostgreSQL
+- DNS: Cloudflare
+- Domain: mjusw.site
+
+문서의 Nginx 구조는 향후 VPS 전환 시 고려하는 구조이다.
+
+현재 Spring Boot 코드는 별도 backend 폴더가 아니라 루트 src 하위에 있다.
+기존 패키지 구조를 임의로 바꾸지 않는다.
+
+현재 보상 처리 완료 범위:
+사고접수 → 손해조사 → 지급품의서 → 결재 승인/반려 → 보험금 지급 → 구상 처리 → 이의제기 처리
+
+소송 처리는 법무팀 담당으로 보고 직접 구현하지 않는다.
+
+---
+
 ## 1. Project Goal
 
 Boonsan1은 보험사 업무 시스템을 기존 Java 콘솔 기반 구조에서 웹 기반 시스템으로 전환하는 프로젝트이다.

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 const menuGroups = [
@@ -49,37 +50,39 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
+  const activeGroupId = menuGroups.find((group) => group.items.some((item) => item.id === activeMenuId))?.id ?? 'claim';
+  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([activeGroupId]);
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroupIds((current) =>
+      current.includes(groupId) ? current.filter((id) => id !== groupId) : [...current, groupId]
+    );
+  };
+
   return (
     <aside className="sidebar" aria-label="업무 메뉴">
       {menuGroups.map((group) => {
-        const isExpanded = group.id === 'claim';
+        const isExpanded = expandedGroupIds.includes(group.id);
         const hasActive = group.items.some((item) => item.id === activeMenuId);
 
         return (
           <section className="menu-group" key={group.id}>
-            <div className={`menu-group-title ${hasActive ? 'active-group' : ''}`}>
+            <button
+              className={`menu-group-title ${hasActive ? 'active-group' : ''}`}
+              type="button"
+              onClick={() => toggleGroup(group.id)}
+              aria-expanded={isExpanded}
+            >
               <span>{group.label}</span>
               {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </div>
+            </button>
             {isExpanded && (
               <div className="menu-items">
                 {group.items.map((item) => (
                   <a
                     key={item.id}
                     className={`menu-item ${item.id === activeMenuId ? 'active' : ''}`}
-                    href={
-                      item.id === 'claim-accident'
-                        ? '/claims/accident'
-                        : item.id === 'claim-investigation'
-                          ? '/claims/investigation'
-                          : item.id === 'claim-payment'
-                            ? '/claims/payment'
-                            : item.id === 'claim-subrogation'
-                              ? '/claims/subrogation'
-                              : item.id === 'claim-objection'
-                                ? '/claims/objection'
-                                : '#'
-                    }
+                    href={getMenuHref(item.id)}
                   >
                     {item.label}
                   </a>
@@ -91,4 +94,13 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
       })}
     </aside>
   );
+}
+
+function getMenuHref(itemId: string) {
+  if (itemId === 'claim-accident') return '/claims/accident';
+  if (itemId === 'claim-investigation') return '/claims/investigation';
+  if (itemId === 'claim-payment') return '/claims/payment';
+  if (itemId === 'claim-subrogation') return '/claims/subrogation';
+  if (itemId === 'claim-objection') return '/claims/objection';
+  return '#';
 }
