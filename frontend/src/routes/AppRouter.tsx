@@ -5,6 +5,8 @@ import { DamageInvestigationPage } from '../pages/claim/DamageInvestigationPage'
 import { ObjectionPage } from '../pages/claim/ObjectionPage';
 import { PaymentPage } from '../pages/claim/PaymentPage';
 import { SubrogationPage } from '../pages/claim/SubrogationPage';
+import { ProductAuthorizationPage } from '../pages/product/ProductAuthorizationPage';
+import { ProductDesignPage } from '../pages/product/ProductDesignPage';
 import { UnderwritingCoinsurancePage } from '../pages/underwriting/UnderwritingCoinsurancePage';
 import { UnderwritingCreditPage } from '../pages/underwriting/UnderwritingCreditPage';
 import { UnderwritingPolicyPage } from '../pages/underwriting/UnderwritingPolicyPage';
@@ -15,6 +17,8 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<MainDashboardPage />} />
+      <Route path="/products/design" element={<ProductDesignPage />} />
+      <Route path="/products/authorization" element={<ProductAuthorizationPage />} />
       <Route path="/claims/accident" element={<AccidentReportPage />} />
       <Route path="/claims/investigation" element={<DamageInvestigationPage />} />
       <Route path="/claims/payment" element={<PaymentPage />} />

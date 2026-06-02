@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration;
 @MapperScan(basePackages = {
         "claim.mapper",
         "underwriting.mapper",
-        "dashboard.mapper"
+        "dashboard.mapper",
+        "product.mapper"
 })
 public class MyBatisConfig {
 }

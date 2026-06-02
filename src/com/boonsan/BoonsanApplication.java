@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         "exception",
         "dashboard",
         "claim",
+        "product",
         "underwriting",
         "service",
         "model",

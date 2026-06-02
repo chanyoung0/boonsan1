@@ -401,3 +401,89 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_insurance_policy_issue_application_id
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_insurance_policy_issue_policy_number
     ON insurance_policy_issue (policy_number);
+
+CREATE TABLE IF NOT EXISTS product (
+    product_code VARCHAR(50) PRIMARY KEY,
+    product_name VARCHAR(255) NOT NULL,
+    insurance_type VARCHAR(50) NOT NULL,
+    target_customer VARCHAR(255),
+    sales_channel VARCHAR(255),
+    insurance_period VARCHAR(100),
+    payment_period VARCHAR(100),
+    insured_amount NUMERIC(15,2),
+    premium NUMERIC(15,2),
+    maturity_refund NUMERIC(15,2),
+    main_coverage TEXT,
+    subscription_conditions TEXT,
+    rate_information TEXT,
+    special_contract_info TEXT,
+    product_status VARCHAR(50) NOT NULL,
+    driver_age INTEGER,
+    vehicle_type VARCHAR(100),
+    building_type VARCHAR(100),
+    location VARCHAR(255),
+    shipping_route VARCHAR(255),
+    vessel_type VARCHAR(100),
+    created_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE product ADD COLUMN IF NOT EXISTS product_code VARCHAR(50);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS product_name VARCHAR(255);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS insurance_type VARCHAR(50);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS target_customer VARCHAR(255);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS sales_channel VARCHAR(255);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS insurance_period VARCHAR(100);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS payment_period VARCHAR(100);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS insured_amount NUMERIC(15,2);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS premium NUMERIC(15,2);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS maturity_refund NUMERIC(15,2);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS main_coverage TEXT;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS subscription_conditions TEXT;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS rate_information TEXT;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS special_contract_info TEXT;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS product_status VARCHAR(50);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS driver_age INTEGER;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS vehicle_type VARCHAR(100);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS building_type VARCHAR(100);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS location VARCHAR(255);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS shipping_route VARCHAR(255);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS vessel_type VARCHAR(100);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_product_insurance_type
+    ON product (insurance_type);
+
+CREATE TABLE IF NOT EXISTS product_authorization (
+    request_id VARCHAR(50) PRIMARY KEY,
+    product_code VARCHAR(50) NOT NULL,
+    requested_at TIMESTAMP NOT NULL,
+    approved_at TIMESTAMP,
+    is_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    request_reason TEXT,
+    submission_agency_name VARCHAR(255),
+    authorization_status VARCHAR(50) NOT NULL,
+    product_description_file_name VARCHAR(255),
+    terms_and_conditions_file_name VARCHAR(255),
+    rate_schedule_file_name VARCHAR(255),
+    product_evidence_file_name VARCHAR(255),
+    revision_request TEXT,
+    updated_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS request_id VARCHAR(50);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS product_code VARCHAR(50);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS requested_at TIMESTAMP;
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP;
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS is_approved BOOLEAN;
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS request_reason TEXT;
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS submission_agency_name VARCHAR(255);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS authorization_status VARCHAR(50);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS product_description_file_name VARCHAR(255);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS terms_and_conditions_file_name VARCHAR(255);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS rate_schedule_file_name VARCHAR(255);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS product_evidence_file_name VARCHAR(255);
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS revision_request TEXT;
+ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_product_authorization_product_code
+    ON product_authorization (product_code);

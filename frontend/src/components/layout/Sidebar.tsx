@@ -109,6 +109,8 @@ export function Sidebar({ activeMenuId }: SidebarProps) {
 
 function getMenuIdFromPath(pathname: string) {
   if (pathname === '/') return 'dashboard';
+  if (pathname === '/products/design') return 'product-design';
+  if (pathname === '/products/authorization') return 'product-approval';
   if (pathname === '/claims/accident') return 'claim-accident';
   if (pathname === '/claims/investigation') return 'claim-investigation';
   if (pathname === '/claims/payment') return 'claim-payment';
@@ -122,11 +124,14 @@ function getMenuIdFromPath(pathname: string) {
   if (pathname.startsWith('/claims/')) return 'claim-accident';
   if (pathname.startsWith('/underwriting/')) return 'underwriting-review';
   if (pathname.startsWith('/contract/')) return 'contract-endorsement';
+  if (pathname.startsWith('/products/')) return 'product-design';
   if (pathname.startsWith('/product/')) return 'product-design';
   return null;
 }
 
 function getMenuHref(itemId: string) {
+  if (itemId === 'product-design') return '/products/design';
+  if (itemId === 'product-approval') return '/products/authorization';
   if (itemId === 'claim-accident') return '/claims/accident';
   if (itemId === 'claim-investigation') return '/claims/investigation';
   if (itemId === 'claim-payment') return '/claims/payment';

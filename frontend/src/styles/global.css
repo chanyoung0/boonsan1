@@ -834,6 +834,35 @@ a {
   color: var(--danger);
 }
 
+.status-design_completed,
+.status-requested {
+  border-color: #b8d3dc;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.status-authorization_requested,
+.status-revision_requested,
+.status-revision_required {
+  border-color: #ead19c;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.status-authorized,
+.status-approved {
+  border-color: #b9ddc7;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-authorization_rejected,
+.status-cancelled {
+  border-color: #efc2c2;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .empty-result {
   display: grid;
   gap: 8px;
