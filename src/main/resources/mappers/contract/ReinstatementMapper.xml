@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contract.mapper.ReinstatementMapper">
+
+    <resultMap id="ReinstatementMap" type="contract.dto.ReinstatementResponse">
+        <id property="reinstatementId" column="reinstatement_id"/>
+        <result property="policyNumber" column="policy_number"/>
+        <result property="reinstatementReason" column="reinstatement_reason" javaType="enums.ReinstatementReason"/>
+        <result property="desiredDate" column="desired_date"/>
+        <result property="hasHealthChanged" column="has_health_changed"/>
+        <result property="lastPaidDate" column="last_paid_date"/>
+        <result property="unpaidInstallmentCount" column="unpaid_installment_count"/>
+        <result property="premiumPerInstallment" column="premium_per_installment"/>
+        <result property="unpaidPremium" column="unpaid_premium"/>
+        <result property="reinstatementStatus" column="reinstatement_status" javaType="enums.ReinstatementStatus"/>
+        <result property="underwritingRequestId" column="underwriting_request_id"/>
+        <result property="appliedAt" column="applied_at"/>
+        <result property="unpaidSettledAt" column="unpaid_settled_at"/>
+        <result property="completedAt" column="completed_at"/>
+        <result property="cancelledAt" column="cancelled_at"/>
+    </resultMap>
+
+    <insert id="insertReinstatement">
+        INSERT INTO reinstatement (
+            reinstatement_id, policy_number, reinstatement_reason, desired_date,
+            has_health_changed, last_paid_date, unpaid_installment_count,
+            premium_per_installment, unpaid_premium,
+            reinstatement_status, applied_at
+        ) VALUES (
+            #{reinstatementId}, #{policyNumber}, #{reinstatementReason}, #{desiredDate},
+            #{hasHealthChanged}, #{lastPaidDate}, #{unpaidInstallmentCount},
+            #{premiumPerInstallment}, #{unpaidPremium},
+            #{reinstatementStatus}, #{appliedAt}
+        )
+    </insert>
+
+    <select id="findById" resultMap="ReinstatementMap">
+        SELECT
+            reinstatement_id, policy_number, reinstatement_reason, desired_date,
+            has_health_changed, last_paid_date, unpaid_installment_count,
+            premium_per_installment, unpaid_premium,
+            reinstatement_status, underwriting_request_id,
+            applied_at, unpaid_settled_at, completed_at, cancelled_at
+        FROM reinstatement
+        WHERE reinstatement_id = #{reinstatementId}
+    </select>
+
+    <select id="findActiveByPolicyNumber" resultMap="ReinstatementMap">
+        SELECT
+            reinstatement_id, policy_number, reinstatement_reason, desired_date,
+            has_health_changed, last_paid_date, unpaid_installment_count,
+            premium_per_installment, unpaid_premium,
+            reinstatement_status, underwriting_request_id,
+            applied_at, unpaid_settled_at, completed_at, cancelled_at
+        FROM reinstatement
+        WHERE policy_number = #{policyNumber}
+          AND reinstatement_status IN ('APPLIED', 'UNPAID_SETTLED')
+        ORDER BY applied_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="findByPolicyNumber" resultMap="ReinstatementMap">
+        SELECT
+            reinstatement_id, policy_number, reinstatement_reason, desired_date,
+            has_health_changed, last_paid_date, unpaid_installment_count,
+            premium_per_installment, unpaid_premium,
+            reinstatement_status, underwriting_request_id,
+            applied_at, unpaid_settled_at, completed_at, cancelled_at
+        FROM reinstatement
+        WHERE policy_number = #{policyNumber}
+        ORDER BY applied_at DESC
+    </select>
+
+    <update id="updateStatusFromAppliedToSettled">
+        UPDATE reinstatement
+        SET reinstatement_status = 'UNPAID_SETTLED',
+            unpaid_settled_at = #{unpaidSettledAt}
+        WHERE reinstatement_id = #{reinstatementId}
+          AND reinstatement_status = 'APPLIED'
+    </update>
+
+    <update id="updateStatusFromSettledToCompleted">
+        UPDATE reinstatement
+        SET reinstatement_status = 'COMPLETED',
+            completed_at = #{completedAt}
+        WHERE reinstatement_id = #{reinstatementId}
+          AND reinstatement_status = 'UNPAID_SETTLED'
+    </update>
+
+    <update id="updateStatusToCancelled">
+        UPDATE reinstatement
+        SET reinstatement_status = 'CANCELLED',
+            cancelled_at = #{cancelledAt}
+        WHERE reinstatement_id = #{reinstatementId}
+          AND reinstatement_status IN ('APPLIED', 'UNPAID_SETTLED')
+    </update>
+
+    <update id="updateContractStatusToActive">
+        UPDATE contract
+        SET contract_status = #{nextStatus}
+        WHERE policy_number = #{policyNumber}
+          AND contract_status = #{currentStatus}
+    </update>
+
+    <update id="updateUnderwritingRequestId">
+        UPDATE reinstatement
+        SET underwriting_request_id = #{underwritingRequestId}
+        WHERE reinstatement_id = #{reinstatementId}
+          AND reinstatement_status IN ('APPLIED', 'UNPAID_SETTLED')
+    </update>
+</mapper>

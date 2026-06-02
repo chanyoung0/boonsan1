@@ -102,5 +102,10 @@ function getMenuHref(itemId: string) {
   if (itemId === 'claim-payment') return '/claims/payment';
   if (itemId === 'claim-subrogation') return '/claims/subrogation';
   if (itemId === 'claim-objection') return '/claims/objection';
+  if (itemId === 'contract-maturity') return '/contracts/maturity';
+  if (itemId === 'contract-payment') return '/contracts/payouts';
+  if (itemId === 'contract-installment') return '/contracts/payment-collections';
+  if (itemId === 'contract-revival') return '/contracts/reinstatements';
+  if (itemId === 'contract-endorsement') return '/contracts/endorsements';
   return '#';
 }

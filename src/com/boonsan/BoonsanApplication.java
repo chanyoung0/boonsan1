@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         "config",
         "exception",
         "claim",
+        "contract",
         "service",
         "model",
         "enums"

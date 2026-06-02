@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contract.mapper.PaymentCollectionMapper">
+
+    <resultMap id="PaymentCollectionMap" type="contract.dto.PaymentCollectionResponse">
+        <id property="collectionId" column="collection_id"/>
+        <result property="policyNumber" column="policy_number"/>
+        <result property="installmentNo" column="installment_no"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="plannedAmount" column="planned_amount"/>
+        <result property="collectedAmount" column="collected_amount"/>
+        <result property="unpaidAmount" column="unpaid_amount"/>
+        <result property="lateFee" column="late_fee"/>
+        <result property="paymentMethod" column="payment_method" javaType="enums.PaymentMethod"/>
+        <result property="processingResult" column="processing_result" javaType="enums.ProcessingResult"/>
+        <result property="collectedAt" column="collected_at"/>
+        <result property="transferType" column="transfer_type" javaType="enums.TransferType"/>
+        <result property="transferredAt" column="transferred_at"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insertCollection">
+        INSERT INTO payment_collection (
+            collection_id, policy_number, installment_no, due_date,
+            planned_amount, collected_amount, unpaid_amount, late_fee,
+            payment_method, processing_result, collected_at, created_at
+        ) VALUES (
+            #{collectionId}, #{policyNumber}, #{installmentNo}, #{dueDate},
+            #{plannedAmount}, #{collectedAmount}, #{unpaidAmount}, #{lateFee},
+            #{paymentMethod}, #{processingResult}, #{collectedAt}, #{createdAt}
+        )
+    </insert>
+
+    <select id="findByCollectionId" resultMap="PaymentCollectionMap">
+        SELECT
+            collection_id, policy_number, installment_no, due_date,
+            planned_amount, collected_amount, unpaid_amount, late_fee,
+            payment_method, processing_result, collected_at,
+            transfer_type, transferred_at, created_at
+        FROM payment_collection
+        WHERE collection_id = #{collectionId}
+    </select>
+
+    <select id="findByPolicyNumber" resultMap="PaymentCollectionMap">
+        SELECT
+            collection_id, policy_number, installment_no, due_date,
+            planned_amount, collected_amount, unpaid_amount, late_fee,
+            payment_method, processing_result, collected_at,
+            transfer_type, transferred_at, created_at
+        FROM payment_collection
+        WHERE policy_number = #{policyNumber}
+        ORDER BY installment_no DESC, created_at DESC
+    </select>
+
+    <update id="updateTransfer">
+        UPDATE payment_collection
+        SET transfer_type = #{transferType},
+            transferred_at = #{transferredAt}
+        WHERE collection_id = #{collectionId}
+          AND transfer_type IS NULL
+    </update>
+</mapper>
