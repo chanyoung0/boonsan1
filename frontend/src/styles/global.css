@@ -416,6 +416,27 @@ a {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.underwriting-form-panel {
+  padding: 28px;
+}
+
+.underwriting-form-panel .panel-header.compact {
+  margin-bottom: 18px;
+}
+
+.underwriting-form-panel .field-grid {
+  gap: 18px;
+}
+
+.underwriting-form-panel .section-title {
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.underwriting-form-panel .inline-note {
+  margin-top: 20px;
+}
+
 .field {
   display: grid;
   gap: 7px;
@@ -965,6 +986,82 @@ a {
   line-height: 1.45;
 }
 
+.credit-flag-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.credit-check-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 10px 12px;
+  color: #3b4858;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.credit-check-field input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.credit-flag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.risk-grade-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  padding: 5px 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.risk-grade-badge.low {
+  border-color: #b9dec8;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.risk-grade-badge.medium {
+  border-color: #efd49d;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.risk-grade-badge.high {
+  border-color: #e8b4b4;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.credit-history-item {
+  grid-template-columns: minmax(160px, 0.9fr) minmax(150px, 0.8fr) minmax(260px, 1.6fr) auto;
+  align-items: center;
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
 .document-section {
   margin-top: 18px;
 }
@@ -1079,7 +1176,9 @@ a {
   .field-grid.three,
   .side-stack,
   .amount-grid,
-  .document-grid {
+  .document-grid,
+  .credit-flag-grid,
+  .credit-history-item {
     grid-template-columns: 1fr;
   }
 

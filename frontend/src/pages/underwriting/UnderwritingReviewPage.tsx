@@ -316,7 +316,7 @@ function ApplicationForm({
   onSubmit: () => void;
 }) {
   return (
-    <section className="work-panel">
+    <section className="work-panel underwriting-form-panel">
       <div className="panel-header compact">
         <div>
           <h2>청약 정보 입력</h2>

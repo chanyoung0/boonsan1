@@ -102,6 +102,31 @@ export interface UnderwritingHistoryResponse {
   createdAt: string;
 }
 
+export type CreditRiskGrade = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface CreditInformationInquiryCreateRequest {
+  customerName: string | null;
+  customerIdentifier: string | null;
+  accidentHistoryExists: boolean | null;
+  otherInsuranceContractExists: boolean | null;
+  previousClaimExists: boolean | null;
+}
+
+export interface CreditInformationInquiryResponse {
+  inquiryId: string;
+  applicationId: string;
+  customerName: string;
+  customerIdentifierMasked: string | null;
+  accidentHistoryExists: boolean;
+  otherInsuranceContractExists: boolean;
+  previousClaimExists: boolean;
+  creditRiskGrade: CreditRiskGrade;
+  riskFlags: string;
+  inquiryStatus: string;
+  externalSystemMessage: string;
+  createdAt: string;
+}
+
 export const UNDERWRITING_RESULT_LABELS: Record<string, string> = {
   APPROVED: '승인',
   SURCHARGE: '할증',
@@ -122,4 +147,17 @@ export const UNDERWRITING_STATUS_LABELS: Record<string, string> = {
   COMPLETED: '심사 완료',
   APPROVED: '승인',
   REJECTED: '거절'
+};
+
+export const CREDIT_RISK_GRADE_LABELS: Record<CreditRiskGrade, string> = {
+  LOW: '낮음',
+  MEDIUM: '보통',
+  HIGH: '높음'
+};
+
+export const CREDIT_RISK_FLAG_LABELS: Record<string, string> = {
+  NONE: '위험 플래그 없음',
+  ACCIDENT_HISTORY: '사고이력 있음',
+  OTHER_INSURANCE_CONTRACT: '타사계약 있음',
+  PREVIOUS_CLAIM: '이전 보험금 지급이력 있음'
 };

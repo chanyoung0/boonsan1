@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="underwriting.mapper.CreditInformationInquiryMapper">
+
+    <resultMap id="CreditInformationInquiryResponseResultMap" type="underwriting.dto.CreditInformationInquiryResponse">
+        <id property="inquiryId" column="inquiry_id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="customerIdentifierMasked" column="customer_identifier_masked"/>
+        <result property="accidentHistoryExists" column="accident_history_exists"/>
+        <result property="otherInsuranceContractExists" column="other_insurance_contract_exists"/>
+        <result property="previousClaimExists" column="previous_claim_exists"/>
+        <result property="creditRiskGrade" column="credit_risk_grade"/>
+        <result property="riskFlags" column="risk_flags"/>
+        <result property="inquiryStatus" column="inquiry_status"/>
+        <result property="externalSystemMessage" column="external_system_message"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insertInquiry">
+        INSERT INTO credit_information_inquiry (
+            inquiry_id,
+            application_id,
+            customer_name,
+            customer_identifier_masked,
+            accident_history_exists,
+            other_insurance_contract_exists,
+            previous_claim_exists,
+            credit_risk_grade,
+            risk_flags,
+            inquiry_status,
+            external_system_message,
+            created_at
+        ) VALUES (
+            #{inquiryId},
+            #{applicationId},
+            #{customerName},
+            #{customerIdentifierMasked},
+            #{accidentHistoryExists},
+            #{otherInsuranceContractExists},
+            #{previousClaimExists},
+            #{creditRiskGrade},
+            #{riskFlags},
+            #{inquiryStatus},
+            #{externalSystemMessage},
+            #{createdAt}
+        )
+    </insert>
+
+    <select id="findByApplicationId" resultMap="CreditInformationInquiryResponseResultMap">
+        SELECT *
+        FROM credit_information_inquiry
+        WHERE application_id = #{applicationId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByInquiryId" resultMap="CreditInformationInquiryResponseResultMap">
+        SELECT *
+        FROM credit_information_inquiry
+        WHERE inquiry_id = #{inquiryId}
+    </select>
+</mapper>

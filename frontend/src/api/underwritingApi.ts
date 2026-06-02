@@ -1,5 +1,7 @@
 import { apiRequest } from './apiClient';
 import type {
+  CreditInformationInquiryCreateRequest,
+  CreditInformationInquiryResponse,
   UnderwritingApplicationCreateRequest,
   UnderwritingApplicationResponse,
   UnderwritingAutoScoreResponse,
@@ -43,5 +45,30 @@ export function finalizeUnderwritingReview(applicationId: string, request: Under
 export function getUnderwritingHistory(applicationId: string) {
   return apiRequest<UnderwritingHistoryResponse[]>(
     `/api/underwriting/applications/${encodeURIComponent(applicationId)}/history`
+  );
+}
+
+export function createCreditInformationInquiry(
+  applicationId: string,
+  request: CreditInformationInquiryCreateRequest
+) {
+  return apiRequest<CreditInformationInquiryResponse>(
+    `/api/underwriting/applications/${encodeURIComponent(applicationId)}/credit-inquiries`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function getCreditInformationInquiries(applicationId: string) {
+  return apiRequest<CreditInformationInquiryResponse[]>(
+    `/api/underwriting/applications/${encodeURIComponent(applicationId)}/credit-inquiries`
+  );
+}
+
+export function getCreditInformationInquiry(inquiryId: string) {
+  return apiRequest<CreditInformationInquiryResponse>(
+    `/api/underwriting/credit-inquiries/${encodeURIComponent(inquiryId)}`
   );
 }

@@ -276,3 +276,34 @@ ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
 
 CREATE INDEX IF NOT EXISTS idx_underwriting_history_application_id
     ON underwriting_history (application_id);
+
+CREATE TABLE IF NOT EXISTS credit_information_inquiry (
+    inquiry_id VARCHAR(50) PRIMARY KEY,
+    application_id VARCHAR(50) NOT NULL,
+    customer_name VARCHAR(100) NOT NULL,
+    customer_identifier_masked VARCHAR(100),
+    accident_history_exists BOOLEAN NOT NULL,
+    other_insurance_contract_exists BOOLEAN NOT NULL,
+    previous_claim_exists BOOLEAN NOT NULL,
+    credit_risk_grade VARCHAR(50) NOT NULL,
+    risk_flags TEXT NOT NULL,
+    inquiry_status VARCHAR(50) NOT NULL,
+    external_system_message TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS inquiry_id VARCHAR(50);
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS customer_name VARCHAR(100);
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS customer_identifier_masked VARCHAR(100);
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS accident_history_exists BOOLEAN;
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS other_insurance_contract_exists BOOLEAN;
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS previous_claim_exists BOOLEAN;
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS credit_risk_grade VARCHAR(50);
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS risk_flags TEXT;
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS inquiry_status VARCHAR(50);
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS external_system_message TEXT;
+ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_credit_information_inquiry_application_id
+    ON credit_information_inquiry (application_id);
