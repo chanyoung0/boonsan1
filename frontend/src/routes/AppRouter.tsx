@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
+import { MainDashboardPage } from '../pages/MainDashboardPage';
 import { AccidentReportPage } from '../pages/claim/AccidentReportPage';
 import { DamageInvestigationPage } from '../pages/claim/DamageInvestigationPage';
 import { ObjectionPage } from '../pages/claim/ObjectionPage';
@@ -13,7 +14,7 @@ import { UnderwritingReviewPage } from '../pages/underwriting/UnderwritingReview
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/claims/accident" replace />} />
+      <Route path="/" element={<MainDashboardPage />} />
       <Route path="/claims/accident" element={<AccidentReportPage />} />
       <Route path="/claims/investigation" element={<DamageInvestigationPage />} />
       <Route path="/claims/payment" element={<PaymentPage />} />
