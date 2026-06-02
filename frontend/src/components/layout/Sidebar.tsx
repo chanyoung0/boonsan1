@@ -104,5 +104,8 @@ function getMenuHref(itemId: string) {
   if (itemId === 'claim-objection') return '/claims/objection';
   if (itemId === 'underwriting-review') return '/underwriting/review';
   if (itemId === 'underwriting-credit') return '/underwriting/credit';
+  if (itemId === 'underwriting-coinsurance') return '/underwriting/coinsurance';
+  if (itemId === 'underwriting-reinsurance') return '/underwriting/reinsurance';
+  if (itemId === 'underwriting-policy') return '/underwriting/policy';
   return '#';
 }

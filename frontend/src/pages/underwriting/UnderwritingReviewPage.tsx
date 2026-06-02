@@ -405,7 +405,7 @@ function AutoScorePanel({
   onRun: () => void;
 }) {
   return (
-    <section className="work-panel">
+    <section className="work-panel underwriting-form-panel">
       <div className="panel-header compact">
         <div>
           <h2>자동심사 실행</h2>
@@ -477,7 +477,7 @@ function FinalizePanel({
   onSubmit: () => void;
 }) {
   return (
-    <section className="work-panel">
+    <section className="work-panel underwriting-form-panel">
       <div className="panel-header compact">
         <div>
           <h2>수동심사/최종심사 입력</h2>

@@ -4,7 +4,10 @@ import { DamageInvestigationPage } from '../pages/claim/DamageInvestigationPage'
 import { ObjectionPage } from '../pages/claim/ObjectionPage';
 import { PaymentPage } from '../pages/claim/PaymentPage';
 import { SubrogationPage } from '../pages/claim/SubrogationPage';
+import { UnderwritingCoinsurancePage } from '../pages/underwriting/UnderwritingCoinsurancePage';
 import { UnderwritingCreditPage } from '../pages/underwriting/UnderwritingCreditPage';
+import { UnderwritingPolicyPage } from '../pages/underwriting/UnderwritingPolicyPage';
+import { UnderwritingReinsurancePage } from '../pages/underwriting/UnderwritingReinsurancePage';
 import { UnderwritingReviewPage } from '../pages/underwriting/UnderwritingReviewPage';
 
 export function AppRouter() {
@@ -18,6 +21,9 @@ export function AppRouter() {
       <Route path="/claims/objection" element={<ObjectionPage />} />
       <Route path="/underwriting/review" element={<UnderwritingReviewPage />} />
       <Route path="/underwriting/credit" element={<UnderwritingCreditPage />} />
+      <Route path="/underwriting/coinsurance" element={<UnderwritingCoinsurancePage />} />
+      <Route path="/underwriting/reinsurance" element={<UnderwritingReinsurancePage />} />
+      <Route path="/underwriting/policy" element={<UnderwritingPolicyPage />} />
       <Route path="*" element={<AccidentReportPage />} />
     </Routes>
   );

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="underwriting.mapper.UnderwritingFollowUpMapper">
+
+    <resultMap id="CoinsuranceProcessResultMap" type="underwriting.dto.CoinsuranceProcessResponse">
+        <id property="processId" column="process_id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="coinsurerName" column="coinsurer_name"/>
+        <result property="requestStatus" column="request_status"/>
+        <result property="resultStatus" column="result_status"/>
+        <result property="retainedAmount" column="retained_amount"/>
+        <result property="shareRate" column="share_rate"/>
+        <result property="manualSelected" column="is_manual_selected"/>
+        <result property="rejectionReason" column="rejection_reason"/>
+        <result property="externalSystemMessage" column="external_system_message"/>
+        <result property="requestedAt" column="requested_at"/>
+        <result property="resultRegisteredAt" column="result_registered_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="ReinsuranceProcessResultMap" type="underwriting.dto.ReinsuranceProcessResponse">
+        <id property="processId" column="process_id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="reinsuranceRequired" column="is_reinsurance_required"/>
+        <result property="reinsuranceReason" column="reinsurance_reason"/>
+        <result property="reinsurerName" column="reinsurer_name"/>
+        <result property="requestStatus" column="request_status"/>
+        <result property="resultStatus" column="result_status"/>
+        <result property="retentionAmount" column="retention_amount"/>
+        <result property="cessionRate" column="cession_rate"/>
+        <result property="rejectionReason" column="rejection_reason"/>
+        <result property="externalSystemMessage" column="external_system_message"/>
+        <result property="requestedAt" column="requested_at"/>
+        <result property="resultRegisteredAt" column="result_registered_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="PolicyIssueResultMap" type="underwriting.dto.PolicyIssueResponse">
+        <id property="issueId" column="issue_id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="policyNumber" column="policy_number"/>
+        <result property="issueStatus" column="issue_status"/>
+        <result property="finalResult" column="final_result"/>
+        <result property="appliedCondition" column="applied_condition"/>
+        <result property="externalSystemMessage" column="external_system_message"/>
+        <result property="issuedAt" column="issued_at"/>
+    </resultMap>
+
+    <insert id="insertCoinsuranceProcess">
+        INSERT INTO coinsurance_process (
+            process_id,
+            application_id,
+            coinsurer_name,
+            request_status,
+            result_status,
+            retained_amount,
+            share_rate,
+            is_manual_selected,
+            external_system_message,
+            requested_at,
+            updated_at
+        ) VALUES (
+            #{processId},
+            #{applicationId},
+            #{coinsurerName},
+            #{requestStatus},
+            #{resultStatus},
+            #{retainedAmount},
+            #{shareRate},
+            #{manualSelected},
+            #{externalSystemMessage},
+            #{requestedAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <select id="findCoinsuranceByApplicationId" resultMap="CoinsuranceProcessResultMap">
+        SELECT *
+        FROM coinsurance_process
+        WHERE application_id = #{applicationId}
+    </select>
+
+    <update id="updateCoinsuranceResult">
+        UPDATE coinsurance_process
+        SET
+            result_status = #{resultStatus},
+            rejection_reason = #{rejectionReason},
+            result_registered_at = #{resultRegisteredAt},
+            updated_at = #{updatedAt}
+        WHERE application_id = #{applicationId}
+          AND result_status = 'PENDING_APPROVAL'
+    </update>
+
+    <insert id="insertReinsuranceProcess">
+        INSERT INTO reinsurance_process (
+            process_id,
+            application_id,
+            is_reinsurance_required,
+            reinsurance_reason,
+            reinsurer_name,
+            request_status,
+            result_status,
+            retention_amount,
+            cession_rate,
+            external_system_message,
+            requested_at,
+            updated_at
+        ) VALUES (
+            #{processId},
+            #{applicationId},
+            #{reinsuranceRequired},
+            #{reinsuranceReason},
+            #{reinsurerName},
+            #{requestStatus},
+            #{resultStatus},
+            #{retentionAmount},
+            #{cessionRate},
+            #{externalSystemMessage},
+            #{requestedAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <select id="findReinsuranceByApplicationId" resultMap="ReinsuranceProcessResultMap">
+        SELECT *
+        FROM reinsurance_process
+        WHERE application_id = #{applicationId}
+    </select>
+
+    <update id="updateReinsuranceResult">
+        UPDATE reinsurance_process
+        SET
+            result_status = #{resultStatus},
+            rejection_reason = #{rejectionReason},
+            result_registered_at = #{resultRegisteredAt},
+            updated_at = #{updatedAt}
+        WHERE application_id = #{applicationId}
+          AND result_status = 'REQUESTED'
+    </update>
+
+    <insert id="insertPolicyIssue">
+        INSERT INTO insurance_policy_issue (
+            issue_id,
+            application_id,
+            policy_number,
+            issue_status,
+            final_result,
+            applied_condition,
+            external_system_message,
+            issued_at
+        ) VALUES (
+            #{issueId},
+            #{applicationId},
+            #{policyNumber},
+            #{issueStatus},
+            #{finalResult},
+            #{appliedCondition},
+            #{externalSystemMessage},
+            #{issuedAt}
+        )
+    </insert>
+
+    <select id="findPolicyIssueByApplicationId" resultMap="PolicyIssueResultMap">
+        SELECT *
+        FROM insurance_policy_issue
+        WHERE application_id = #{applicationId}
+    </select>
+</mapper>

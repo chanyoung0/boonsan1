@@ -307,3 +307,97 @@ ALTER TABLE credit_information_inquiry ADD COLUMN IF NOT EXISTS created_at TIMES
 
 CREATE INDEX IF NOT EXISTS idx_credit_information_inquiry_application_id
     ON credit_information_inquiry (application_id);
+
+CREATE TABLE IF NOT EXISTS coinsurance_process (
+    process_id VARCHAR(50) PRIMARY KEY,
+    application_id VARCHAR(50) NOT NULL,
+    coinsurer_name VARCHAR(100) NOT NULL,
+    request_status VARCHAR(50) NOT NULL,
+    result_status VARCHAR(50) NOT NULL,
+    retained_amount NUMERIC(15,2),
+    share_rate NUMERIC(7,2),
+    is_manual_selected BOOLEAN NOT NULL,
+    rejection_reason TEXT,
+    external_system_message TEXT NOT NULL,
+    requested_at TIMESTAMP NOT NULL,
+    result_registered_at TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS process_id VARCHAR(50);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS coinsurer_name VARCHAR(100);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS request_status VARCHAR(50);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS result_status VARCHAR(50);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS retained_amount NUMERIC(15,2);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS share_rate NUMERIC(7,2);
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS is_manual_selected BOOLEAN;
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS external_system_message TEXT;
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS requested_at TIMESTAMP;
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS result_registered_at TIMESTAMP;
+ALTER TABLE coinsurance_process ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_coinsurance_process_application_id
+    ON coinsurance_process (application_id);
+
+CREATE TABLE IF NOT EXISTS reinsurance_process (
+    process_id VARCHAR(50) PRIMARY KEY,
+    application_id VARCHAR(50) NOT NULL,
+    is_reinsurance_required BOOLEAN NOT NULL,
+    reinsurance_reason TEXT NOT NULL,
+    reinsurer_name VARCHAR(100) NOT NULL,
+    request_status VARCHAR(50) NOT NULL,
+    result_status VARCHAR(50) NOT NULL,
+    retention_amount NUMERIC(15,2),
+    cession_rate NUMERIC(7,2),
+    rejection_reason TEXT,
+    external_system_message TEXT NOT NULL,
+    requested_at TIMESTAMP NOT NULL,
+    result_registered_at TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS process_id VARCHAR(50);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS is_reinsurance_required BOOLEAN;
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS reinsurance_reason TEXT;
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS reinsurer_name VARCHAR(100);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS request_status VARCHAR(50);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS result_status VARCHAR(50);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS retention_amount NUMERIC(15,2);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS cession_rate NUMERIC(7,2);
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS external_system_message TEXT;
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS requested_at TIMESTAMP;
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS result_registered_at TIMESTAMP;
+ALTER TABLE reinsurance_process ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reinsurance_process_application_id
+    ON reinsurance_process (application_id);
+
+CREATE TABLE IF NOT EXISTS insurance_policy_issue (
+    issue_id VARCHAR(50) PRIMARY KEY,
+    application_id VARCHAR(50) NOT NULL,
+    policy_number VARCHAR(50) NOT NULL,
+    issue_status VARCHAR(50) NOT NULL,
+    final_result VARCHAR(50) NOT NULL,
+    applied_condition TEXT,
+    external_system_message TEXT NOT NULL,
+    issued_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS issue_id VARCHAR(50);
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS policy_number VARCHAR(50);
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS issue_status VARCHAR(50);
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS final_result VARCHAR(50);
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS applied_condition TEXT;
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS external_system_message TEXT;
+ALTER TABLE insurance_policy_issue ADD COLUMN IF NOT EXISTS issued_at TIMESTAMP;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_insurance_policy_issue_application_id
+    ON insurance_policy_issue (application_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_insurance_policy_issue_policy_number
+    ON insurance_policy_issue (policy_number);

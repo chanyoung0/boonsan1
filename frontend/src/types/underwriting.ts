@@ -127,6 +127,88 @@ export interface CreditInformationInquiryResponse {
   createdAt: string;
 }
 
+export interface UnderwritingFollowUpEligibilityResponse {
+  applicationId: string;
+  eligible: boolean;
+  reason: string;
+  applicationStatus: string;
+  finalResult: UnderwritingResultType | null;
+  totalScore: number | null;
+  coinsuranceRecommended: boolean;
+  reinsuranceRequired: boolean;
+  processStatus: string | null;
+  resultStatus: string | null;
+  policyNumber: string | null;
+  nextStepMessage: string | null;
+}
+
+export interface CoinsuranceCreateRequest {
+  coinsurerName: string;
+  manualSelected: boolean;
+  retainedAmount: number;
+  shareRate: number;
+}
+
+export interface CoinsuranceResultRequest {
+  resultStatus: 'APPROVED' | 'REJECTED';
+  rejectionReason: string | null;
+}
+
+export interface CoinsuranceProcessResponse {
+  processId: string;
+  applicationId: string;
+  coinsurerName: string;
+  requestStatus: string;
+  resultStatus: string;
+  retainedAmount: number;
+  shareRate: number;
+  manualSelected: boolean;
+  rejectionReason: string | null;
+  externalSystemMessage: string;
+  requestedAt: string;
+  resultRegisteredAt: string | null;
+  updatedAt: string;
+}
+
+export interface ReinsuranceCreateRequest {
+  reinsurerName: string;
+  retentionAmount: number;
+  cessionRate: number;
+}
+
+export interface ReinsuranceResultRequest {
+  resultStatus: 'ACCEPTED' | 'REJECTED';
+  rejectionReason: string | null;
+}
+
+export interface ReinsuranceProcessResponse {
+  processId: string;
+  applicationId: string;
+  reinsuranceRequired: boolean;
+  reinsuranceReason: string;
+  reinsurerName: string;
+  requestStatus: string;
+  resultStatus: string;
+  retentionAmount: number;
+  cessionRate: number;
+  rejectionReason: string | null;
+  externalSystemMessage: string;
+  requestedAt: string;
+  resultRegisteredAt: string | null;
+  updatedAt: string;
+}
+
+export interface PolicyIssueResponse {
+  issueId: string;
+  applicationId: string;
+  policyNumber: string;
+  issueStatus: string;
+  finalResult: UnderwritingResultType;
+  appliedCondition: string | null;
+  externalSystemMessage: string;
+  issuedAt: string;
+}
+
 export const UNDERWRITING_RESULT_LABELS: Record<string, string> = {
   APPROVED: '승인',
   SURCHARGE: '할증',
@@ -160,4 +242,13 @@ export const CREDIT_RISK_FLAG_LABELS: Record<string, string> = {
   ACCIDENT_HISTORY: '사고이력 있음',
   OTHER_INSURANCE_CONTRACT: '타사계약 있음',
   PREVIOUS_CLAIM: '이전 보험금 지급이력 있음'
+};
+
+export const FOLLOW_UP_STATUS_LABELS: Record<string, string> = {
+  REQUESTED: '요청',
+  PENDING_APPROVAL: '승인 대기',
+  APPROVED: '승인',
+  REJECTED: '거절',
+  ACCEPTED: '수락',
+  ISSUED: '발행 완료'
 };

@@ -617,6 +617,15 @@ a {
   color: var(--success);
 }
 
+.success-panel {
+  border-color: #b9dec8;
+  background: #fbfffd;
+}
+
+.followup-check {
+  margin-top: 18px;
+}
+
 .result-panel {
   border-color: #bbdec9;
   background: linear-gradient(180deg, #f7fcf9, #ffffff);
