@@ -102,5 +102,6 @@ function getMenuHref(itemId: string) {
   if (itemId === 'claim-payment') return '/claims/payment';
   if (itemId === 'claim-subrogation') return '/claims/subrogation';
   if (itemId === 'claim-objection') return '/claims/objection';
+  if (itemId === 'underwriting-review') return '/underwriting/review';
   return '#';
 }

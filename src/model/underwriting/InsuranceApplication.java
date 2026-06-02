@@ -26,7 +26,7 @@ public class InsuranceApplication {
 
     public void issuePolicyNumber() {}
 
-    public void receiveApplication() {}
+    public String receiveApplication() { return applicationId; }
 
     public String getApplicationId() { return applicationId; }
 }

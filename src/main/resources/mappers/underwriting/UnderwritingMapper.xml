@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="underwriting.mapper.UnderwritingMapper">
+
+    <resultMap id="ApplicationResponseResultMap" type="underwriting.dto.UnderwritingApplicationResponse">
+        <id property="applicationId" column="application_id"/>
+        <result property="applicationStatus" column="application_status"/>
+        <result property="appliedAt" column="applied_at"/>
+        <result property="appliedCondition" column="applied_condition"/>
+        <result property="insuredAmount" column="insured_amount"/>
+        <result property="insuredPersonInfo" column="insured_person_info"/>
+        <result property="paymentCycle" column="payment_cycle"/>
+        <result property="premium" column="premium"/>
+        <result property="productCode" column="product_code"/>
+        <result property="specialContractList" column="special_contract_list"/>
+        <result property="termsVersion" column="terms_version"/>
+        <result property="insuredPersonName" column="insured_person_name"/>
+        <result property="age" column="age"/>
+        <result property="gender" column="gender"/>
+        <result property="occupation" column="occupation"/>
+        <result property="annualIncome" column="annual_income"/>
+        <result property="pastMedicalHistory" column="past_medical_history"/>
+        <result property="medicated" column="is_medicated"/>
+        <result property="surgeryHistory" column="surgery_history"/>
+        <result property="familyHistory" column="family_history"/>
+        <result property="smoker" column="is_smoker"/>
+        <result property="alcoholConsumption" column="alcohol_consumption"/>
+        <result property="bmi" column="bmi"/>
+        <result property="vehicleModel" column="vehicle_model"/>
+        <result property="vehicleNumber" column="vehicle_number"/>
+        <result property="hasAccidentHistory" column="has_accident_history"/>
+        <result property="hasOtherContract" column="has_other_contract"/>
+    </resultMap>
+
+    <resultMap id="ReviewResponseResultMap" type="underwriting.dto.UnderwritingReviewResponse">
+        <id property="reviewId" column="review_id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="underwritingStatus" column="underwriting_status"/>
+        <result property="underwritingType" column="underwriting_type"/>
+        <result property="totalScore" column="auto_score"/>
+        <result property="totalDeduction" column="total_deduction"/>
+        <result property="recommendedResult" column="recommended_result"/>
+        <result property="finalResult" column="final_result"/>
+        <result property="autoReviewAvailable" column="is_auto_review_available"/>
+        <result property="coinsuranceRecommended" column="is_coinsurance_recommended"/>
+        <result property="itemizedScores" column="itemized_scores"/>
+        <result property="underwriterId" column="underwriter_id"/>
+        <result property="underwriterName" column="underwriter_name"/>
+        <result property="department" column="department"/>
+        <result property="underwritingOpinion" column="underwriting_opinion"/>
+        <result property="surchargeCondition" column="surcharge_condition"/>
+        <result property="rejectionReason" column="rejection_reason"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="finalizedAt" column="finalized_at"/>
+    </resultMap>
+
+    <resultMap id="HistoryResponseResultMap" type="underwriting.dto.UnderwritingHistoryResponse">
+        <id property="historyId" column="history_id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="reviewId" column="review_id"/>
+        <result property="eventType" column="event_type"/>
+        <result property="eventMessage" column="event_message"/>
+        <result property="score" column="score"/>
+        <result property="result" column="result"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insertApplication">
+        INSERT INTO insurance_application (
+            application_id,
+            application_status,
+            applied_at,
+            applied_condition,
+            insured_amount,
+            insured_person_info,
+            payment_cycle,
+            premium,
+            product_code,
+            special_contract_list,
+            terms_version,
+            insured_person_name,
+            age,
+            gender,
+            occupation,
+            annual_income,
+            past_medical_history,
+            is_medicated,
+            surgery_history,
+            family_history,
+            is_smoker,
+            alcohol_consumption,
+            bmi,
+            vehicle_model,
+            vehicle_number,
+            has_accident_history,
+            has_other_contract
+        ) VALUES (
+            #{applicationId},
+            #{applicationStatus},
+            #{appliedAt},
+            #{appliedCondition},
+            #{insuredAmount},
+            #{insuredPersonInfo},
+            #{paymentCycle},
+            #{premium},
+            #{productCode},
+            #{specialContractList},
+            #{termsVersion},
+            #{insuredPersonName},
+            #{age},
+            #{gender},
+            #{occupation},
+            #{annualIncome},
+            #{pastMedicalHistory},
+            #{medicated},
+            #{surgeryHistory},
+            #{familyHistory},
+            #{smoker},
+            #{alcoholConsumption},
+            #{bmi},
+            #{vehicleModel},
+            #{vehicleNumber},
+            #{hasAccidentHistory},
+            #{hasOtherContract}
+        )
+    </insert>
+
+    <select id="findApplicationById" resultMap="ApplicationResponseResultMap">
+        SELECT *
+        FROM insurance_application
+        WHERE application_id = #{applicationId}
+    </select>
+
+    <insert id="insertReview">
+        INSERT INTO underwriting_review (
+            review_id,
+            application_id,
+            underwriting_status,
+            underwriting_type,
+            auto_score,
+            total_deduction,
+            recommended_result,
+            is_auto_review_available,
+            is_coinsurance_recommended,
+            itemized_scores,
+            created_at
+        ) VALUES (
+            #{reviewId},
+            #{applicationId},
+            #{underwritingStatus},
+            #{underwritingType},
+            #{autoScore},
+            #{totalDeduction},
+            #{recommendedResult},
+            #{autoReviewAvailable},
+            #{coinsuranceRecommended},
+            #{itemizedScores},
+            #{createdAt}
+        )
+    </insert>
+
+    <select id="findLatestReviewByApplicationId" resultMap="ReviewResponseResultMap">
+        SELECT *
+        FROM underwriting_review
+        WHERE application_id = #{applicationId}
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <update id="finalizeLatestReview">
+        UPDATE underwriting_review
+        SET
+            underwriting_status = #{underwritingStatus},
+            final_result = #{finalResult},
+            underwriter_id = #{underwriterId},
+            underwriter_name = #{underwriterName},
+            department = #{department},
+            underwriting_opinion = #{underwritingOpinion},
+            surcharge_condition = #{surchargeCondition},
+            rejection_reason = #{rejectionReason},
+            finalized_at = #{finalizedAt}
+        WHERE review_id = (
+            SELECT review_id
+            FROM underwriting_review
+            WHERE application_id = #{applicationId}
+            ORDER BY created_at DESC
+            LIMIT 1
+        )
+          AND final_result IS NULL
+    </update>
+
+    <update id="updateApplicationAfterFinalReview">
+        UPDATE insurance_application
+        SET
+            application_status = #{applicationStatus},
+            applied_condition = #{appliedCondition}
+        WHERE application_id = #{applicationId}
+    </update>
+
+    <insert id="insertHistory">
+        INSERT INTO underwriting_history (
+            history_id,
+            application_id,
+            review_id,
+            event_type,
+            event_message,
+            score,
+            result,
+            created_at
+        ) VALUES (
+            #{historyId},
+            #{applicationId},
+            #{reviewId},
+            #{eventType},
+            #{eventMessage},
+            #{score},
+            #{result},
+            #{createdAt}
+        )
+    </insert>
+
+    <select id="findHistoryByApplicationId" resultMap="HistoryResponseResultMap">
+        SELECT *
+        FROM underwriting_history
+        WHERE application_id = #{applicationId}
+        ORDER BY created_at ASC
+    </select>
+</mapper>

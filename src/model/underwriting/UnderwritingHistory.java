@@ -5,6 +5,7 @@ import model.person.InsuredPerson;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 // 언더라이팅 이력 도메인 모델 — 피보험자 심사 판단 결과 이력 관리
 public class UnderwritingHistory {
@@ -28,7 +29,7 @@ public class UnderwritingHistory {
     private String vehicleNumber;
 
     // 심사 이력 조회
-    public void getHistory() {}
+    public List<UnderwritingHistory> getHistory() { return List.of(this); }
 
     // 심사 이력 등록
     public void registerHistory() {}

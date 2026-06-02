@@ -21,7 +21,7 @@ public class Underwriting {
     private LocalDateTime underwrittenAt;
 
     // 심사 점수 계산
-    public void calculateScore() {}
+    public float calculateScore() { return totalScore; }
 
     // 자동 심사 실행
     public void executeAutoUnderwriting() {}

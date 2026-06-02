@@ -150,3 +150,129 @@ ALTER TABLE objection ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_objection_accident_number
     ON objection (accident_number);
+
+CREATE TABLE IF NOT EXISTS insurance_application (
+    application_id VARCHAR(50) PRIMARY KEY,
+    application_status VARCHAR(50) NOT NULL,
+    applied_at TIMESTAMP NOT NULL,
+    applied_condition TEXT,
+    insured_amount NUMERIC(15,2) NOT NULL,
+    insured_person_info TEXT NOT NULL,
+    payment_cycle VARCHAR(50) NOT NULL,
+    premium NUMERIC(15,2) NOT NULL,
+    product_code VARCHAR(50) NOT NULL,
+    special_contract_list VARCHAR(100),
+    terms_version VARCHAR(100) NOT NULL,
+    insured_person_name VARCHAR(100) NOT NULL,
+    age INTEGER NOT NULL,
+    gender VARCHAR(20) NOT NULL,
+    occupation VARCHAR(100) NOT NULL,
+    annual_income NUMERIC(15,2) NOT NULL,
+    past_medical_history TEXT,
+    is_medicated BOOLEAN NOT NULL,
+    surgery_history TEXT,
+    family_history TEXT,
+    is_smoker BOOLEAN NOT NULL,
+    alcohol_consumption VARCHAR(100),
+    bmi NUMERIC(5,2) NOT NULL,
+    vehicle_model VARCHAR(100),
+    vehicle_number VARCHAR(50),
+    has_accident_history BOOLEAN NOT NULL,
+    has_other_contract BOOLEAN NOT NULL
+);
+
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS application_status VARCHAR(50);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS applied_at TIMESTAMP;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS applied_condition TEXT;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS insured_amount NUMERIC(15,2);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS insured_person_info TEXT;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS payment_cycle VARCHAR(50);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS premium NUMERIC(15,2);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS product_code VARCHAR(50);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS special_contract_list VARCHAR(100);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS terms_version VARCHAR(100);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS insured_person_name VARCHAR(100);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS age INTEGER;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS gender VARCHAR(20);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS occupation VARCHAR(100);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS annual_income NUMERIC(15,2);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS past_medical_history TEXT;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS is_medicated BOOLEAN;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS surgery_history TEXT;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS family_history TEXT;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS is_smoker BOOLEAN;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS alcohol_consumption VARCHAR(100);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS bmi NUMERIC(5,2);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS vehicle_model VARCHAR(100);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS vehicle_number VARCHAR(50);
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS has_accident_history BOOLEAN;
+ALTER TABLE insurance_application ADD COLUMN IF NOT EXISTS has_other_contract BOOLEAN;
+
+CREATE TABLE IF NOT EXISTS underwriting_review (
+    review_id VARCHAR(50) PRIMARY KEY,
+    application_id VARCHAR(50) NOT NULL,
+    underwriting_status VARCHAR(50) NOT NULL,
+    underwriting_type VARCHAR(50) NOT NULL,
+    auto_score REAL NOT NULL,
+    total_deduction INTEGER NOT NULL,
+    recommended_result VARCHAR(50) NOT NULL,
+    final_result VARCHAR(50),
+    is_auto_review_available BOOLEAN NOT NULL,
+    is_coinsurance_recommended BOOLEAN NOT NULL,
+    itemized_scores TEXT NOT NULL,
+    underwriter_id VARCHAR(50),
+    underwriter_name VARCHAR(100),
+    department VARCHAR(100),
+    underwriting_opinion TEXT,
+    surcharge_condition VARCHAR(100),
+    rejection_reason TEXT,
+    created_at TIMESTAMP NOT NULL,
+    finalized_at TIMESTAMP
+);
+
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS review_id VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS underwriting_status VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS underwriting_type VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS auto_score REAL;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS total_deduction INTEGER;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS recommended_result VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS final_result VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS is_auto_review_available BOOLEAN;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS is_coinsurance_recommended BOOLEAN;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS itemized_scores TEXT;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS underwriter_id VARCHAR(50);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS underwriter_name VARCHAR(100);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS department VARCHAR(100);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS underwriting_opinion TEXT;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS surcharge_condition VARCHAR(100);
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+ALTER TABLE underwriting_review ADD COLUMN IF NOT EXISTS finalized_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_underwriting_review_application_id
+    ON underwriting_review (application_id);
+
+CREATE TABLE IF NOT EXISTS underwriting_history (
+    history_id VARCHAR(50) PRIMARY KEY,
+    application_id VARCHAR(50) NOT NULL,
+    review_id VARCHAR(50),
+    event_type VARCHAR(50) NOT NULL,
+    event_message TEXT NOT NULL,
+    score REAL,
+    result VARCHAR(50),
+    created_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS history_id VARCHAR(50);
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS application_id VARCHAR(50);
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS review_id VARCHAR(50);
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS event_type VARCHAR(50);
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS event_message TEXT;
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS score REAL;
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS result VARCHAR(50);
+ALTER TABLE underwriting_history ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_underwriting_history_application_id
+    ON underwriting_history (application_id);
