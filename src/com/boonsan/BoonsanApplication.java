@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         "common",
         "config",
         "exception",
+        "dashboard",
         "claim",
         "underwriting",
         "service",

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dashboard.mapper.DashboardMapper">
+
+    <select id="countUnderwritingInProgress" resultType="int">
+        SELECT COUNT(*)
+        FROM insurance_application ia
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM underwriting_review ur
+            WHERE ur.application_id = ia.application_id
+              AND ur.final_result IS NOT NULL
+        )
+    </select>
+
+    <select id="countPaymentApprovalPending" resultType="int">
+        SELECT COUNT(*)
+        FROM payment_approval_document
+        WHERE submission_status = 'APPROVAL_REQUESTED'
+    </select>
+
+    <select id="countSubrogationInProgress" resultType="int">
+        SELECT COUNT(*)
+        FROM subrogation
+        WHERE subrogation_status = 'REQUESTED'
+    </select>
+
+    <select id="countObjectionReceived" resultType="int">
+        SELECT COUNT(*)
+        FROM objection
+        WHERE objection_status = 'RECEIVED'
+    </select>
+</mapper>

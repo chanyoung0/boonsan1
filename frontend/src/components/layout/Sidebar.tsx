@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 const menuGroups = [
   {
@@ -49,9 +50,15 @@ interface SidebarProps {
   activeMenuId?: string;
 }
 
-export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
-  const activeGroupId = menuGroups.find((group) => group.items.some((item) => item.id === activeMenuId))?.id ?? 'claim';
-  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([activeGroupId]);
+export function Sidebar({ activeMenuId }: SidebarProps) {
+  const location = useLocation();
+  const currentActiveMenuId = getMenuIdFromPath(location.pathname) ?? activeMenuId;
+  const activeGroupId = menuGroups.find((group) => group.items.some((item) => item.id === currentActiveMenuId))?.id;
+  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>(() => (activeGroupId ? [activeGroupId] : []));
+
+  useEffect(() => {
+    setExpandedGroupIds(activeGroupId ? [activeGroupId] : []);
+  }, [activeGroupId]);
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroupIds((current) =>
@@ -61,9 +68,13 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
 
   return (
     <aside className="sidebar" aria-label="업무 메뉴">
+      <Link className={`menu-dashboard-item ${currentActiveMenuId === 'dashboard' ? 'active' : ''}`} to="/">
+        <LayoutDashboard size={17} />
+        <span>대시보드</span>
+      </Link>
       {menuGroups.map((group) => {
         const isExpanded = expandedGroupIds.includes(group.id);
-        const hasActive = group.items.some((item) => item.id === activeMenuId);
+        const hasActive = group.items.some((item) => item.id === currentActiveMenuId);
 
         return (
           <section className="menu-group" key={group.id}>
@@ -79,13 +90,13 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
             {isExpanded && (
               <div className="menu-items">
                 {group.items.map((item) => (
-                  <a
+                  <Link
                     key={item.id}
-                    className={`menu-item ${item.id === activeMenuId ? 'active' : ''}`}
-                    href={getMenuHref(item.id)}
+                    className={`menu-item ${item.id === currentActiveMenuId ? 'active' : ''}`}
+                    to={getMenuHref(item.id)}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             )}
@@ -94,6 +105,25 @@ export function Sidebar({ activeMenuId = 'claim-accident' }: SidebarProps) {
       })}
     </aside>
   );
+}
+
+function getMenuIdFromPath(pathname: string) {
+  if (pathname === '/') return 'dashboard';
+  if (pathname === '/claims/accident') return 'claim-accident';
+  if (pathname === '/claims/investigation') return 'claim-investigation';
+  if (pathname === '/claims/payment') return 'claim-payment';
+  if (pathname === '/claims/subrogation') return 'claim-subrogation';
+  if (pathname === '/claims/objection') return 'claim-objection';
+  if (pathname === '/underwriting/review') return 'underwriting-review';
+  if (pathname === '/underwriting/credit') return 'underwriting-credit';
+  if (pathname === '/underwriting/coinsurance') return 'underwriting-coinsurance';
+  if (pathname === '/underwriting/reinsurance') return 'underwriting-reinsurance';
+  if (pathname === '/underwriting/policy') return 'underwriting-policy';
+  if (pathname.startsWith('/claims/')) return 'claim-accident';
+  if (pathname.startsWith('/underwriting/')) return 'underwriting-review';
+  if (pathname.startsWith('/contract/')) return 'contract-endorsement';
+  if (pathname.startsWith('/product/')) return 'product-design';
+  return null;
 }
 
 function getMenuHref(itemId: string) {

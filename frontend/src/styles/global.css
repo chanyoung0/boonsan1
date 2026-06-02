@@ -98,9 +98,20 @@ a {
 
 .brand-mark {
   gap: 10px;
+  border-radius: 8px;
+  padding: 6px 8px;
   color: var(--primary-dark);
+  cursor: pointer;
   font-size: 18px;
   font-weight: 750;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.brand-mark:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .header-meta {
@@ -138,6 +149,25 @@ a {
 
 .menu-group {
   margin-bottom: 8px;
+}
+
+.menu-dashboard-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+  color: var(--sidebar-muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.menu-dashboard-item:hover,
+.menu-dashboard-item.active {
+  background: #e7f5ed;
+  color: #132033;
 }
 
 .menu-group-title {

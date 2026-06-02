@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -14,7 +15,9 @@ import {
   UserCheck
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { getDashboardSummary } from '../api/dashboardApi';
 import { AppLayout } from '../components/layout/AppLayout';
+import type { DashboardSummaryResponse } from '../types/dashboard';
 
 type ModuleStatus = 'active' | 'planned';
 
@@ -29,10 +32,10 @@ interface WorkModule {
   status: ModuleStatus;
 }
 
-interface StatusItem {
+interface StatusItemDefinition {
   id: string;
   label: string;
-  count: number;
+  countKey: keyof DashboardSummaryResponse;
   description: string;
 }
 
@@ -96,11 +99,38 @@ const workModules: WorkModule[] = [
   }
 ];
 
-const statusItems: StatusItem[] = [
-  { id: 'underwriting', label: '청약 심사 진행 중', count: 24, description: '자동/수동 심사 대기 및 진행 건' },
-  { id: 'payment', label: '지급 심사 대기', count: 18, description: '결재 요청 후 지급 확인 대기 건' },
-  { id: 'subrogation', label: '구상 처리 중', count: 7, description: '구상 요청 및 회수 관리 건' },
-  { id: 'objection', label: '이의제기 접수', count: 3, description: '지급 결과 재검토 요청 건' }
+const emptyDashboardSummary: DashboardSummaryResponse = {
+  underwritingInProgress: 0,
+  paymentApprovalPending: 0,
+  subrogationInProgress: 0,
+  objectionReceived: 0
+};
+
+const statusItemDefinitions: StatusItemDefinition[] = [
+  {
+    id: 'underwriting',
+    label: '청약 심사 진행 중',
+    countKey: 'underwritingInProgress',
+    description: '최종 심사가 아직 저장되지 않은 청약'
+  },
+  {
+    id: 'payment',
+    label: '지급 심사 대기',
+    countKey: 'paymentApprovalPending',
+    description: '결재 요청 상태의 지급품의서'
+  },
+  {
+    id: 'subrogation',
+    label: '구상 처리 중',
+    countKey: 'subrogationInProgress',
+    description: '구상 요청 후 회수 완료 전 건'
+  },
+  {
+    id: 'objection',
+    label: '이의제기 접수',
+    countKey: 'objectionReceived',
+    description: '접수 상태의 이의제기 건'
+  }
 ];
 
 const recentWorkItems: RecentWorkItem[] = [
@@ -151,12 +181,44 @@ const quickActions: QuickAction[] = [
 ];
 
 export function MainDashboardPage() {
+  const [summary, setSummary] = useState<DashboardSummaryResponse>(emptyDashboardSummary);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
   const today = new Intl.DateTimeFormat('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     weekday: 'long'
   }).format(new Date());
+
+  useEffect(() => {
+    let mounted = true;
+
+    getDashboardSummary()
+      .then((data) => {
+        if (!mounted) {
+          return;
+        }
+        setSummary(data);
+        setSummaryError(null);
+      })
+      .catch((error: unknown) => {
+        if (!mounted) {
+          return;
+        }
+        setSummary(emptyDashboardSummary);
+        setSummaryError(error instanceof Error ? error.message : '대시보드 요약 정보를 불러오지 못했습니다.');
+      })
+      .finally(() => {
+        if (mounted) {
+          setSummaryLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <AppLayout activeMenuId="dashboard">
@@ -210,13 +272,14 @@ export function MainDashboardPage() {
         <section className="dashboard-section">
           <div className="dashboard-section-heading">
             <h2>업무 진행 현황</h2>
-            <p>실제 API 연결 전까지 운영 확인용 Mock 지표로 표시합니다.</p>
+            <p>PostgreSQL 업무 테이블을 기준으로 집계합니다.</p>
           </div>
+          {summaryError && <div className="alert-message error">{summaryError}</div>}
           <div className="dashboard-status-grid">
-            {statusItems.map((item) => (
+            {statusItemDefinitions.map((item) => (
               <article className="work-panel dashboard-status-card" key={item.id}>
                 <span>{item.label}</span>
-                <strong>{item.count}</strong>
+                <strong>{summaryLoading ? '-' : summary[item.countKey]}</strong>
                 <p>{item.description}</p>
               </article>
             ))}
