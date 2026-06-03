@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contract.mapper.UnderwritingRequestMapper">
+
+    <resultMap id="UnderwritingRequestMap" type="contract.dto.UnderwritingRequestResponse">
+        <id property="requestId" column="request_id"/>
+        <result property="policyNumber" column="policy_number"/>
+        <result property="requestReason" column="request_reason" javaType="enums.RequestReason"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="underwritingType" column="underwriting_type" javaType="enums.UnderwritingType"/>
+        <result property="requestStatus" column="request_status" javaType="enums.RequestStatus"/>
+        <result property="underwritingResult" column="underwriting_result" javaType="enums.UnderwritingResultType"/>
+        <result property="rejectionReason" column="rejection_reason" javaType="enums.RejectionReason"/>
+        <result property="surchargeCondition" column="surcharge_condition" javaType="enums.SurchargeCondition"/>
+        <result property="requestedAt" column="requested_at"/>
+        <result property="completedAt" column="completed_at"/>
+        <result property="cancelledAt" column="cancelled_at"/>
+    </resultMap>
+
+    <insert id="insertRequest">
+        INSERT INTO contract_underwriting_request (
+            request_id, policy_number, request_reason, source_id,
+            underwriting_type, request_status, requested_at
+        ) VALUES (
+            #{requestId}, #{policyNumber}, #{requestReason}, #{sourceId},
+            #{underwritingType}, #{requestStatus}, #{requestedAt}
+        )
+    </insert>
+
+    <select id="findById" resultMap="UnderwritingRequestMap">
+        SELECT
+            request_id, policy_number, request_reason, source_id,
+            underwriting_type, request_status, underwriting_result,
+            rejection_reason, surcharge_condition,
+            requested_at, completed_at, cancelled_at
+        FROM contract_underwriting_request
+        WHERE request_id = #{requestId}
+    </select>
+
+    <select id="findBySourceId" resultMap="UnderwritingRequestMap">
+        SELECT
+            request_id, policy_number, request_reason, source_id,
+            underwriting_type, request_status, underwriting_result,
+            rejection_reason, surcharge_condition,
+            requested_at, completed_at, cancelled_at
+        FROM contract_underwriting_request
+        WHERE source_id = #{sourceId}
+        ORDER BY requested_at DESC
+    </select>
+
+    <update id="updateCompleteResult">
+        UPDATE contract_underwriting_request
+        SET request_status = 'COMPLETED',
+            underwriting_result = #{underwritingResult},
+            rejection_reason = #{rejectionReason},
+            surcharge_condition = #{surchargeCondition},
+            completed_at = #{completedAt}
+        WHERE request_id = #{requestId}
+          AND request_status = 'PENDING'
+    </update>
+
+    <update id="updateStatusToCancelled">
+        UPDATE contract_underwriting_request
+        SET request_status = 'CANCELLED',
+            cancelled_at = #{cancelledAt}
+        WHERE request_id = #{requestId}
+          AND request_status = 'PENDING'
+    </update>
+</mapper>

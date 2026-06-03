@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contract.mapper.PayoutMapper">
+
+    <resultMap id="PayoutResponseMap" type="contract.dto.PayoutResponse">
+        <id property="payoutId" column="payout_id"/>
+        <result property="policyNumber" column="policy_number"/>
+        <result property="calculationBasis" column="calculation_basis" javaType="enums.CalculationBasis"/>
+        <result property="paymentType" column="payment_type" javaType="enums.PaymentType"/>
+        <result property="paidPremiumAmount" column="paid_premium_amount"/>
+        <result property="refundRate" column="refund_rate"/>
+        <result property="calculatedAmount" column="calculated_amount"/>
+        <result property="deductionItem" column="deduction_item"/>
+        <result property="deductionAmount" column="deduction_amount"/>
+        <result property="finalPaymentAmount" column="final_payment_amount"/>
+        <result property="processor" column="processor"/>
+        <result property="payoutStatus" column="payout_status" javaType="enums.PayoutStatus"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="approvedAt" column="approved_at"/>
+        <result property="paidAt" column="paid_at"/>
+        <result property="cancelledAt" column="cancelled_at"/>
+    </resultMap>
+
+    <insert id="insertPayout">
+        INSERT INTO contract_payout (
+            payout_id,
+            policy_number,
+            calculation_basis,
+            payment_type,
+            paid_premium_amount,
+            refund_rate,
+            calculated_amount,
+            deduction_item,
+            deduction_amount,
+            final_payment_amount,
+            payout_status,
+            created_at
+        ) VALUES (
+            #{payoutId},
+            #{policyNumber},
+            #{calculationBasis},
+            #{paymentType},
+            #{paidPremiumAmount},
+            #{refundRate},
+            #{calculatedAmount},
+            #{deductionItem},
+            #{deductionAmount},
+            #{finalPaymentAmount},
+            #{payoutStatus},
+            #{createdAt}
+        )
+    </insert>
+
+    <select id="findByPayoutId" resultMap="PayoutResponseMap">
+        SELECT
+            payout_id, policy_number, calculation_basis, payment_type,
+            paid_premium_amount, refund_rate, calculated_amount,
+            deduction_item, deduction_amount, final_payment_amount,
+            processor, payout_status,
+            created_at, approved_at, paid_at, cancelled_at
+        FROM contract_payout
+        WHERE payout_id = #{payoutId}
+    </select>
+
+    <select id="findByPolicyNumber" resultMap="PayoutResponseMap">
+        SELECT
+            payout_id, policy_number, calculation_basis, payment_type,
+            paid_premium_amount, refund_rate, calculated_amount,
+            deduction_item, deduction_amount, final_payment_amount,
+            processor, payout_status,
+            created_at, approved_at, paid_at, cancelled_at
+        FROM contract_payout
+        WHERE policy_number = #{policyNumber}
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="updateStatusToApproved">
+        UPDATE contract_payout
+        SET payout_status = #{nextStatus},
+            processor = #{processor},
+            approved_at = #{approvedAt}
+        WHERE payout_id = #{payoutId}
+          AND payout_status = #{currentStatus}
+    </update>
+
+    <update id="updateStatusToPaid">
+        UPDATE contract_payout
+        SET payout_status = #{nextStatus},
+            paid_at = #{paidAt}
+        WHERE payout_id = #{payoutId}
+          AND payout_status = #{currentStatus}
+    </update>
+
+    <update id="updateStatusToCancelled">
+        UPDATE contract_payout
+        SET payout_status = #{nextStatus},
+            cancelled_at = #{cancelledAt}
+        WHERE payout_id = #{payoutId}
+          AND payout_status IN ('CALCULATED', 'APPROVED')
+    </update>
+</mapper>

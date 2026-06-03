@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Configuration;
         "claim.mapper",
         "underwriting.mapper",
         "dashboard.mapper",
-        "product.mapper"
+        "product.mapper",
+        "contract.mapper"
 })
 public class MyBatisConfig {
 }

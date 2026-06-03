@@ -487,3 +487,160 @@ ALTER TABLE product_authorization ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
 
 CREATE INDEX IF NOT EXISTS idx_product_authorization_product_code
     ON product_authorization (product_code);
+
+CREATE TABLE IF NOT EXISTS contract (
+    policy_number VARCHAR(50) PRIMARY KEY,
+    product_code VARCHAR(50) NOT NULL,
+    contract_status VARCHAR(50) NOT NULL,
+    payment_cycle VARCHAR(50) NOT NULL,
+    premium_amount NUMERIC(15,2) NOT NULL,
+    installment_count INTEGER NOT NULL,
+    has_unpaid_premium BOOLEAN NOT NULL,
+    contract_start_date DATE NOT NULL,
+    contract_end_date DATE NOT NULL,
+    insured_name VARCHAR(100) NOT NULL,
+    insured_rrn VARCHAR(20) NOT NULL,
+    insured_contact VARCHAR(50) NOT NULL,
+    account_number VARCHAR(50),
+    account_bank VARCHAR(50),
+    created_at TIMESTAMP NOT NULL
+);
+
+INSERT INTO contract (
+    policy_number, product_code, contract_status, payment_cycle,
+    premium_amount, installment_count, has_unpaid_premium,
+    contract_start_date, contract_end_date,
+    insured_name, insured_rrn, insured_contact,
+    account_number, account_bank, created_at
+) VALUES
+    ('POL-2024-000001', 'PRD-AUTO-001', 'ACTIVE', 'MONTHLY',
+     120000.00, 12, FALSE,
+     '2024-01-15', '2027-01-15',
+     '계약테스트1', '900101-1******', '010-0000-0001',
+     'TEST-ACCOUNT-0001', 'SHINHAN', '2024-01-15 10:00:00'),
+    ('POL-2023-000099', 'PRD-LIFE-002', 'ACTIVE', 'ANNUALLY',
+     480000.00, 1, FALSE,
+     '2023-06-01', '2026-06-01',
+     '계약테스트2', '850515-2******', '010-0000-0002',
+     'TEST-ACCOUNT-0002', 'NH', '2023-06-01 09:30:00'),
+    ('POL-2022-000050', 'PRD-FIRE-003', 'EXPIRED', 'QUARTERLY',
+     200000.00, 4, FALSE,
+     '2022-01-01', '2025-01-01',
+     '계약테스트3', '770808-1******', '010-0000-0003',
+     'TEST-ACCOUNT-0003', 'KB', '2022-01-01 14:20:00'),
+    ('POL-2024-000111', 'PRD-AUTO-001', 'SUSPENDED', 'MONTHLY',
+     150000.00, 12, TRUE,
+     '2024-03-01', '2027-03-01',
+     '계약테스트4', '880920-2******', '010-0000-0004',
+     'TEST-ACCOUNT-0004', 'SHINHAN', '2024-03-01 11:00:00')
+ON CONFLICT (policy_number) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS contract_payout (
+    payout_id VARCHAR(50) PRIMARY KEY,
+    policy_number VARCHAR(50) NOT NULL,
+    calculation_basis VARCHAR(50) NOT NULL,
+    payment_type VARCHAR(50) NOT NULL,
+    paid_premium_amount NUMERIC(15,2) NOT NULL,
+    refund_rate NUMERIC(7,4) NOT NULL,
+    calculated_amount NUMERIC(15,2) NOT NULL,
+    deduction_item VARCHAR(255),
+    deduction_amount NUMERIC(15,2) NOT NULL,
+    final_payment_amount NUMERIC(15,2) NOT NULL,
+    processor VARCHAR(50),
+    payout_status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    approved_at TIMESTAMP,
+    paid_at TIMESTAMP,
+    cancelled_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_contract_payout_policy_number
+    ON contract_payout (policy_number);
+
+CREATE TABLE IF NOT EXISTS contract_payment_collection (
+    collection_id VARCHAR(50) PRIMARY KEY,
+    policy_number VARCHAR(50) NOT NULL,
+    installment_no INTEGER NOT NULL,
+    due_date DATE NOT NULL,
+    planned_amount NUMERIC(15,2) NOT NULL,
+    collected_amount NUMERIC(15,2) NOT NULL,
+    unpaid_amount NUMERIC(15,2) NOT NULL,
+    late_fee NUMERIC(15,2) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    processing_result VARCHAR(50) NOT NULL,
+    collected_at TIMESTAMP NOT NULL,
+    transfer_type VARCHAR(50),
+    transferred_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_contract_payment_collection_policy_number
+    ON contract_payment_collection (policy_number);
+
+CREATE TABLE IF NOT EXISTS contract_reinstatement (
+    reinstatement_id VARCHAR(50) PRIMARY KEY,
+    policy_number VARCHAR(50) NOT NULL,
+    reinstatement_reason VARCHAR(50) NOT NULL,
+    desired_date DATE NOT NULL,
+    has_health_changed BOOLEAN NOT NULL,
+    last_paid_date DATE,
+    unpaid_installment_count INTEGER NOT NULL,
+    premium_per_installment NUMERIC(15,2) NOT NULL,
+    unpaid_premium NUMERIC(15,2) NOT NULL,
+    reinstatement_status VARCHAR(50) NOT NULL,
+    underwriting_request_id VARCHAR(50),
+    applied_at TIMESTAMP NOT NULL,
+    unpaid_settled_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    cancelled_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_contract_reinstatement_policy_number
+    ON contract_reinstatement (policy_number);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_contract_reinstatement_active_policy
+    ON contract_reinstatement (policy_number)
+    WHERE reinstatement_status IN ('APPLIED', 'UNPAID_SETTLED');
+
+CREATE TABLE IF NOT EXISTS contract_underwriting_request (
+    request_id VARCHAR(50) PRIMARY KEY,
+    policy_number VARCHAR(50) NOT NULL,
+    request_reason VARCHAR(50) NOT NULL,
+    source_id VARCHAR(50) NOT NULL,
+    underwriting_type VARCHAR(50),
+    request_status VARCHAR(50) NOT NULL,
+    underwriting_result VARCHAR(50),
+    rejection_reason VARCHAR(50),
+    surcharge_condition VARCHAR(50),
+    requested_at TIMESTAMP NOT NULL,
+    completed_at TIMESTAMP,
+    cancelled_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_contract_underwriting_request_policy_number
+    ON contract_underwriting_request (policy_number);
+
+CREATE INDEX IF NOT EXISTS idx_contract_underwriting_request_source_id
+    ON contract_underwriting_request (source_id);
+
+CREATE TABLE IF NOT EXISTS contract_endorsement (
+    endorsement_id VARCHAR(50) PRIMARY KEY,
+    policy_number VARCHAR(50) NOT NULL,
+    endorsement_type VARCHAR(50) NOT NULL,
+    change_reason VARCHAR(50) NOT NULL,
+    previous_content TEXT NOT NULL,
+    new_content TEXT NOT NULL,
+    endorsement_status VARCHAR(50) NOT NULL,
+    underwriting_request_id VARCHAR(50),
+    applied_at TIMESTAMP NOT NULL,
+    approved_at TIMESTAMP,
+    rejected_at TIMESTAMP,
+    cancelled_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_contract_endorsement_policy_number
+    ON contract_endorsement (policy_number);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_contract_endorsement_active_policy
+    ON contract_endorsement (policy_number)
+    WHERE endorsement_status = 'APPLIED';

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contract.mapper.ContractMapper">
+
+    <resultMap id="ContractResultMap" type="model.contract.Contract">
+        <id property="policyNumber" column="policy_number"/>
+        <result property="productCode" column="product_code"/>
+        <result property="contractStatus" column="contract_status" javaType="enums.ContractStatus"/>
+        <result property="paymentCycle" column="payment_cycle" javaType="enums.PaymentCycle"/>
+        <result property="premiumAmount" column="premium_amount"/>
+        <result property="installmentCount" column="installment_count"/>
+        <result property="hasUnpaidPremium" column="has_unpaid_premium"/>
+        <result property="contractStartDate" column="contract_start_date"/>
+        <result property="contractEndDate" column="contract_end_date"/>
+        <result property="insuredName" column="insured_name"/>
+        <result property="insuredRrn" column="insured_rrn"/>
+        <result property="insuredContact" column="insured_contact"/>
+        <result property="accountNumber" column="account_number"/>
+        <result property="accountBank" column="account_bank"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findByPolicyNumber" resultMap="ContractResultMap">
+        SELECT
+            policy_number,
+            product_code,
+            contract_status,
+            payment_cycle,
+            premium_amount,
+            installment_count,
+            has_unpaid_premium,
+            contract_start_date,
+            contract_end_date,
+            insured_name,
+            insured_rrn,
+            insured_contact,
+            account_number,
+            account_bank,
+            created_at
+        FROM contract
+        WHERE policy_number = #{policyNumber}
+    </select>
+</mapper>

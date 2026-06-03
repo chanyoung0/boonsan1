@@ -26,6 +26,7 @@ const menuGroups = [
     id: 'contract',
     label: '계약 관리',
     items: [
+      { id: 'contract-search', label: '계약 조회' },
       { id: 'contract-endorsement', label: '배서 관리' },
       { id: 'contract-revival', label: '부활 관리' },
       { id: 'contract-payment', label: '제지급금 관리' },
@@ -121,9 +122,15 @@ function getMenuIdFromPath(pathname: string) {
   if (pathname === '/underwriting/coinsurance') return 'underwriting-coinsurance';
   if (pathname === '/underwriting/reinsurance') return 'underwriting-reinsurance';
   if (pathname === '/underwriting/policy') return 'underwriting-policy';
+  if (pathname === '/contracts/search' || pathname === '/contracts') return 'contract-search';
+  if (pathname === '/contracts/endorsements') return 'contract-endorsement';
+  if (pathname === '/contracts/reinstatements') return 'contract-revival';
+  if (pathname === '/contracts/payouts') return 'contract-payment';
+  if (pathname === '/contracts/payment-collections') return 'contract-installment';
+  if (pathname === '/contracts/maturity') return 'contract-maturity';
   if (pathname.startsWith('/claims/')) return 'claim-accident';
   if (pathname.startsWith('/underwriting/')) return 'underwriting-review';
-  if (pathname.startsWith('/contract/')) return 'contract-endorsement';
+  if (pathname.startsWith('/contracts/')) return 'contract-search';
   if (pathname.startsWith('/products/')) return 'product-design';
   if (pathname.startsWith('/product/')) return 'product-design';
   return null;
@@ -142,5 +149,11 @@ function getMenuHref(itemId: string) {
   if (itemId === 'underwriting-coinsurance') return '/underwriting/coinsurance';
   if (itemId === 'underwriting-reinsurance') return '/underwriting/reinsurance';
   if (itemId === 'underwriting-policy') return '/underwriting/policy';
+  if (itemId === 'contract-search') return '/contracts/search';
+  if (itemId === 'contract-endorsement') return '/contracts/endorsements';
+  if (itemId === 'contract-revival') return '/contracts/reinstatements';
+  if (itemId === 'contract-payment') return '/contracts/payouts';
+  if (itemId === 'contract-installment') return '/contracts/payment-collections';
+  if (itemId === 'contract-maturity') return '/contracts/maturity';
   return '#';
 }

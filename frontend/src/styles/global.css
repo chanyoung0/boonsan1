@@ -1541,6 +1541,200 @@ a {
   font-size: 13px;
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.form-grid label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.form-grid label span {
+  color: #3b4858;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font: inherit;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.form-grid textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-grid .full-row,
+.full-row {
+  grid-column: 1 / -1;
+}
+
+.payout-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 22px 22px;
+}
+
+.payout-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  padding: 16px 18px;
+}
+
+.payout-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.payout-row-header > div,
+.payout-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.payout-row-header strong {
+  font-size: 15px;
+  color: var(--primary-dark);
+}
+
+.payout-row-sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.payout-row-actions {
+  margin-top: 12px;
+}
+
+.payout-row-actions input,
+.payout-row-actions select {
+  min-height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: inherit;
+}
+
+.notice-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  border-left: 3px solid var(--primary);
+}
+
+.notice-box strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.notice-box p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.notice-box small {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface-strong);
+  color: var(--primary-dark);
+  text-transform: uppercase;
+}
+
+.status-tag.calculated,
+.status-tag.applied,
+.status-tag.pending {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.status-tag.approved,
+.status-tag.completed,
+.status-tag.paid,
+.status-tag.success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-tag.unpaid_settled,
+.status-tag.in_progress,
+.status-tag.partial {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.status-tag.rejected,
+.status-tag.failed {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.status-tag.cancelled {
+  background: var(--surface-strong);
+  color: var(--muted);
+}
+
+.product-detail-wide .detail-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.product-detail-wide .detail-item strong {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.product-detail-wide .detail-item strong.mono {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
 @media (max-width: 1040px) {
   .content-grid {
     grid-template-columns: 1fr;
@@ -1562,6 +1756,10 @@ a {
 
   .dashboard-hero-status {
     min-width: 0;
+  }
+
+  .product-detail-wide .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dashboard-quick-grid,
@@ -1621,6 +1819,7 @@ a {
   .workflow-steps,
   .investigation-steps,
   .detail-grid,
+  .form-grid,
   .field-grid.two,
   .field-grid.three,
   .side-stack,
@@ -1656,6 +1855,11 @@ a {
 
   .search-row,
   .form-actions {
+    flex-direction: column;
+  }
+
+  .payout-row-header {
+    align-items: flex-start;
     flex-direction: column;
   }
 

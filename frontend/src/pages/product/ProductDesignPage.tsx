@@ -41,9 +41,14 @@ export function ProductDesignPage() {
                 <p>상품 설계를 저장하면 백엔드가 발급한 상품 코드가 여기에 표시됩니다.</p>
               </aside>
             )}
-            {registrationResult && <ProductDetailCard data={registrationResult} />}
           </div>
         </section>
+
+        {registrationResult && (
+          <div className="product-detail-wide">
+            <ProductDetailCard data={registrationResult} />
+          </div>
+        )}
 
         <ProductSearchBox />
       </div>
