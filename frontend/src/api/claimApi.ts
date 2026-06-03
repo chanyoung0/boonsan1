@@ -3,11 +3,15 @@ import type {
   AccidentReportCreateRequest,
   AccidentReportResponse,
   AdjusterOpinionRequest,
+  ClaimAlternativeFlowResponse,
   DamageAssessmentRequest,
+  DamageInvestigationRejectRequest,
   DamageInvestigationResultResponse,
   DamageInvestigationStartResponse,
   FieldInvestigationMaterialResponse,
+  FraudInvestigationRequest,
   InvestigationApprovalRequest,
+  OutsourceInvestigationRequest,
   PaymentApprovalDocumentResponse,
   PaymentApprovalDraftResponse,
   ObjectionCreateRequest,
@@ -80,6 +84,51 @@ export function payPaymentApprovalDocument(accidentNumber: string) {
     {
       method: 'PATCH'
     }
+  );
+}
+
+export function rejectInsuranceProcessing(accidentNumber: string, request: DamageInvestigationRejectRequest) {
+  return apiRequest<ClaimAlternativeFlowResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/investigation/reject`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function requestFraudInvestigation(accidentNumber: string, request: FraudInvestigationRequest) {
+  return apiRequest<ClaimAlternativeFlowResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/investigation/fraud-request`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function requestOutsourceInvestigation(accidentNumber: string, request: OutsourceInvestigationRequest) {
+  return apiRequest<ClaimAlternativeFlowResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/investigation/outsource`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    }
+  );
+}
+
+export function completeOutsourceInvestigation(accidentNumber: string) {
+  return apiRequest<ClaimAlternativeFlowResponse>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/investigation/outsource/complete`,
+    {
+      method: 'PATCH'
+    }
+  );
+}
+
+export function getClaimAlternativeFlowHistory(accidentNumber: string) {
+  return apiRequest<ClaimAlternativeFlowResponse[]>(
+    `/api/claims/accident-reports/${encodeURIComponent(accidentNumber)}/investigation/actions`
   );
 }
 

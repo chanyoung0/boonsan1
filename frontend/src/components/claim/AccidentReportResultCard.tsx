@@ -40,6 +40,13 @@ export function AccidentReportResultCard({ data }: AccidentReportResultCardProps
         <SummaryItem icon={<ClipboardList size={17} />} label="증권번호" value={data.policyNumber} />
         <SummaryItem icon={<FileText size={17} />} label="사고 유형" value={getAccidentTypeLabel(data.accidentType)} />
         <SummaryItem icon={<CalendarDays size={17} />} label="사고 일시" value={formatDateTime(data.accidentAt)} />
+        {data.documentSubmissionDeadline && (
+          <SummaryItem
+            icon={<CalendarDays size={17} />}
+            label="서류 제출 기한"
+            value={formatDateTime(data.documentSubmissionDeadline)}
+          />
+        )}
         <div className="summary-item">
           <dt>사고 상태</dt>
           <dd>
@@ -75,7 +82,7 @@ function SummaryItem({ icon, label, value }: { icon: ReactNode; label: string; v
   );
 }
 
-function DocumentItem({ label, value }: { label: string; value: string | null }) {
+function DocumentItem({ label, value }: { label: string | null; value: string | null }) {
   const hasFileName = Boolean(value?.trim());
   const displayValue = hasFileName ? value!.trim() : '미등록';
 

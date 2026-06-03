@@ -1,11 +1,16 @@
-import { KeyboardEvent, useMemo, useState } from 'react';
+import { type FormEvent, type KeyboardEvent, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import {
+  completeOutsourceInvestigation,
   createPaymentApprovalDraft,
   getAccidentReportForInvestigation,
+  getClaimAlternativeFlowHistory,
   getDamageInvestigationResult,
   getFieldInvestigationMaterials,
+  rejectInsuranceProcessing,
+  requestFraudInvestigation,
   requestInvestigationApproval,
+  requestOutsourceInvestigation,
   saveAdjusterOpinion
 } from '../../api/claimApi';
 import { ApiError } from '../../api/apiClient';
@@ -22,6 +27,7 @@ import { PaymentApprovalDraftCard } from '../../components/claim/PaymentApproval
 import { AppLayout } from '../../components/layout/AppLayout';
 import type {
   AdjusterOpinionRequest,
+  ClaimAlternativeFlowResponse,
   DamageAssessmentRequest,
   DamageInvestigationResultResponse,
   DamageInvestigationStartResponse,
@@ -30,8 +36,37 @@ import type {
   PaymentApprovalDocumentResponse,
   PaymentApprovalDraftResponse
 } from '../../types/claim';
+import { getClaimAlternativeActionLabel } from '../../types/claim';
 
-type LoadingAction = 'lookup' | 'materials' | 'draft' | 'opinion' | 'approval' | null;
+type LoadingAction =
+  | 'lookup'
+  | 'materials'
+  | 'draft'
+  | 'opinion'
+  | 'approval'
+  | 'reject'
+  | 'fraud'
+  | 'outsource'
+  | 'outsourceComplete'
+  | 'history'
+  | null;
+
+const emptyRejectForm = {
+  employeeNo: '',
+  rejectionReason: ''
+};
+
+const emptyFraudForm = {
+  employeeNo: '',
+  confirmation: '실시한다'
+};
+
+const emptyOutsourceForm = {
+  employeeNo: '',
+  partnerName: '',
+  materialChecklist: '보험계약사항, 청구서류, 진단서, 사고경위서, 현장사진, 블랙박스, 수리견적서',
+  requestDetails: ''
+};
 
 export function DamageInvestigationPage() {
   const [accidentNumberInput, setAccidentNumberInput] = useState('');
@@ -40,6 +75,10 @@ export function DamageInvestigationPage() {
   const [draft, setDraft] = useState<PaymentApprovalDraftResponse | null>(null);
   const [existingResult, setExistingResult] = useState<DamageInvestigationResultResponse | null>(null);
   const [finalDocument, setFinalDocument] = useState<PaymentApprovalDocumentResponse | null>(null);
+  const [alternativeHistory, setAlternativeHistory] = useState<ClaimAlternativeFlowResponse[]>([]);
+  const [rejectForm, setRejectForm] = useState(emptyRejectForm);
+  const [fraudForm, setFraudForm] = useState(emptyFraudForm);
+  const [outsourceForm, setOutsourceForm] = useState(emptyOutsourceForm);
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -71,11 +110,13 @@ export function DamageInvestigationPage() {
     setDraft(null);
     setExistingResult(null);
     setFinalDocument(null);
+    setAlternativeHistory([]);
     try {
       const response = await getAccidentReportForInvestigation(accidentNumber);
       setAccident(response);
       setAccidentNumberInput(response.accidentNumber);
       await loadExistingResult(response.accidentNumber);
+      await loadAlternativeHistory(response.accidentNumber, false);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '사고 접수 내용을 조회할 수 없습니다.');
     } finally {
@@ -106,6 +147,22 @@ export function DamageInvestigationPage() {
     }
   };
 
+  const loadAlternativeHistory = async (accidentNumber: string, showMessage = true) => {
+    try {
+      const history = await getClaimAlternativeFlowHistory(accidentNumber);
+      setAlternativeHistory(history);
+      if (showMessage) {
+        setSuccess('Alternative Flow 이력을 조회했습니다.');
+      }
+    } catch (caught) {
+      if (caught instanceof ApiError && caught.status === 404) {
+        setAlternativeHistory([]);
+        return;
+      }
+      throw caught;
+    }
+  };
+
   const handleLoadMaterials = async () => {
     if (!accident) return;
 
@@ -117,6 +174,113 @@ export function DamageInvestigationPage() {
       setSuccess('현장조사 자료를 조회했습니다.');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '현장조사 자료를 조회할 수 없습니다.');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleRejectInsuranceProcessing = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!accident) return;
+    if (!rejectForm.employeeNo.trim() || !rejectForm.rejectionReason.trim()) {
+      setError('담당자 번호와 반려 사유를 입력하세요.');
+      return;
+    }
+
+    setLoadingAction('reject');
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await rejectInsuranceProcessing(accident.accidentNumber, {
+        employeeNo: rejectForm.employeeNo.trim(),
+        rejectionReason: rejectForm.rejectionReason.trim()
+      });
+      setAccident((prev) => (prev ? { ...prev, accidentStatus: 'REJECTED' } : prev));
+      setSuccess(response.resultMessage || '보험 처리 반려가 저장되었습니다.');
+      setRejectForm(emptyRejectForm);
+      await loadAlternativeHistory(accident.accidentNumber, false);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '보험 처리 반려 저장에 실패했습니다.');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleRequestFraudInvestigation = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!accident) return;
+    if (!fraudForm.employeeNo.trim() || !fraudForm.confirmation.trim()) {
+      setError('담당자 번호와 실시 여부를 입력하세요.');
+      return;
+    }
+
+    setLoadingAction('fraud');
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await requestFraudInvestigation(accident.accidentNumber, {
+        employeeNo: fraudForm.employeeNo.trim(),
+        confirmation: fraudForm.confirmation.trim()
+      });
+      setAccident((prev) => (prev ? { ...prev, accidentStatus: 'FRAUD_INVESTIGATION' } : prev));
+      setSuccess(response.resultMessage || '보험사기 조사 요청이 저장되었습니다.');
+      setFraudForm(emptyFraudForm);
+      await loadAlternativeHistory(accident.accidentNumber, false);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '보험사기 조사 요청에 실패했습니다.');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleRequestOutsourceInvestigation = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!accident) return;
+    if (
+      !outsourceForm.employeeNo.trim() ||
+      !outsourceForm.partnerName.trim() ||
+      !outsourceForm.materialChecklist.trim() ||
+      !outsourceForm.requestDetails.trim()
+    ) {
+      setError('담당자 번호, 위탁 업체, 전달 서류, 위탁 요청 내용을 모두 입력하세요.');
+      return;
+    }
+
+    setLoadingAction('outsource');
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await requestOutsourceInvestigation(accident.accidentNumber, {
+        employeeNo: outsourceForm.employeeNo.trim(),
+        partnerName: outsourceForm.partnerName.trim(),
+        materialChecklist: outsourceForm.materialChecklist.trim(),
+        requestDetails: outsourceForm.requestDetails.trim()
+      });
+      setAccident((prev) => (prev ? { ...prev, accidentStatus: 'OUTSOURCED_INVESTIGATION' } : prev));
+      setSuccess(response.resultMessage || '손해조사 위탁 요청이 저장되었습니다.');
+      await loadAlternativeHistory(accident.accidentNumber, false);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '손해조사 위탁 요청에 실패했습니다.');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleCompleteOutsourceInvestigation = async () => {
+    if (!accident) return;
+
+    setLoadingAction('outsourceComplete');
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await completeOutsourceInvestigation(accident.accidentNumber);
+      const refreshed = await getAccidentReportForInvestigation(accident.accidentNumber);
+      setAccident(refreshed);
+      setSuccess(response.resultMessage || '위탁 손해조사 결과가 반영되었습니다.');
+      setOutsourceForm(emptyOutsourceForm);
+      await loadAlternativeHistory(accident.accidentNumber, false);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '위탁 손해조사 완료 처리에 실패했습니다.');
     } finally {
       setLoadingAction(null);
     }
@@ -232,6 +396,159 @@ export function DamageInvestigationPage() {
 
         {accident && <AccidentReportInvestigationSummary data={accident} />}
 
+        {accident && (
+          <section className="work-panel form-panel">
+            <div className="panel-header">
+              <div>
+                <h2>손해조사 Alternative Flow</h2>
+                <p>시나리오 기준 반려, 보험사기 조사 요청, 외부 손해조사 위탁을 처리합니다.</p>
+              </div>
+            </div>
+
+            <div className="field-grid three">
+              <form className="form-section" onSubmit={handleRejectInsuranceProcessing}>
+                <h3>보험 처리 반려</h3>
+                <label className="field full">
+                  <span>담당자 번호</span>
+                  <input
+                    value={rejectForm.employeeNo}
+                    onChange={(event) => setRejectForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
+                    placeholder="EMP-001"
+                    disabled={loadingAction === 'reject'}
+                  />
+                </label>
+                <label className="field full">
+                  <span>반려 사유</span>
+                  <textarea
+                    value={rejectForm.rejectionReason}
+                    onChange={(event) => setRejectForm((prev) => ({ ...prev, rejectionReason: event.target.value }))}
+                    placeholder="계약 보장 범위와 관련 없는 사고로 판단"
+                    disabled={loadingAction === 'reject'}
+                  />
+                </label>
+                <button className="button secondary" type="submit" disabled={loadingAction === 'reject'}>
+                  {loadingAction === 'reject' ? '반려 처리 중...' : '보험 처리 반려'}
+                </button>
+              </form>
+
+              <form className="form-section" onSubmit={handleRequestFraudInvestigation}>
+                <h3>보험사기 조사 요청</h3>
+                <label className="field full">
+                  <span>담당자 번호</span>
+                  <input
+                    value={fraudForm.employeeNo}
+                    onChange={(event) => setFraudForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
+                    placeholder="EMP-001"
+                    disabled={loadingAction === 'fraud'}
+                  />
+                </label>
+                <label className="field full">
+                  <span>실시 여부</span>
+                  <input
+                    value={fraudForm.confirmation}
+                    onChange={(event) => setFraudForm((prev) => ({ ...prev, confirmation: event.target.value }))}
+                    placeholder="실시한다"
+                    disabled={loadingAction === 'fraud'}
+                  />
+                </label>
+                <button className="button secondary" type="submit" disabled={loadingAction === 'fraud'}>
+                  {loadingAction === 'fraud' ? '요청 중...' : '보험사기 조사 요청'}
+                </button>
+              </form>
+
+              <form className="form-section" onSubmit={handleRequestOutsourceInvestigation}>
+                <h3>손해조사 위탁</h3>
+                <label className="field full">
+                  <span>담당자 번호</span>
+                  <input
+                    value={outsourceForm.employeeNo}
+                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
+                    placeholder="EMP-001"
+                    disabled={loadingAction === 'outsource'}
+                  />
+                </label>
+                <label className="field full">
+                  <span>위탁 업체</span>
+                  <input
+                    value={outsourceForm.partnerName}
+                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, partnerName: event.target.value }))}
+                    placeholder="대한손해사정"
+                    disabled={loadingAction === 'outsource'}
+                  />
+                </label>
+                <label className="field full">
+                  <span>전달 서류</span>
+                  <textarea
+                    value={outsourceForm.materialChecklist}
+                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, materialChecklist: event.target.value }))}
+                    disabled={loadingAction === 'outsource'}
+                  />
+                </label>
+                <label className="field full">
+                  <span>위탁 요청 내용</span>
+                  <textarea
+                    value={outsourceForm.requestDetails}
+                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, requestDetails: event.target.value }))}
+                    placeholder="자체 조사 범위를 초과하여 외부 손해사정 위탁 요청"
+                    disabled={loadingAction === 'outsource'}
+                  />
+                </label>
+                <div className="form-actions">
+                  <button className="button secondary" type="submit" disabled={loadingAction === 'outsource'}>
+                    {loadingAction === 'outsource' ? '위탁 요청 중...' : '손해조사 위탁'}
+                  </button>
+                  <button
+                    className="button primary"
+                    type="button"
+                    onClick={handleCompleteOutsourceInvestigation}
+                    disabled={loadingAction === 'outsourceComplete'}
+                  >
+                    {loadingAction === 'outsourceComplete' ? '완료 처리 중...' : '위탁 결과 반영'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        )}
+
+        {accident && (
+          <section className="work-panel detail-panel">
+            <div className="panel-header detail-title">
+              <div>
+                <h2>Alternative Flow 처리 이력</h2>
+                <p>반려, 보험사기 조사, 위탁 처리 결과를 조회합니다.</p>
+              </div>
+              <button
+                className="button secondary"
+                type="button"
+                onClick={() => loadAlternativeHistory(accident.accidentNumber)}
+                disabled={loadingAction === 'history'}
+              >
+                {loadingAction === 'history' ? '조회 중...' : '이력 새로고침'}
+              </button>
+            </div>
+            {alternativeHistory.length === 0 ? (
+              <p className="empty-value">저장된 Alternative Flow 이력이 없습니다.</p>
+            ) : (
+              <div className="document-list">
+                {alternativeHistory.map((item) => (
+                  <div className="document-item" key={item.actionId}>
+                    <div>
+                      <span>{getClaimAlternativeActionLabel(item.actionType)}</span>
+                      <strong>{item.resultMessage}</strong>
+                      <em>
+                        담당자 {item.employeeNo} · {formatDateTime(item.createdAt)}
+                      </em>
+                      {item.reason && <p>{item.reason}</p>}
+                      {item.partnerName && <p>위탁 업체: {item.partnerName}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         <FieldInvestigationMaterialCard
           materials={materials}
           isLoading={loadingAction === 'materials'}
@@ -281,4 +598,14 @@ export function DamageInvestigationPage() {
       </div>
     </AppLayout>
   );
+}
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }

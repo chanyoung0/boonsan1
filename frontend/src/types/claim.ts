@@ -1,4 +1,4 @@
-export type AccidentType = 'VEHICLE' | 'INJURY' | 'PROPERTY' | 'FIRE' | 'ETC';
+export type AccidentType = 'VEHICLE' | 'INJURY' | 'PROPERTY' | 'FIRE' | 'ETC' | 'PERSONAL_INJURY' | 'NATURAL_DISASTER';
 
 export type AccidentStatus =
   | 'RECEIVED'
@@ -14,6 +14,12 @@ export type AccidentStatus =
   | 'TRANSFERRED_TO_LEGAL'
   | 'OUTSOURCED_INVESTIGATION'
   | 'TEMP_SAVED';
+
+export type ClaimAlternativeActionType =
+  | 'INVESTIGATION_REJECTED'
+  | 'FRAUD_INVESTIGATION_REQUESTED'
+  | 'OUTSOURCE_INVESTIGATION_REQUESTED'
+  | 'OUTSOURCE_INVESTIGATION_COMPLETED';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -31,6 +37,7 @@ export interface AccidentReportCreateRequest {
   accidentReportDocumentName: string | null;
   medicalCertificateFileName: string | null;
   claimDocumentName: string | null;
+  submitDocumentsLater?: boolean;
 }
 
 export interface AccidentReportResponse {
@@ -44,6 +51,7 @@ export interface AccidentReportResponse {
   accidentReportDocumentName: string | null;
   medicalCertificateFileName: string | null;
   claimDocumentName: string | null;
+  documentSubmissionDeadline?: string | null;
   createdAt?: string;
 }
 
@@ -58,12 +66,43 @@ export interface DamageInvestigationStartResponse {
   accidentReportDocumentName: string | null;
   medicalCertificateFileName: string | null;
   claimDocumentName: string | null;
+  documentSubmissionDeadline?: string | null;
 }
 
 export interface FieldInvestigationMaterialResponse {
   accidentScenePhotoName: string;
   blackBoxVideoName: string;
   repairEstimateFileName: string;
+}
+
+export interface DamageInvestigationRejectRequest {
+  employeeNo: string;
+  rejectionReason: string;
+}
+
+export interface FraudInvestigationRequest {
+  employeeNo: string;
+  confirmation: string;
+}
+
+export interface OutsourceInvestigationRequest {
+  employeeNo: string;
+  partnerName: string;
+  materialChecklist: string;
+  requestDetails: string;
+}
+
+export interface ClaimAlternativeFlowResponse {
+  actionId: string;
+  accidentNumber: string;
+  actionType: ClaimAlternativeActionType;
+  employeeNo: string;
+  reason: string | null;
+  partnerName: string | null;
+  materialChecklist: string | null;
+  resultMessage: string;
+  createdAt: string;
+  completedAt: string | null;
 }
 
 export interface DamageAssessmentRequest {
@@ -218,7 +257,9 @@ export const ACCIDENT_TYPE_LABELS: Record<AccidentType, string> = {
   INJURY: '상해 사고',
   PROPERTY: '재물 손해',
   FIRE: '화재 사고',
-  ETC: '기타'
+  ETC: '기타',
+  PERSONAL_INJURY: '인적 피해',
+  NATURAL_DISASTER: '자연재해'
 };
 
 export const ACCIDENT_STATUS_LABELS: Record<AccidentStatus, string> = {
@@ -237,10 +278,21 @@ export const ACCIDENT_STATUS_LABELS: Record<AccidentStatus, string> = {
   TEMP_SAVED: '임시저장'
 };
 
+export const CLAIM_ALTERNATIVE_ACTION_LABELS: Record<ClaimAlternativeActionType, string> = {
+  INVESTIGATION_REJECTED: '보험 처리 반려',
+  FRAUD_INVESTIGATION_REQUESTED: '보험사기 조사 요청',
+  OUTSOURCE_INVESTIGATION_REQUESTED: '손해조사 위탁 요청',
+  OUTSOURCE_INVESTIGATION_COMPLETED: '손해조사 위탁 완료'
+};
+
 export function getAccidentTypeLabel(type: AccidentType) {
   return ACCIDENT_TYPE_LABELS[type] ?? type;
 }
 
 export function getAccidentStatusLabel(status: AccidentStatus) {
   return ACCIDENT_STATUS_LABELS[status] ?? status;
+}
+
+export function getClaimAlternativeActionLabel(actionType: ClaimAlternativeActionType) {
+  return CLAIM_ALTERNATIVE_ACTION_LABELS[actionType] ?? actionType;
 }

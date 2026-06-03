@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
-import { FileText, Info, RotateCcw, Save } from 'lucide-react';
+import { Clock, FileText, Info, RotateCcw, Save } from 'lucide-react';
 import { createAccidentReport } from '../../api/claimApi';
 import type { AccidentReportCreateRequest, AccidentReportResponse, AccidentType } from '../../types/claim';
 import { ACCIDENT_TYPE_LABELS } from '../../types/claim';
@@ -17,9 +17,12 @@ const emptyForm = {
   damageDetails: '',
   accidentReportDocumentName: '',
   medicalCertificateFileName: '',
-  claimDocumentName: ''
+  claimDocumentName: '',
+  submitDocumentsLater: false
 };
 
+type AccidentReportFormData = typeof emptyForm;
+type TextFormField = Exclude<keyof AccidentReportFormData, 'submitDocumentsLater'>;
 type AttachmentField = 'accidentReportDocumentName' | 'medicalCertificateFileName' | 'claimDocumentName';
 
 const attachmentFields: Array<{ name: AttachmentField; label: string }> = [
@@ -38,8 +41,26 @@ export function AccidentReportForm({ onSuccess }: AccidentReportFormProps) {
     claimDocumentName: null
   });
 
-  const updateField = (name: keyof typeof formData, value: string) => {
+  const updateField = (name: TextFormField, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const updateSubmitDocumentsLater = (checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      submitDocumentsLater: checked,
+      accidentReportDocumentName: checked ? '' : prev.accidentReportDocumentName,
+      medicalCertificateFileName: checked ? '' : prev.medicalCertificateFileName,
+      claimDocumentName: checked ? '' : prev.claimDocumentName
+    }));
+    if (checked) {
+      attachmentFields.forEach(({ name }) => {
+        const input = fileInputRefs.current[name];
+        if (input) {
+          input.value = '';
+        }
+      });
+    }
   };
 
   const handleFileChange = (name: AttachmentField, event: ChangeEvent<HTMLInputElement>) => {
@@ -76,9 +97,14 @@ export function AccidentReportForm({ onSuccess }: AccidentReportFormProps) {
       accidentDescription: formData.accidentDescription.trim(),
       damageDetails: formData.damageDetails.trim(),
       accidentType: formData.accidentType,
-      accidentReportDocumentName: normalizeOptional(formData.accidentReportDocumentName),
-      medicalCertificateFileName: normalizeOptional(formData.medicalCertificateFileName),
-      claimDocumentName: normalizeOptional(formData.claimDocumentName)
+      accidentReportDocumentName: formData.submitDocumentsLater
+        ? null
+        : normalizeOptional(formData.accidentReportDocumentName),
+      medicalCertificateFileName: formData.submitDocumentsLater
+        ? null
+        : normalizeOptional(formData.medicalCertificateFileName),
+      claimDocumentName: formData.submitDocumentsLater ? null : normalizeOptional(formData.claimDocumentName),
+      submitDocumentsLater: formData.submitDocumentsLater
     };
 
     setIsSubmitting(true);
@@ -190,6 +216,27 @@ export function AccidentReportForm({ onSuccess }: AccidentReportFormProps) {
           <Info aria-hidden="true" size={16} />
           <span>현재 단계에서는 실제 파일 업로드가 아닌 첨부 서류 파일명만 등록합니다.</span>
         </div>
+        <label className="field full">
+          <span>서류 제출 방식</span>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={formData.submitDocumentsLater}
+              onChange={(event) => updateSubmitDocumentsLater(event.target.checked)}
+              disabled={isSubmitting}
+            />
+            <span>
+              <Clock aria-hidden="true" size={15} />
+              서류 나중에 제출
+            </span>
+          </label>
+        </label>
+        {formData.submitDocumentsLater && (
+          <div className="inline-note">
+            <Clock aria-hidden="true" size={16} />
+            <span>접수 후 상태가 서류 보완 필요로 저장되고, 백엔드가 제출 기한을 자동 산정합니다.</span>
+          </div>
+        )}
         <div className="field-grid three">
           {attachmentFields.map(({ name, label }) => (
             <div className="field file-field" key={name}>
@@ -201,13 +248,13 @@ export function AccidentReportForm({ onSuccess }: AccidentReportFormProps) {
                 }}
                 type="file"
                 onChange={(event) => handleFileChange(name, event)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || formData.submitDocumentsLater}
               />
               <div className="selected-file-row">
                 <span className={formData[name] ? 'selected-file-name' : 'selected-file-empty'}>
-                  {formData[name] || '선택된 파일 없음'}
+                  {formData.submitDocumentsLater ? '서류 나중 제출' : formData[name] || '선택된 파일 없음'}
                 </span>
-                {formData[name] && (
+                {formData[name] && !formData.submitDocumentsLater && (
                   <button
                     type="button"
                     className="file-clear-button"

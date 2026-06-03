@@ -24,6 +24,13 @@ export function AccidentReportDetailCard({ data }: AccidentReportDetailCardProps
         <DetailItem icon={<FileText size={17} />} label="증권번호" value={data.policyNumber} />
         <DetailItem icon={<CalendarDays size={17} />} label="사고 일시" value={formatDateTime(data.accidentAt)} />
         <DetailItem icon={<AlertTriangle size={17} />} label="사고 유형" value={getAccidentTypeLabel(data.accidentType)} />
+        {data.documentSubmissionDeadline && (
+          <DetailItem
+            icon={<CalendarDays size={17} />}
+            label="서류 제출 기한"
+            value={formatDateTime(data.documentSubmissionDeadline)}
+          />
+        )}
       </div>
 
       <div className="text-detail-blocks">
