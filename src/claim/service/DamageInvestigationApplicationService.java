@@ -1,11 +1,15 @@
 package claim.service;
 
 import claim.dto.AdjusterOpinionRequest;
+import claim.dto.ClaimAlternativeFlowResponse;
 import claim.dto.DamageAssessmentRequest;
+import claim.dto.DamageInvestigationRejectRequest;
 import claim.dto.DamageInvestigationResultResponse;
 import claim.dto.DamageInvestigationStartResponse;
 import claim.dto.FieldInvestigationMaterialResponse;
 import claim.dto.InvestigationApprovalRequest;
+import claim.dto.FraudInvestigationRequest;
+import claim.dto.OutsourceInvestigationRequest;
 import claim.dto.PaymentApprovalDocumentResponse;
 import claim.dto.PaymentApprovalDraftResponse;
 import claim.mapper.DamageInvestigationMapper;
@@ -18,6 +22,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.NoSuchElementException;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -31,6 +36,13 @@ public class DamageInvestigationApplicationService {
     private static final String REJECTED_STATUS = "REJECTED";
     private static final String PAID_STATUS = "PAID";
     private static final String COMPLETED_ACCIDENT_STATUS = "COMPLETED";
+    private static final String REJECTED_ACCIDENT_STATUS = "REJECTED";
+    private static final String FRAUD_INVESTIGATION_STATUS = "FRAUD_INVESTIGATION";
+    private static final String OUTSOURCED_INVESTIGATION_STATUS = "OUTSOURCED_INVESTIGATION";
+    private static final String FIELD_INVESTIGATION_REQUIRED_STATUS = "FIELD_INVESTIGATION_REQUIRED";
+    private static final String ACTION_REJECTED = "INVESTIGATION_REJECTED";
+    private static final String ACTION_FRAUD = "FRAUD_INVESTIGATION_REQUESTED";
+    private static final String ACTION_OUTSOURCE = "OUTSOURCE_REQUESTED";
 
     private final DamageInvestigationMapper damageInvestigationMapper;
 
@@ -112,6 +124,81 @@ public class DamageInvestigationApplicationService {
         );
         damageInvestigationMapper.updateAccidentStatus(normalizedAccidentNumber, COMPLETED_ACCIDENT_STATUS);
         return requirePaymentApprovalDocument(normalizedAccidentNumber);
+    }
+
+    @Transactional
+    public ClaimAlternativeFlowResponse rejectInsuranceProcessing(
+            String accidentNumber,
+            DamageInvestigationRejectRequest request
+    ) {
+        String normalized = requireAccidentReport(accidentNumber).getReportNo();
+        LocalDateTime now = LocalDateTime.now();
+        damageInvestigationMapper.insertAlternativeFlowHistory(
+                generateId("CAF"), normalized, ACTION_REJECTED,
+                requireText(request.getEmployeeNo(), "employeeNo"),
+                requireText(request.getRejectionReason(), "rejectionReason"),
+                null, null, "Insurance processing rejected", now
+        );
+        damageInvestigationMapper.updateAccidentStatus(normalized, REJECTED_ACCIDENT_STATUS);
+        return latestAction(normalized);
+    }
+
+    @Transactional
+    public ClaimAlternativeFlowResponse requestFraudInvestigation(
+            String accidentNumber,
+            FraudInvestigationRequest request
+    ) {
+        String normalized = requireAccidentReport(accidentNumber).getReportNo();
+        if (!"실시한다".equals(request.getConfirmation().trim())) {
+            throw new IllegalArgumentException("confirmation must be 실시한다.");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        damageInvestigationMapper.insertAlternativeFlowHistory(
+                generateId("CAF"), normalized, ACTION_FRAUD,
+                requireText(request.getEmployeeNo(), "employeeNo"),
+                "Insurance fraud suspected", null, null,
+                "Mock SIU delegation registered", now
+        );
+        damageInvestigationMapper.updateAccidentStatus(normalized, FRAUD_INVESTIGATION_STATUS);
+        return latestAction(normalized);
+    }
+
+    @Transactional
+    public ClaimAlternativeFlowResponse requestOutsourceInvestigation(
+            String accidentNumber,
+            OutsourceInvestigationRequest request
+    ) {
+        String normalized = requireAccidentReport(accidentNumber).getReportNo();
+        LocalDateTime now = LocalDateTime.now();
+        damageInvestigationMapper.insertAlternativeFlowHistory(
+                generateId("CAF"), normalized, ACTION_OUTSOURCE,
+                requireText(request.getEmployeeNo(), "employeeNo"),
+                requireText(request.getRequestDetails(), "requestDetails"),
+                requireText(request.getPartnerName(), "partnerName"),
+                requireText(request.getMaterialChecklist(), "materialChecklist"),
+                "Outsource request document stored", now
+        );
+        damageInvestigationMapper.updateAccidentStatus(normalized, OUTSOURCED_INVESTIGATION_STATUS);
+        return latestAction(normalized);
+    }
+
+    @Transactional
+    public ClaimAlternativeFlowResponse completeOutsourceInvestigation(String accidentNumber) {
+        String normalized = requireAccidentReport(accidentNumber).getReportNo();
+        int updated = damageInvestigationMapper.completeLatestAlternativeFlow(
+                normalized, ACTION_OUTSOURCE, "Mock outsource result received", LocalDateTime.now()
+        );
+        if (updated == 0) {
+            throw new IllegalArgumentException("Open outsource investigation request not found.");
+        }
+        damageInvestigationMapper.updateAccidentStatus(normalized, FIELD_INVESTIGATION_REQUIRED_STATUS);
+        return latestAction(normalized);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClaimAlternativeFlowResponse> getAlternativeFlowHistory(String accidentNumber) {
+        String normalized = requireAccidentReport(accidentNumber).getReportNo();
+        return damageInvestigationMapper.findAlternativeFlowHistory(normalized);
     }
 
     @Transactional
@@ -280,17 +367,19 @@ public class DamageInvestigationApplicationService {
     }
 
     private void rejectDuplicatePaymentApprovalDocument(String accidentNumber) {
-        DamageInvestigationResultResponse existingResult =
-                damageInvestigationMapper.findDamageInvestigationResultByAccidentNumber(accidentNumber);
-        if (existingResult != null) {
-            throw new IllegalArgumentException("Damage investigation result already exists: " + accidentNumber);
-        }
-
         PaymentApprovalDocumentResponse existing =
                 damageInvestigationMapper.findPaymentApprovalDocumentByAccidentNumber(accidentNumber);
-        if (existing != null) {
+        if (existing != null && !REJECTED_STATUS.equals(existing.getSubmissionStatus())) {
             throw new IllegalArgumentException("Payment approval document already exists: " + accidentNumber);
         }
+    }
+
+    private ClaimAlternativeFlowResponse latestAction(String accidentNumber) {
+        List<ClaimAlternativeFlowResponse> history = damageInvestigationMapper.findAlternativeFlowHistory(accidentNumber);
+        if (history.isEmpty()) {
+            throw new NoSuchElementException("Alternative flow history not found: " + accidentNumber);
+        }
+        return history.get(0);
     }
 
     private void rejectAlreadyApprovalRequested(String accidentNumber) {

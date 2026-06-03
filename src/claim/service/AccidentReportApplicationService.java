@@ -17,6 +17,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class AccidentReportApplicationService {
 
+    private static final int DOCUMENT_SUBMISSION_DEADLINE_DAYS = 7;
+
     private final AccidentReportMapper accidentReportMapper;
 
     public AccidentReportApplicationService(AccidentReportMapper accidentReportMapper) {
@@ -41,6 +43,8 @@ public class AccidentReportApplicationService {
     }
 
     private AccidentReport toModel(AccidentReportCreateRequest request) {
+        LocalDateTime createdAt = LocalDateTime.now();
+        boolean submitDocumentsLater = request.isSubmitDocumentsLater();
         return new AccidentReport(
                 generateReportNo(),
                 requireText(request.getPolicyNumber(), "policyNumber"),
@@ -48,11 +52,12 @@ public class AccidentReportApplicationService {
                 requireText(request.getAccidentDescription(), "accidentDescription"),
                 requireText(request.getDamageDetails(), "damageDetails"),
                 request.getAccidentType() == null ? AccidentDetailsType.VEHICLE : request.getAccidentType(),
-                AccidentReportStatus.RECEIVED,
+                submitDocumentsLater ? AccidentReportStatus.DOCUMENT_PENDING : AccidentReportStatus.RECEIVED,
                 normalizeOptionalText(request.getAccidentReportDocumentName()),
                 normalizeOptionalText(request.getMedicalCertificateFileName()),
                 normalizeOptionalText(request.getClaimDocumentName()),
-                LocalDateTime.now()
+                submitDocumentsLater ? createdAt.plusDays(DOCUMENT_SUBMISSION_DEADLINE_DAYS) : null,
+                createdAt
         );
     }
 

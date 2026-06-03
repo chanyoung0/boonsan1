@@ -1,11 +1,15 @@
 package claim.controller;
 
 import claim.dto.AdjusterOpinionRequest;
+import claim.dto.ClaimAlternativeFlowResponse;
 import claim.dto.DamageAssessmentRequest;
+import claim.dto.DamageInvestigationRejectRequest;
 import claim.dto.DamageInvestigationResultResponse;
 import claim.dto.DamageInvestigationStartResponse;
 import claim.dto.FieldInvestigationMaterialResponse;
 import claim.dto.InvestigationApprovalRequest;
+import claim.dto.FraudInvestigationRequest;
+import claim.dto.OutsourceInvestigationRequest;
 import claim.dto.PaymentApprovalDocumentResponse;
 import claim.dto.PaymentApprovalDraftResponse;
 import claim.service.DamageInvestigationApplicationService;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/claims/accident-reports/{accidentNumber}")
@@ -92,6 +97,59 @@ public class DamageInvestigationController {
         PaymentApprovalDocumentResponse response =
                 damageInvestigationApplicationService.payPaymentApprovalDocument(accidentNumber);
         return ApiResponse.success(response, "Insurance payment completed");
+    }
+
+    @PostMapping("/investigation/reject")
+    public ApiResponse<ClaimAlternativeFlowResponse> rejectInsuranceProcessing(
+            @PathVariable String accidentNumber,
+            @Valid @RequestBody DamageInvestigationRejectRequest request
+    ) {
+        return ApiResponse.success(
+                damageInvestigationApplicationService.rejectInsuranceProcessing(accidentNumber, request),
+                "Insurance processing rejected"
+        );
+    }
+
+    @PostMapping("/investigation/fraud-request")
+    public ApiResponse<ClaimAlternativeFlowResponse> requestFraudInvestigation(
+            @PathVariable String accidentNumber,
+            @Valid @RequestBody FraudInvestigationRequest request
+    ) {
+        return ApiResponse.success(
+                damageInvestigationApplicationService.requestFraudInvestigation(accidentNumber, request),
+                "Mock SIU investigation requested"
+        );
+    }
+
+    @PostMapping("/investigation/outsource")
+    public ApiResponse<ClaimAlternativeFlowResponse> requestOutsourceInvestigation(
+            @PathVariable String accidentNumber,
+            @Valid @RequestBody OutsourceInvestigationRequest request
+    ) {
+        return ApiResponse.success(
+                damageInvestigationApplicationService.requestOutsourceInvestigation(accidentNumber, request),
+                "Outsource investigation requested"
+        );
+    }
+
+    @PatchMapping("/investigation/outsource/complete")
+    public ApiResponse<ClaimAlternativeFlowResponse> completeOutsourceInvestigation(
+            @PathVariable String accidentNumber
+    ) {
+        return ApiResponse.success(
+                damageInvestigationApplicationService.completeOutsourceInvestigation(accidentNumber),
+                "Mock outsource investigation completed"
+        );
+    }
+
+    @GetMapping("/investigation/actions")
+    public ApiResponse<List<ClaimAlternativeFlowResponse>> getAlternativeFlowHistory(
+            @PathVariable String accidentNumber
+    ) {
+        return ApiResponse.success(
+                damageInvestigationApplicationService.getAlternativeFlowHistory(accidentNumber),
+                "Alternative flow history loaded"
+        );
     }
 
     @PostMapping("/damage-investigations/draft")

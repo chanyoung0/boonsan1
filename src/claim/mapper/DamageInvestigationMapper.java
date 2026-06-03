@@ -2,12 +2,14 @@ package claim.mapper;
 
 import claim.dto.DamageAssessmentRequest;
 import claim.dto.DamageInvestigationResultResponse;
+import claim.dto.ClaimAlternativeFlowResponse;
 import claim.dto.PaymentApprovalDocumentResponse;
 import model.accident.AccidentReport;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface DamageInvestigationMapper {
 
@@ -63,5 +65,28 @@ public interface DamageInvestigationMapper {
     int updateAccidentStatus(
             @Param("accidentNumber") String accidentNumber,
             @Param("accidentStatus") String accidentStatus
+    );
+
+    void insertAlternativeFlowHistory(
+            @Param("actionId") String actionId,
+            @Param("accidentNumber") String accidentNumber,
+            @Param("actionType") String actionType,
+            @Param("employeeNo") String employeeNo,
+            @Param("reason") String reason,
+            @Param("partnerName") String partnerName,
+            @Param("materialChecklist") String materialChecklist,
+            @Param("resultMessage") String resultMessage,
+            @Param("createdAt") LocalDateTime createdAt
+    );
+
+    int completeLatestAlternativeFlow(
+            @Param("accidentNumber") String accidentNumber,
+            @Param("actionType") String actionType,
+            @Param("resultMessage") String resultMessage,
+            @Param("completedAt") LocalDateTime completedAt
+    );
+
+    List<ClaimAlternativeFlowResponse> findAlternativeFlowHistory(
+            @Param("accidentNumber") String accidentNumber
     );
 }

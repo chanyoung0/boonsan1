@@ -18,6 +18,7 @@ public class DamageInvestigationStartResponse {
     private final String accidentReportDocumentName;
     private final String medicalCertificateFileName;
     private final String claimDocumentName;
+    private final LocalDateTime documentSubmissionDeadline;
 
     private DamageInvestigationStartResponse(
             String accidentNumber,
@@ -29,7 +30,8 @@ public class DamageInvestigationStartResponse {
             AccidentReportStatus accidentStatus,
             String accidentReportDocumentName,
             String medicalCertificateFileName,
-            String claimDocumentName
+            String claimDocumentName,
+            LocalDateTime documentSubmissionDeadline
     ) {
         this.accidentNumber = accidentNumber;
         this.policyNumber = policyNumber;
@@ -41,6 +43,7 @@ public class DamageInvestigationStartResponse {
         this.accidentReportDocumentName = accidentReportDocumentName;
         this.medicalCertificateFileName = medicalCertificateFileName;
         this.claimDocumentName = claimDocumentName;
+        this.documentSubmissionDeadline = documentSubmissionDeadline;
     }
 
     public static DamageInvestigationStartResponse from(AccidentReport report) {
@@ -54,7 +57,8 @@ public class DamageInvestigationStartResponse {
                 report.getAccidentStatus(),
                 report.getAccidentReportDocumentName(),
                 report.getMedicalCertificateFileName(),
-                report.getClaimDocumentName()
+                report.getClaimDocumentName(),
+                report.getDocumentSubmissionDeadline()
         );
     }
 
@@ -77,4 +81,6 @@ public class DamageInvestigationStartResponse {
     public String getMedicalCertificateFileName() { return medicalCertificateFileName; }
 
     public String getClaimDocumentName() { return claimDocumentName; }
+
+    public LocalDateTime getDocumentSubmissionDeadline() { return documentSubmissionDeadline; }
 }

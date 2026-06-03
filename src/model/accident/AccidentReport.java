@@ -16,6 +16,7 @@ public class AccidentReport {
     private String claimDocumentName;
     private LocalDateTime createdAt;
     private String damageDetails;
+    private LocalDateTime documentSubmissionDeadline;
     private String medicalCertificateFileName;
     private String policyNumber;
     private String reportNo;
@@ -34,6 +35,7 @@ public class AccidentReport {
             String accidentReportDocumentName,
             String medicalCertificateFileName,
             String claimDocumentName,
+            LocalDateTime documentSubmissionDeadline,
             LocalDateTime createdAt
     ) {
         this.reportNo = reportNo;
@@ -46,6 +48,7 @@ public class AccidentReport {
         this.accidentReportDocumentName = accidentReportDocumentName;
         this.medicalCertificateFileName = medicalCertificateFileName;
         this.claimDocumentName = claimDocumentName;
+        this.documentSubmissionDeadline = documentSubmissionDeadline;
         this.createdAt = createdAt;
     }
 
@@ -110,6 +113,12 @@ public class AccidentReport {
 
     public void setDamageDetails(String damageDetails) {
         this.damageDetails = damageDetails;
+    }
+
+    public LocalDateTime getDocumentSubmissionDeadline() { return documentSubmissionDeadline; }
+
+    public void setDocumentSubmissionDeadline(LocalDateTime documentSubmissionDeadline) {
+        this.documentSubmissionDeadline = documentSubmissionDeadline;
     }
 
     public String getMedicalCertificateFileName() { return medicalCertificateFileName; }

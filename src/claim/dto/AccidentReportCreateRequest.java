@@ -33,6 +33,8 @@ public class AccidentReportCreateRequest {
     @Size(max = 255)
     private String claimDocumentName;
 
+    private boolean submitDocumentsLater;
+
     public String getPolicyNumber() {
         return policyNumber;
     }
@@ -95,5 +97,11 @@ public class AccidentReportCreateRequest {
 
     public void setClaimDocumentName(String claimDocumentName) {
         this.claimDocumentName = claimDocumentName;
+    }
+
+    public boolean isSubmitDocumentsLater() { return submitDocumentsLater; }
+
+    public void setSubmitDocumentsLater(boolean submitDocumentsLater) {
+        this.submitDocumentsLater = submitDocumentsLater;
     }
 }

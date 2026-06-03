@@ -17,6 +17,7 @@ ALTER TABLE accident_report ADD COLUMN IF NOT EXISTS accident_type VARCHAR(50);
 ALTER TABLE accident_report ADD COLUMN IF NOT EXISTS accident_report_document_name VARCHAR(255);
 ALTER TABLE accident_report ADD COLUMN IF NOT EXISTS medical_certificate_file_name VARCHAR(255);
 ALTER TABLE accident_report ADD COLUMN IF NOT EXISTS claim_document_name VARCHAR(255);
+ALTER TABLE accident_report ADD COLUMN IF NOT EXISTS document_submission_deadline TIMESTAMP;
 ALTER TABLE accident_report ALTER COLUMN accident_status SET DEFAULT 'RECEIVED';
 
 UPDATE accident_report
@@ -150,6 +151,22 @@ ALTER TABLE objection ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_objection_accident_number
     ON objection (accident_number);
+
+CREATE TABLE IF NOT EXISTS claim_alternative_flow_history (
+    action_id VARCHAR(50) PRIMARY KEY,
+    report_no VARCHAR(50) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    employee_no VARCHAR(50),
+    reason TEXT,
+    partner_name VARCHAR(255),
+    material_checklist TEXT,
+    result_message TEXT,
+    created_at TIMESTAMP NOT NULL,
+    completed_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_claim_alternative_flow_history_report_no
+    ON claim_alternative_flow_history (report_no);
 
 CREATE TABLE IF NOT EXISTS insurance_application (
     application_id VARCHAR(50) PRIMARY KEY,

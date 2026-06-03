@@ -15,6 +15,7 @@
         <result property="accidentReportDocumentName" column="accident_report_document_name"/>
         <result property="medicalCertificateFileName" column="medical_certificate_file_name"/>
         <result property="claimDocumentName" column="claim_document_name"/>
+        <result property="documentSubmissionDeadline" column="document_submission_deadline"/>
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
@@ -30,6 +31,7 @@
             accident_report_document_name,
             medical_certificate_file_name,
             claim_document_name,
+            document_submission_deadline,
             created_at
         ) VALUES (
             #{reportNo},
@@ -42,6 +44,7 @@
             #{accidentReportDocumentName},
             #{medicalCertificateFileName},
             #{claimDocumentName},
+            #{documentSubmissionDeadline},
             #{createdAt}
         )
     </insert>
@@ -58,6 +61,7 @@
             accident_report_document_name,
             medical_certificate_file_name,
             claim_document_name,
+            document_submission_deadline,
             created_at
         FROM accident_report
         WHERE report_no = #{accidentNumber}

@@ -15,6 +15,7 @@
         <result property="accidentReportDocumentName" column="accident_report_document_name"/>
         <result property="medicalCertificateFileName" column="medical_certificate_file_name"/>
         <result property="claimDocumentName" column="claim_document_name"/>
+        <result property="documentSubmissionDeadline" column="document_submission_deadline"/>
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
@@ -58,6 +59,19 @@
         <result property="submittedAt" column="submitted_at"/>
     </resultMap>
 
+    <resultMap id="ClaimAlternativeFlowResponseResultMap" type="claim.dto.ClaimAlternativeFlowResponse">
+        <id property="actionId" column="action_id"/>
+        <result property="accidentNumber" column="report_no"/>
+        <result property="actionType" column="action_type"/>
+        <result property="employeeNo" column="employee_no"/>
+        <result property="reason" column="reason"/>
+        <result property="partnerName" column="partner_name"/>
+        <result property="materialChecklist" column="material_checklist"/>
+        <result property="resultMessage" column="result_message"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="completedAt" column="completed_at"/>
+    </resultMap>
+
     <select id="findAccidentReportForInvestigation" resultMap="AccidentReportForInvestigationResultMap">
         SELECT
             report_no,
@@ -70,6 +84,7 @@
             accident_report_document_name,
             medical_certificate_file_name,
             claim_document_name,
+            document_submission_deadline,
             created_at
         FROM accident_report
         WHERE report_no = #{accidentNumber}
@@ -253,4 +268,36 @@
         SET accident_status = #{accidentStatus}
         WHERE report_no = #{accidentNumber}
     </update>
+
+    <insert id="insertAlternativeFlowHistory">
+        INSERT INTO claim_alternative_flow_history (
+            action_id, report_no, action_type, employee_no, reason,
+            partner_name, material_checklist, result_message, created_at
+        ) VALUES (
+            #{actionId}, #{accidentNumber}, #{actionType}, #{employeeNo}, #{reason},
+            #{partnerName}, #{materialChecklist}, #{resultMessage}, #{createdAt}
+        )
+    </insert>
+
+    <update id="completeLatestAlternativeFlow">
+        UPDATE claim_alternative_flow_history
+        SET result_message = #{resultMessage}, completed_at = #{completedAt}
+        WHERE action_id = (
+            SELECT action_id
+            FROM claim_alternative_flow_history
+            WHERE report_no = #{accidentNumber}
+              AND action_type = #{actionType}
+              AND completed_at IS NULL
+            ORDER BY created_at DESC
+            LIMIT 1
+        )
+    </update>
+
+    <select id="findAlternativeFlowHistory" resultMap="ClaimAlternativeFlowResponseResultMap">
+        SELECT action_id, report_no, action_type, employee_no, reason,
+               partner_name, material_checklist, result_message, created_at, completed_at
+        FROM claim_alternative_flow_history
+        WHERE report_no = #{accidentNumber}
+        ORDER BY created_at DESC
+    </select>
 </mapper>
