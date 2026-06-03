@@ -21,6 +21,13 @@ public abstract class Insurance {
     protected String mainCoverage;
     protected String subscriptionConditions;
     protected String rateInformation;
+    protected BigDecimal baseRate;
+    protected BigDecimal riskRate;
+    protected BigDecimal expectedInterestRate;
+    protected BigDecimal operatingExpenseRatio;
+    protected BigDecimal discountSurchargeRate;
+    protected BigDecimal appliedRate;
+    protected BigDecimal profitLossEstimate;
     protected String specialContractInfo;
     protected ProductStatus productStatus;
     protected LocalDateTime createdAt;
@@ -116,6 +123,27 @@ public abstract class Insurance {
 
     public String getRateInformation() { return rateInformation; }
     public void setRateInformation(String rateInformation) { this.rateInformation = rateInformation; }
+
+    public BigDecimal getBaseRate() { return baseRate; }
+    public void setBaseRate(BigDecimal baseRate) { this.baseRate = baseRate; }
+
+    public BigDecimal getRiskRate() { return riskRate; }
+    public void setRiskRate(BigDecimal riskRate) { this.riskRate = riskRate; }
+
+    public BigDecimal getExpectedInterestRate() { return expectedInterestRate; }
+    public void setExpectedInterestRate(BigDecimal expectedInterestRate) { this.expectedInterestRate = expectedInterestRate; }
+
+    public BigDecimal getOperatingExpenseRatio() { return operatingExpenseRatio; }
+    public void setOperatingExpenseRatio(BigDecimal operatingExpenseRatio) { this.operatingExpenseRatio = operatingExpenseRatio; }
+
+    public BigDecimal getDiscountSurchargeRate() { return discountSurchargeRate; }
+    public void setDiscountSurchargeRate(BigDecimal discountSurchargeRate) { this.discountSurchargeRate = discountSurchargeRate; }
+
+    public BigDecimal getAppliedRate() { return appliedRate; }
+    public void setAppliedRate(BigDecimal appliedRate) { this.appliedRate = appliedRate; }
+
+    public BigDecimal getProfitLossEstimate() { return profitLossEstimate; }
+    public void setProfitLossEstimate(BigDecimal profitLossEstimate) { this.profitLossEstimate = profitLossEstimate; }
 
     public String getSpecialContractInfo() { return specialContractInfo; }
     public void setSpecialContractInfo(String specialContractInfo) { this.specialContractInfo = specialContractInfo; }

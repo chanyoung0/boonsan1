@@ -4,12 +4,21 @@ import type {
   AuthorizationEligibilityResponse,
   AuthorizationResponse,
   AuthorizationRevisionRequest,
+  PremiumEstimateRequest,
+  PremiumEstimateResponse,
   ProductDesignRequest,
   ProductResponse
 } from '../types/product';
 
 export function createProduct(request: ProductDesignRequest) {
   return apiRequest<ProductResponse>('/api/products', {
+    method: 'POST',
+    body: JSON.stringify(request)
+  });
+}
+
+export function estimatePremium(request: PremiumEstimateRequest) {
+  return apiRequest<PremiumEstimateResponse>('/api/products/premium-estimate', {
     method: 'POST',
     body: JSON.stringify(request)
   });

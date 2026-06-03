@@ -18,6 +18,13 @@
         <result property="mainCoverage" column="main_coverage"/>
         <result property="subscriptionConditions" column="subscription_conditions"/>
         <result property="rateInformation" column="rate_information"/>
+        <result property="baseRate" column="base_rate"/>
+        <result property="riskRate" column="risk_rate"/>
+        <result property="expectedInterestRate" column="expected_interest_rate"/>
+        <result property="operatingExpenseRatio" column="operating_expense_ratio"/>
+        <result property="discountSurchargeRate" column="discount_surcharge_rate"/>
+        <result property="appliedRate" column="applied_rate"/>
+        <result property="profitLossEstimate" column="profit_loss_estimate"/>
         <result property="specialContractInfo" column="special_contract_info"/>
         <result property="productStatus" column="product_status" javaType="enums.ProductStatus"/>
         <result property="createdAt" column="created_at"/>
@@ -58,6 +65,13 @@
             main_coverage,
             subscription_conditions,
             rate_information,
+            base_rate,
+            risk_rate,
+            expected_interest_rate,
+            operating_expense_ratio,
+            discount_surcharge_rate,
+            applied_rate,
+            profit_loss_estimate,
             special_contract_info,
             product_status,
             driver_age,
@@ -81,6 +95,13 @@
             #{mainCoverage},
             #{subscriptionConditions},
             #{rateInformation},
+            #{baseRate},
+            #{riskRate},
+            #{expectedInterestRate},
+            #{operatingExpenseRatio},
+            #{discountSurchargeRate},
+            #{appliedRate},
+            #{profitLossEstimate},
             #{specialContractInfo},
             #{productStatus},
             <choose>
@@ -126,6 +147,13 @@
             main_coverage,
             subscription_conditions,
             rate_information,
+            base_rate,
+            risk_rate,
+            expected_interest_rate,
+            operating_expense_ratio,
+            discount_surcharge_rate,
+            applied_rate,
+            profit_loss_estimate,
             special_contract_info,
             product_status,
             driver_age,
@@ -154,6 +182,13 @@
             main_coverage,
             subscription_conditions,
             rate_information,
+            base_rate,
+            risk_rate,
+            expected_interest_rate,
+            operating_expense_ratio,
+            discount_surcharge_rate,
+            applied_rate,
+            profit_loss_estimate,
             special_contract_info,
             product_status,
             driver_age,

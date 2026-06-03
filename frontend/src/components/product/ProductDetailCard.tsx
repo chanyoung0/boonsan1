@@ -36,9 +36,20 @@ export function ProductDetailCard({ data }: ProductDetailCardProps) {
       <div className="text-detail-blocks">
         {data.mainCoverage && <TextBox title="주담보 / 보장내용" value={data.mainCoverage} />}
         {data.subscriptionConditions && <TextBox title="가입조건" value={data.subscriptionConditions} />}
-        {data.rateInformation && <TextBox title="요율 정보" value={data.rateInformation} />}
         {data.specialContractInfo && <TextBox title="특약 정보" value={data.specialContractInfo} />}
       </div>
+
+      {hasRateInfo(data) && (
+        <div className="detail-grid">
+          <DetailItem icon={<Wallet size={17} />} label="기초요율" value={formatRate(data.baseRate)} />
+          <DetailItem icon={<Wallet size={17} />} label="위험률" value={formatRate(data.riskRate)} />
+          <DetailItem icon={<Wallet size={17} />} label="예정이율" value={formatRate(data.expectedInterestRate)} />
+          <DetailItem icon={<Wallet size={17} />} label="사업비율" value={formatRate(data.operatingExpenseRatio)} />
+          <DetailItem icon={<Wallet size={17} />} label="할인/할증요율" value={formatRate(data.discountSurchargeRate)} />
+          <DetailItem icon={<Wallet size={17} />} label="적용요율" value={formatAppliedRate(data.appliedRate)} />
+          <DetailItem icon={<Wallet size={17} />} label="손익예상치" value={formatAmount(data.profitLossEstimate)} />
+        </div>
+      )}
 
       {renderSubtypeDetails(data)}
     </article>
@@ -109,6 +120,28 @@ function TextBox({ title, value }: { title: string; value: string }) {
 function formatAmount(value: number | null) {
   if (value == null) return '-';
   return new Intl.NumberFormat('ko-KR').format(value) + ' 원';
+}
+
+function formatRate(value: number | null) {
+  if (value == null) return '-';
+  return value.toFixed(2) + ' %';
+}
+
+function formatAppliedRate(value: number | null) {
+  if (value == null) return '-';
+  return (value * 100).toFixed(4) + ' %';
+}
+
+function hasRateInfo(data: ProductResponse) {
+  return (
+    data.baseRate != null ||
+    data.riskRate != null ||
+    data.expectedInterestRate != null ||
+    data.operatingExpenseRatio != null ||
+    data.discountSurchargeRate != null ||
+    data.appliedRate != null ||
+    data.profitLossEstimate != null
+  );
 }
 
 function formatDateTime(value: string) {

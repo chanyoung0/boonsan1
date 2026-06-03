@@ -28,6 +28,13 @@ export interface ProductDesignRequest {
   mainCoverage: string | null;
   subscriptionConditions: string | null;
   rateInformation: string | null;
+  baseRate: number | null;
+  riskRate: number | null;
+  expectedInterestRate: number | null;
+  operatingExpenseRatio: number | null;
+  discountSurchargeRate: number | null;
+  appliedRate: number | null;
+  profitLossEstimate: number | null;
   specialContractInfo: string | null;
   driverAge: number | null;
   vehicleType: string | null;
@@ -51,6 +58,13 @@ export interface ProductResponse {
   mainCoverage: string | null;
   subscriptionConditions: string | null;
   rateInformation: string | null;
+  baseRate: number | null;
+  riskRate: number | null;
+  expectedInterestRate: number | null;
+  operatingExpenseRatio: number | null;
+  discountSurchargeRate: number | null;
+  appliedRate: number | null;
+  profitLossEstimate: number | null;
   specialContractInfo: string | null;
   productStatus: ProductStatus;
   driverAge: number | null;
@@ -60,6 +74,22 @@ export interface ProductResponse {
   shippingRoute: string | null;
   vesselType: string | null;
   createdAt: string;
+}
+
+export interface PremiumEstimateRequest {
+  insuredAmount: number;
+  baseRate: number;
+  riskRate: number;
+  expectedInterestRate: number;
+  operatingExpenseRatio: number;
+  discountSurchargeRate: number;
+}
+
+export interface PremiumEstimateResponse {
+  baseRate: number;
+  appliedRate: number;
+  estimatedPremium: number;
+  profitLossEstimate: number;
 }
 
 export interface AuthorizationEligibilityResponse {

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import product.dto.PremiumEstimateRequest;
+import product.dto.PremiumEstimateResponse;
 import product.dto.ProductDesignRequest;
 import product.dto.ProductResponse;
 import product.service.ProductDesignApplicationService;
@@ -28,6 +30,12 @@ public class ProductController {
     public ApiResponse<ProductResponse> create(@Valid @RequestBody ProductDesignRequest request) {
         ProductResponse response = productDesignApplicationService.create(request);
         return ApiResponse.success(response, "Product designed");
+    }
+
+    @PostMapping("/premium-estimate")
+    public ApiResponse<PremiumEstimateResponse> estimatePremium(@Valid @RequestBody PremiumEstimateRequest request) {
+        PremiumEstimateResponse response = productDesignApplicationService.estimatePremium(request);
+        return ApiResponse.success(response, "Premium estimated");
     }
 
     @GetMapping

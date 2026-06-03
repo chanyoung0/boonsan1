@@ -1,8 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { FileText, RotateCcw, Save, Settings2, ShieldCheck, Wallet } from 'lucide-react';
-import { createProduct } from '../../api/productApi';
+import { Calculator, FileText, RotateCcw, Save, Settings2, ShieldCheck, Wallet } from 'lucide-react';
+import { createProduct, estimatePremium } from '../../api/productApi';
 import type {
   InsuranceTypeCode,
+  PremiumEstimateResponse,
   ProductDesignRequest,
   ProductResponse
 } from '../../types/product';
@@ -21,11 +22,14 @@ const emptyForm = {
   insurancePeriod: '',
   paymentPeriod: '',
   insuredAmount: '',
-  premium: '',
   maturityRefund: '',
   mainCoverage: '',
   subscriptionConditions: '',
-  rateInformation: '',
+  baseRate: '',
+  riskRate: '',
+  expectedInterestRate: '',
+  operatingExpenseRatio: '',
+  discountSurchargeRate: '',
   specialContractInfo: '',
   driverAge: '',
   vehicleType: '',
@@ -35,13 +39,71 @@ const emptyForm = {
   vesselType: ''
 };
 
+const RATE_FIELDS = [
+  'baseRate',
+  'riskRate',
+  'expectedInterestRate',
+  'operatingExpenseRatio',
+  'discountSurchargeRate'
+] as const;
+
 export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
   const [formData, setFormData] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [rateMessage, setRateMessage] = useState<string | null>(null);
+  const [estimate, setEstimate] = useState<PremiumEstimateResponse | null>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateField = (name: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // 요율 또는 가입금액 변경 시 기존 산정 결과 무효화 — 재산정 유도
+    if (name === 'insuredAmount' || RATE_FIELDS.includes(name as typeof RATE_FIELDS[number])) {
+      setEstimate(null);
+      setRateMessage(null);
+    }
+  };
+
+  const handleEstimate = async () => {
+    setRateMessage(null);
+
+    const insuredAmount = Number(formData.insuredAmount);
+    if (!Number.isFinite(insuredAmount) || insuredAmount <= 0) {
+      setRateMessage('보험가입금액을 먼저 입력하세요.');
+      return;
+    }
+
+    const rateValues: Record<typeof RATE_FIELDS[number], number> = {} as never;
+    for (const field of RATE_FIELDS) {
+      const raw = formData[field].trim();
+      if (raw.length === 0) {
+        setRateMessage('5개 요율(기초·위험·예정이·사업비·할인할증)을 모두 입력하세요.');
+        return;
+      }
+      const num = Number(raw);
+      if (!Number.isFinite(num)) {
+        setRateMessage(`${RATE_LABELS[field]} 값이 올바르지 않습니다.`);
+        return;
+      }
+      rateValues[field] = num;
+    }
+
+    setIsEstimating(true);
+    try {
+      const response = await estimatePremium({
+        insuredAmount,
+        baseRate: rateValues.baseRate,
+        riskRate: rateValues.riskRate,
+        expectedInterestRate: rateValues.expectedInterestRate,
+        operatingExpenseRatio: rateValues.operatingExpenseRatio,
+        discountSurchargeRate: rateValues.discountSurchargeRate
+      });
+      setEstimate(response);
+    } catch (caught) {
+      setRateMessage(caught instanceof Error ? caught.message : '요율 산정 중 오류가 발생했습니다.');
+    } finally {
+      setIsEstimating(false);
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -59,6 +121,11 @@ export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
       return;
     }
 
+    if (!estimate) {
+      setError('먼저 "요율 산정" 버튼을 눌러 보험료를 산정하세요.');
+      return;
+    }
+
     const request: ProductDesignRequest = {
       productName: formData.productName.trim(),
       insuranceTypeCode: formData.insuranceTypeCode,
@@ -67,11 +134,18 @@ export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
       insurancePeriod: normalizeOptional(formData.insurancePeriod),
       paymentPeriod: normalizeOptional(formData.paymentPeriod),
       insuredAmount: insuredAmountNumber,
-      premium: optionalNumber(formData.premium),
+      premium: estimate.estimatedPremium,
       maturityRefund: optionalNumber(formData.maturityRefund),
       mainCoverage: normalizeOptional(formData.mainCoverage),
       subscriptionConditions: normalizeOptional(formData.subscriptionConditions),
-      rateInformation: normalizeOptional(formData.rateInformation),
+      rateInformation: null,
+      baseRate: optionalNumber(formData.baseRate),
+      riskRate: optionalNumber(formData.riskRate),
+      expectedInterestRate: optionalNumber(formData.expectedInterestRate),
+      operatingExpenseRatio: optionalNumber(formData.operatingExpenseRatio),
+      discountSurchargeRate: optionalNumber(formData.discountSurchargeRate),
+      appliedRate: estimate.appliedRate,
+      profitLossEstimate: estimate.profitLossEstimate,
       specialContractInfo: normalizeOptional(formData.specialContractInfo),
       driverAge: formData.insuranceTypeCode === 'AUTO' ? optionalNumber(formData.driverAge) : null,
       vehicleType: formData.insuranceTypeCode === 'AUTO' ? normalizeOptional(formData.vehicleType) : null,
@@ -95,6 +169,8 @@ export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
   const handleReset = () => {
     setFormData(emptyForm);
     setError(null);
+    setRateMessage(null);
+    setEstimate(null);
   };
 
   const insuranceType = formData.insuranceTypeCode;
@@ -202,7 +278,7 @@ export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
 
       <section className="form-section">
         <SectionTitle icon={<Wallet size={17} />} title="보험금·요율" />
-        <div className="field-grid three">
+        <div className="field-grid two">
           <label className="field">
             <span>보험가입금액</span>
             <input
@@ -212,17 +288,6 @@ export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
               value={formData.insuredAmount}
               onChange={(event) => updateField('insuredAmount', event.target.value)}
               placeholder="100000000"
-              disabled={isSubmitting}
-            />
-          </label>
-          <label className="field">
-            <span>예상 보험료</span>
-            <input
-              type="number"
-              min="0"
-              value={formData.premium}
-              onChange={(event) => updateField('premium', event.target.value)}
-              placeholder="120000"
               disabled={isSubmitting}
             />
           </label>
@@ -238,15 +303,41 @@ export function ProductDesignForm({ onSuccess }: ProductDesignFormProps) {
             />
           </label>
         </div>
-        <label className="field full">
-          <span>요율 정보</span>
-          <textarea
-            value={formData.rateInformation}
-            onChange={(event) => updateField('rateInformation', event.target.value)}
-            placeholder="기초요율, 위험률, 예정이율, 사업비율, 할인/할증요율"
-            disabled={isSubmitting}
-          />
-        </label>
+
+        <div className="rate-inputs">
+          <div className="rate-inputs-header">
+            <span>요율 정보 (% 단위)</span>
+            <small>기초·위험·예정이·사업비·할인할증 요율을 입력 후 산정 버튼을 누르세요.</small>
+          </div>
+          <div className="field-grid three">
+            {RATE_FIELDS.map((field) => (
+              <label className="field" key={field}>
+                <span>{RATE_LABELS[field]}</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData[field]}
+                  onChange={(event) => updateField(field, event.target.value)}
+                  placeholder={RATE_PLACEHOLDERS[field]}
+                  disabled={isSubmitting}
+                />
+              </label>
+            ))}
+          </div>
+          <div className="rate-actions">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={handleEstimate}
+              disabled={isSubmitting || isEstimating}
+            >
+              <Calculator aria-hidden="true" size={16} />
+              {isEstimating ? '산정 중...' : '요율 산정'}
+            </button>
+          </div>
+          {rateMessage && <AlertMessage type="error" message={rateMessage} />}
+          {estimate && <EstimateResultCard data={estimate} />}
+        </div>
       </section>
 
       <section className="form-section">
@@ -361,6 +452,48 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   );
 }
 
+function EstimateResultCard({ data }: { data: PremiumEstimateResponse }) {
+  return (
+    <div className="estimate-result">
+      <h4>요율 산정 결과</h4>
+      <dl className="estimate-grid">
+        <div>
+          <dt>기초요율</dt>
+          <dd>{formatRate(data.baseRate)}</dd>
+        </div>
+        <div>
+          <dt>적용요율</dt>
+          <dd>{formatAppliedRate(data.appliedRate)}</dd>
+        </div>
+        <div>
+          <dt>예상보험료</dt>
+          <dd>{formatAmount(data.estimatedPremium)}</dd>
+        </div>
+        <div>
+          <dt>손익예상치</dt>
+          <dd className={data.profitLossEstimate < 0 ? 'negative' : ''}>{formatAmount(data.profitLossEstimate)}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+const RATE_LABELS: Record<typeof RATE_FIELDS[number], string> = {
+  baseRate: '기초요율',
+  riskRate: '위험률',
+  expectedInterestRate: '예정이율',
+  operatingExpenseRatio: '사업비율',
+  discountSurchargeRate: '할인/할증요율'
+};
+
+const RATE_PLACEHOLDERS: Record<typeof RATE_FIELDS[number], string> = {
+  baseRate: '1.50',
+  riskRate: '0.30',
+  expectedInterestRate: '2.50',
+  operatingExpenseRatio: '15.00',
+  discountSurchargeRate: '0.00'
+};
+
 function normalizeOptional(value: string) {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
@@ -371,4 +504,19 @@ function optionalNumber(value: string): number | null {
   if (trimmed.length === 0) return null;
   const numeric = Number(trimmed);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatAmount(value: number | null) {
+  if (value == null) return '-';
+  return new Intl.NumberFormat('ko-KR').format(Math.round(value)) + ' 원';
+}
+
+function formatRate(value: number | null) {
+  if (value == null) return '-';
+  return value.toFixed(2) + ' %';
+}
+
+function formatAppliedRate(value: number | null) {
+  if (value == null) return '-';
+  return (value * 100).toFixed(4) + ' %';
 }

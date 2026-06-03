@@ -165,6 +165,13 @@ CREATE TABLE IF NOT EXISTS product (
     main_coverage TEXT,
     subscription_conditions TEXT,
     rate_information TEXT,
+    base_rate NUMERIC(8,4),
+    risk_rate NUMERIC(8,4),
+    expected_interest_rate NUMERIC(8,4),
+    operating_expense_ratio NUMERIC(8,4),
+    discount_surcharge_rate NUMERIC(8,4),
+    applied_rate NUMERIC(10,6),
+    profit_loss_estimate NUMERIC(15,2),
     special_contract_info TEXT,
     product_status VARCHAR(50) NOT NULL,
     driver_age INTEGER,
@@ -189,6 +196,13 @@ ALTER TABLE product ADD COLUMN IF NOT EXISTS maturity_refund NUMERIC(15,2);
 ALTER TABLE product ADD COLUMN IF NOT EXISTS main_coverage TEXT;
 ALTER TABLE product ADD COLUMN IF NOT EXISTS subscription_conditions TEXT;
 ALTER TABLE product ADD COLUMN IF NOT EXISTS rate_information TEXT;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS base_rate NUMERIC(8,4);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS risk_rate NUMERIC(8,4);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS expected_interest_rate NUMERIC(8,4);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS operating_expense_ratio NUMERIC(8,4);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS discount_surcharge_rate NUMERIC(8,4);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS applied_rate NUMERIC(10,6);
+ALTER TABLE product ADD COLUMN IF NOT EXISTS profit_loss_estimate NUMERIC(15,2);
 ALTER TABLE product ADD COLUMN IF NOT EXISTS special_contract_info TEXT;
 ALTER TABLE product ADD COLUMN IF NOT EXISTS product_status VARCHAR(50);
 ALTER TABLE product ADD COLUMN IF NOT EXISTS driver_age INTEGER;

@@ -43,6 +43,14 @@ public class ProductDesignRequest {
 
     private String rateInformation;
 
+    private BigDecimal baseRate;
+    private BigDecimal riskRate;
+    private BigDecimal expectedInterestRate;
+    private BigDecimal operatingExpenseRatio;
+    private BigDecimal discountSurchargeRate;
+    private BigDecimal appliedRate;
+    private BigDecimal profitLossEstimate;
+
     private String specialContractInfo;
 
     private Integer driverAge;
@@ -97,6 +105,27 @@ public class ProductDesignRequest {
 
     public String getRateInformation() { return rateInformation; }
     public void setRateInformation(String rateInformation) { this.rateInformation = rateInformation; }
+
+    public BigDecimal getBaseRate() { return baseRate; }
+    public void setBaseRate(BigDecimal baseRate) { this.baseRate = baseRate; }
+
+    public BigDecimal getRiskRate() { return riskRate; }
+    public void setRiskRate(BigDecimal riskRate) { this.riskRate = riskRate; }
+
+    public BigDecimal getExpectedInterestRate() { return expectedInterestRate; }
+    public void setExpectedInterestRate(BigDecimal expectedInterestRate) { this.expectedInterestRate = expectedInterestRate; }
+
+    public BigDecimal getOperatingExpenseRatio() { return operatingExpenseRatio; }
+    public void setOperatingExpenseRatio(BigDecimal operatingExpenseRatio) { this.operatingExpenseRatio = operatingExpenseRatio; }
+
+    public BigDecimal getDiscountSurchargeRate() { return discountSurchargeRate; }
+    public void setDiscountSurchargeRate(BigDecimal discountSurchargeRate) { this.discountSurchargeRate = discountSurchargeRate; }
+
+    public BigDecimal getAppliedRate() { return appliedRate; }
+    public void setAppliedRate(BigDecimal appliedRate) { this.appliedRate = appliedRate; }
+
+    public BigDecimal getProfitLossEstimate() { return profitLossEstimate; }
+    public void setProfitLossEstimate(BigDecimal profitLossEstimate) { this.profitLossEstimate = profitLossEstimate; }
 
     public String getSpecialContractInfo() { return specialContractInfo; }
     public void setSpecialContractInfo(String specialContractInfo) { this.specialContractInfo = specialContractInfo; }

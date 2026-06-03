@@ -24,6 +24,13 @@ public class ProductResponse {
     private final String mainCoverage;
     private final String subscriptionConditions;
     private final String rateInformation;
+    private final BigDecimal baseRate;
+    private final BigDecimal riskRate;
+    private final BigDecimal expectedInterestRate;
+    private final BigDecimal operatingExpenseRatio;
+    private final BigDecimal discountSurchargeRate;
+    private final BigDecimal appliedRate;
+    private final BigDecimal profitLossEstimate;
     private final String specialContractInfo;
     private final ProductStatus productStatus;
     private final Integer driverAge;
@@ -48,6 +55,13 @@ public class ProductResponse {
             String mainCoverage,
             String subscriptionConditions,
             String rateInformation,
+            BigDecimal baseRate,
+            BigDecimal riskRate,
+            BigDecimal expectedInterestRate,
+            BigDecimal operatingExpenseRatio,
+            BigDecimal discountSurchargeRate,
+            BigDecimal appliedRate,
+            BigDecimal profitLossEstimate,
             String specialContractInfo,
             ProductStatus productStatus,
             Integer driverAge,
@@ -71,6 +85,13 @@ public class ProductResponse {
         this.mainCoverage = mainCoverage;
         this.subscriptionConditions = subscriptionConditions;
         this.rateInformation = rateInformation;
+        this.baseRate = baseRate;
+        this.riskRate = riskRate;
+        this.expectedInterestRate = expectedInterestRate;
+        this.operatingExpenseRatio = operatingExpenseRatio;
+        this.discountSurchargeRate = discountSurchargeRate;
+        this.appliedRate = appliedRate;
+        this.profitLossEstimate = profitLossEstimate;
         this.specialContractInfo = specialContractInfo;
         this.productStatus = productStatus;
         this.driverAge = driverAge;
@@ -115,6 +136,13 @@ public class ProductResponse {
                 insurance.getMainCoverage(),
                 insurance.getSubscriptionConditions(),
                 insurance.getRateInformation(),
+                insurance.getBaseRate(),
+                insurance.getRiskRate(),
+                insurance.getExpectedInterestRate(),
+                insurance.getOperatingExpenseRatio(),
+                insurance.getDiscountSurchargeRate(),
+                insurance.getAppliedRate(),
+                insurance.getProfitLossEstimate(),
                 insurance.getSpecialContractInfo(),
                 insurance.getProductStatus(),
                 driverAge,
@@ -140,6 +168,13 @@ public class ProductResponse {
     public String getMainCoverage() { return mainCoverage; }
     public String getSubscriptionConditions() { return subscriptionConditions; }
     public String getRateInformation() { return rateInformation; }
+    public BigDecimal getBaseRate() { return baseRate; }
+    public BigDecimal getRiskRate() { return riskRate; }
+    public BigDecimal getExpectedInterestRate() { return expectedInterestRate; }
+    public BigDecimal getOperatingExpenseRatio() { return operatingExpenseRatio; }
+    public BigDecimal getDiscountSurchargeRate() { return discountSurchargeRate; }
+    public BigDecimal getAppliedRate() { return appliedRate; }
+    public BigDecimal getProfitLossEstimate() { return profitLossEstimate; }
     public String getSpecialContractInfo() { return specialContractInfo; }
     public ProductStatus getProductStatus() { return productStatus; }
     public Integer getDriverAge() { return driverAge; }
