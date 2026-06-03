@@ -58,7 +58,7 @@ const emptyRejectForm = {
 
 const emptyFraudForm = {
   employeeNo: '',
-  confirmation: '실시한다'
+  confirmation: '?�시?�다'
 };
 
 const emptyOutsourceForm = {
@@ -98,7 +98,7 @@ export function DamageInvestigationPage() {
   const handleLookup = async () => {
     const accidentNumber = accidentNumberInput.trim();
     if (!accidentNumber) {
-      setError('사고 접수번호를 입력하세요.');
+      setError('?�고 ?�수번호�??�력?�세??');
       return;
     }
 
@@ -118,7 +118,7 @@ export function DamageInvestigationPage() {
       await loadExistingResult(response.accidentNumber);
       await loadAlternativeHistory(response.accidentNumber, false);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '사고 접수 내용을 조회할 수 없습니다.');
+      setError(caught instanceof Error ? caught.message : '?�고 ?�수 ?�용??조회?????�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -135,12 +135,12 @@ export function DamageInvestigationPage() {
       setMaterials(fieldMaterials);
       setSuccess(
         result.accidentStatus === 'APPROVAL_REQUIRED'
-          ? '이미 결재 요청된 손해조사입니다.'
-          : '저장된 손해조사 결과를 불러왔습니다.'
+          ? '?��? 결재 ?�청???�해조사?�니??'
+          : '?�?�된 ?�해조사 결과�?불러?�습?�다.'
       );
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 404) {
-        setSuccess('사고 접수 내용을 조회했습니다. 기존 손해조사 결과가 없어 새 손해조사를 진행할 수 있습니다.');
+        setSuccess('?�고 ?�수 ?�용??조회?�습?�다. 기존 ?�해조사 결과가 ?�어 ???�해조사�?진행?????�습?�다.');
         return;
       }
       throw caught;
@@ -152,7 +152,7 @@ export function DamageInvestigationPage() {
       const history = await getClaimAlternativeFlowHistory(accidentNumber);
       setAlternativeHistory(history);
       if (showMessage) {
-        setSuccess('Alternative Flow 이력을 조회했습니다.');
+        setSuccess('Alternative Flow ?�력??조회?�습?�다.');
       }
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 404) {
@@ -171,9 +171,9 @@ export function DamageInvestigationPage() {
     setSuccess(null);
     try {
       setMaterials(await getFieldInvestigationMaterials(accident.accidentNumber));
-      setSuccess('현장조사 자료를 조회했습니다.');
+      setSuccess('?�장조사 ?�료�?조회?�습?�다.');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '현장조사 자료를 조회할 수 없습니다.');
+      setError(caught instanceof Error ? caught.message : '?�장조사 ?�료�?조회?????�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -183,7 +183,7 @@ export function DamageInvestigationPage() {
     event.preventDefault();
     if (!accident) return;
     if (!rejectForm.employeeNo.trim() || !rejectForm.rejectionReason.trim()) {
-      setError('담당자 번호와 반려 사유를 입력하세요.');
+      setError('?�당??번호?� 반려 ?�유�??�력?�세??');
       return;
     }
 
@@ -196,11 +196,11 @@ export function DamageInvestigationPage() {
         rejectionReason: rejectForm.rejectionReason.trim()
       });
       setAccident((prev) => (prev ? { ...prev, accidentStatus: 'REJECTED' } : prev));
-      setSuccess(response.resultMessage || '보험 처리 반려가 저장되었습니다.');
+      setSuccess(response.resultMessage || '보험 처리 반려가 ?�?�되?�습?�다.');
       setRejectForm(emptyRejectForm);
       await loadAlternativeHistory(accident.accidentNumber, false);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '보험 처리 반려 저장에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '보험 처리 반려 ?�?�에 ?�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -210,7 +210,7 @@ export function DamageInvestigationPage() {
     event.preventDefault();
     if (!accident) return;
     if (!fraudForm.employeeNo.trim() || !fraudForm.confirmation.trim()) {
-      setError('담당자 번호와 실시 여부를 입력하세요.');
+      setError('?�당??번호?� ?�시 ?��?�??�력?�세??');
       return;
     }
 
@@ -223,11 +223,11 @@ export function DamageInvestigationPage() {
         confirmation: fraudForm.confirmation.trim()
       });
       setAccident((prev) => (prev ? { ...prev, accidentStatus: 'FRAUD_INVESTIGATION' } : prev));
-      setSuccess(response.resultMessage || '보험사기 조사 요청이 저장되었습니다.');
+      setSuccess(response.resultMessage || '보험?�기 조사 ?�청???�?�되?�습?�다.');
       setFraudForm(emptyFraudForm);
       await loadAlternativeHistory(accident.accidentNumber, false);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '보험사기 조사 요청에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '보험?�기 조사 ?�청???�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -242,7 +242,7 @@ export function DamageInvestigationPage() {
       !outsourceForm.materialChecklist.trim() ||
       !outsourceForm.requestDetails.trim()
     ) {
-      setError('담당자 번호, 위탁 업체, 전달 서류, 위탁 요청 내용을 모두 입력하세요.');
+      setError('?�당??번호, ?�탁 ?�체, ?�달 ?�류, ?�탁 ?�청 ?�용??모두 ?�력?�세??');
       return;
     }
 
@@ -257,10 +257,10 @@ export function DamageInvestigationPage() {
         requestDetails: outsourceForm.requestDetails.trim()
       });
       setAccident((prev) => (prev ? { ...prev, accidentStatus: 'OUTSOURCED_INVESTIGATION' } : prev));
-      setSuccess(response.resultMessage || '손해조사 위탁 요청이 저장되었습니다.');
+      setSuccess(response.resultMessage || '?�해조사 ?�탁 ?�청???�?�되?�습?�다.');
       await loadAlternativeHistory(accident.accidentNumber, false);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '손해조사 위탁 요청에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '?�해조사 ?�탁 ?�청???�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -276,11 +276,11 @@ export function DamageInvestigationPage() {
       const response = await completeOutsourceInvestigation(accident.accidentNumber);
       const refreshed = await getAccidentReportForInvestigation(accident.accidentNumber);
       setAccident(refreshed);
-      setSuccess(response.resultMessage || '위탁 손해조사 결과가 반영되었습니다.');
+      setSuccess(response.resultMessage || '?�탁 ?�해조사 결과가 반영?�었?�니??');
       setOutsourceForm(emptyOutsourceForm);
       await loadAlternativeHistory(accident.accidentNumber, false);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '위탁 손해조사 완료 처리에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '?�탁 ?�해조사 ?�료 처리???�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -294,15 +294,15 @@ export function DamageInvestigationPage() {
     setSuccess(null);
     setFinalDocument(null);
     if (existingResult) {
-      setError('이미 저장된 손해조사 결과가 있어 초안을 중복 작성할 수 없습니다.');
+      setError('?��? ?�?�된 ?�해조사 결과가 ?�어 초안??중복 ?�성?????�습?�다.');
       setLoadingAction(null);
       return;
     }
     try {
       setDraft(await createPaymentApprovalDraft(accident.accidentNumber, request));
-      setSuccess('지급품의서 초안을 작성했습니다.');
+      setSuccess('지급품?�서 초안???�성?�습?�다.');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '지급품의서 초안 작성에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '지급품?�서 초안 ?�성???�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -316,9 +316,9 @@ export function DamageInvestigationPage() {
     setSuccess(null);
     try {
       setFinalDocument(await saveAdjusterOpinion(accident.accidentNumber, request));
-      setSuccess('손해사정인 소견을 저장했습니다.');
+      setSuccess('?�해?�정???�견???�?�했?�니??');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '손해사정인 소견 저장에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '?�해?�정???�견 ?�?�에 ?�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -334,9 +334,9 @@ export function DamageInvestigationPage() {
       const response = await requestInvestigationApproval(accident.accidentNumber, request);
       setFinalDocument(response);
       setAccident((prev) => (prev ? { ...prev, accidentStatus: response.accidentStatus } : prev));
-      setSuccess('결재 요청이 완료되어 사고 상태가 결재 필요로 변경되었습니다.');
+      setSuccess('결재 ?�청???�료?�어 ?�고 ?�태가 결재 ?�요�?변경되?�습?�다.');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '결재 요청에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '결재 ?�청???�패?�습?�다.');
     } finally {
       setLoadingAction(null);
     }
@@ -352,17 +352,17 @@ export function DamageInvestigationPage() {
     <AppLayout activeMenuId="claim-investigation">
       <div className="page-stack">
         <header className="page-header">
-          <nav className="breadcrumb" aria-label="현재 위치">
+          <nav className="breadcrumb" aria-label="?�재 ?�치">
             <span>보상 처리</span>
             <span aria-hidden="true">/</span>
-            <strong>손해 조사</strong>
+            <strong>?�해 조사</strong>
           </nav>
           <div className="page-heading-row">
             <div>
-              <h1>손해 조사</h1>
-              <p>사고 접수번호 조회부터 손해액 입력, 지급품의서 작성, 결재 요청까지 Basic Path 순서로 처리합니다.</p>
+              <h1>?�해 조사</h1>
+              <p>?�고 ?�수번호 조회부???�해???�력, 지급품?�서 ?�성, 결재 ?�청까�? Basic Path ?�서�?처리?�니??</p>
             </div>
-            <span className="page-kicker">보상 처리 · 손해사정</span>
+            <span className="page-kicker">보상 처리 · ?�해?�정</span>
           </div>
         </header>
 
@@ -371,13 +371,13 @@ export function DamageInvestigationPage() {
         <section className="work-panel search-panel investigation-lookup-panel">
           <div className="panel-header compact">
             <div>
-              <h2>사고 접수번호 조회</h2>
-              <p>손해조사를 시작할 사고 접수번호를 입력합니다.</p>
+              <h2>?�고 ?�수번호 조회</h2>
+              <p>?�해조사�??�작???�고 ?�수번호�??�력?�니??</p>
             </div>
           </div>
           <div className="search-row">
             <input
-              aria-label="사고 접수번호"
+              aria-label="?�고 ?�수번호"
               value={accidentNumberInput}
               onChange={(event) => setAccidentNumberInput(event.target.value)}
               onKeyDown={handleKeyDown}
@@ -386,7 +386,7 @@ export function DamageInvestigationPage() {
             />
             <button className="button primary" type="button" onClick={handleLookup} disabled={loadingAction === 'lookup'}>
               <Search aria-hidden="true" size={16} />
-              {loadingAction === 'lookup' ? '조회 중...' : '조회'}
+              {loadingAction === 'lookup' ? '조회 �?..' : '조회'}
             </button>
           </div>
         </section>
@@ -400,8 +400,8 @@ export function DamageInvestigationPage() {
           <section className="work-panel form-panel">
             <div className="panel-header">
               <div>
-                <h2>손해조사 Alternative Flow</h2>
-                <p>시나리오 기준 반려, 보험사기 조사 요청, 외부 손해조사 위탁을 처리합니다.</p>
+                <h2>?�해조사 Alternative Flow</h2>
+                <p>?�나리오 기�? 반려, 보험?�기 조사 ?�청, ?��? ?�해조사 ?�탁??처리?�니??</p>
               </div>
             </div>
 
@@ -409,7 +409,7 @@ export function DamageInvestigationPage() {
               <form className="form-section" onSubmit={handleRejectInsuranceProcessing}>
                 <h3>보험 처리 반려</h3>
                 <label className="field full">
-                  <span>담당자 번호</span>
+                  <span>?�당??번호</span>
                   <input
                     value={rejectForm.employeeNo}
                     onChange={(event) => setRejectForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
@@ -418,23 +418,23 @@ export function DamageInvestigationPage() {
                   />
                 </label>
                 <label className="field full">
-                  <span>반려 사유</span>
+                  <span>반려 ?�유</span>
                   <textarea
                     value={rejectForm.rejectionReason}
                     onChange={(event) => setRejectForm((prev) => ({ ...prev, rejectionReason: event.target.value }))}
-                    placeholder="계약 보장 범위와 관련 없는 사고로 판단"
+                    placeholder="계약 보장 범위?� 관???�는 ?�고�??�단"
                     disabled={loadingAction === 'reject'}
                   />
                 </label>
                 <button className="button secondary" type="submit" disabled={loadingAction === 'reject'}>
-                  {loadingAction === 'reject' ? '반려 처리 중...' : '보험 처리 반려'}
+                  {loadingAction === 'reject' ? '반려 처리 �?..' : '보험 처리 반려'}
                 </button>
               </form>
 
               <form className="form-section" onSubmit={handleRequestFraudInvestigation}>
-                <h3>보험사기 조사 요청</h3>
+                <h3>보험?�기 조사 ?�청</h3>
                 <label className="field full">
-                  <span>담당자 번호</span>
+                  <span>?�당??번호</span>
                   <input
                     value={fraudForm.employeeNo}
                     onChange={(event) => setFraudForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
@@ -443,23 +443,23 @@ export function DamageInvestigationPage() {
                   />
                 </label>
                 <label className="field full">
-                  <span>실시 여부</span>
+                  <span>?�시 ?��?</span>
                   <input
                     value={fraudForm.confirmation}
                     onChange={(event) => setFraudForm((prev) => ({ ...prev, confirmation: event.target.value }))}
-                    placeholder="실시한다"
+                    placeholder="?�시?�다"
                     disabled={loadingAction === 'fraud'}
                   />
                 </label>
                 <button className="button secondary" type="submit" disabled={loadingAction === 'fraud'}>
-                  {loadingAction === 'fraud' ? '요청 중...' : '보험사기 조사 요청'}
+                  {loadingAction === 'fraud' ? '?�청 �?..' : '보험?�기 조사 ?�청'}
                 </button>
               </form>
 
               <form className="form-section" onSubmit={handleRequestOutsourceInvestigation}>
-                <h3>손해조사 위탁</h3>
+                <h3>?�해조사 ?�탁</h3>
                 <label className="field full">
-                  <span>담당자 번호</span>
+                  <span>?�당??번호</span>
                   <input
                     value={outsourceForm.employeeNo}
                     onChange={(event) => setOutsourceForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
@@ -468,7 +468,7 @@ export function DamageInvestigationPage() {
                   />
                 </label>
                 <label className="field full">
-                  <span>위탁 업체</span>
+                  <span>?�탁 ?�체</span>
                   <input
                     value={outsourceForm.partnerName}
                     onChange={(event) => setOutsourceForm((prev) => ({ ...prev, partnerName: event.target.value }))}
@@ -477,7 +477,7 @@ export function DamageInvestigationPage() {
                   />
                 </label>
                 <label className="field full">
-                  <span>전달 서류</span>
+                  <span>?�달 ?�류</span>
                   <textarea
                     value={outsourceForm.materialChecklist}
                     onChange={(event) => setOutsourceForm((prev) => ({ ...prev, materialChecklist: event.target.value }))}
@@ -485,17 +485,17 @@ export function DamageInvestigationPage() {
                   />
                 </label>
                 <label className="field full">
-                  <span>위탁 요청 내용</span>
+                  <span>?�탁 ?�청 ?�용</span>
                   <textarea
                     value={outsourceForm.requestDetails}
                     onChange={(event) => setOutsourceForm((prev) => ({ ...prev, requestDetails: event.target.value }))}
-                    placeholder="자체 조사 범위를 초과하여 외부 손해사정 위탁 요청"
+                    placeholder="?�체 조사 범위�?초과?�여 ?��? ?�해?�정 ?�탁 ?�청"
                     disabled={loadingAction === 'outsource'}
                   />
                 </label>
                 <div className="form-actions">
                   <button className="button secondary" type="submit" disabled={loadingAction === 'outsource'}>
-                    {loadingAction === 'outsource' ? '위탁 요청 중...' : '손해조사 위탁'}
+                    {loadingAction === 'outsource' ? '?�탁 ?�청 �?..' : '?�해조사 ?�탁'}
                   </button>
                   <button
                     className="button primary"
@@ -503,7 +503,7 @@ export function DamageInvestigationPage() {
                     onClick={handleCompleteOutsourceInvestigation}
                     disabled={loadingAction === 'outsourceComplete'}
                   >
-                    {loadingAction === 'outsourceComplete' ? '완료 처리 중...' : '위탁 결과 반영'}
+                    {loadingAction === 'outsourceComplete' ? '?�료 처리 �?..' : '?�탁 결과 반영'}
                   </button>
                 </div>
               </form>
@@ -515,8 +515,8 @@ export function DamageInvestigationPage() {
           <section className="work-panel detail-panel">
             <div className="panel-header detail-title">
               <div>
-                <h2>Alternative Flow 처리 이력</h2>
-                <p>반려, 보험사기 조사, 위탁 처리 결과를 조회합니다.</p>
+                <h2>Alternative Flow 처리 ?�력</h2>
+                <p>반려, 보험?�기 조사, ?�탁 처리 결과�?조회?�니??</p>
               </div>
               <button
                 className="button secondary"
@@ -524,11 +524,11 @@ export function DamageInvestigationPage() {
                 onClick={() => loadAlternativeHistory(accident.accidentNumber)}
                 disabled={loadingAction === 'history'}
               >
-                {loadingAction === 'history' ? '조회 중...' : '이력 새로고침'}
+                {loadingAction === 'history' ? '조회 �?..' : '?�력 ?�로고침'}
               </button>
             </div>
             {alternativeHistory.length === 0 ? (
-              <p className="empty-value">저장된 Alternative Flow 이력이 없습니다.</p>
+              <p className="empty-value">?�?�된 Alternative Flow ?�력???�습?�다.</p>
             ) : (
               <div className="document-list">
                 {alternativeHistory.map((item) => (
@@ -537,10 +537,10 @@ export function DamageInvestigationPage() {
                       <span>{getClaimAlternativeActionLabel(item.actionType)}</span>
                       <strong>{item.resultMessage}</strong>
                       <em>
-                        담당자 {item.employeeNo} · {formatDateTime(item.createdAt)}
+                        ?�당??{item.employeeNo} · {formatDateTime(item.createdAt)}
                       </em>
                       {item.reason && <p>{item.reason}</p>}
-                      {item.partnerName && <p>위탁 업체: {item.partnerName}</p>}
+                      {item.partnerName && <p>?�탁 ?�체: {item.partnerName}</p>}
                     </div>
                   </div>
                 ))}
@@ -580,14 +580,14 @@ export function DamageInvestigationPage() {
 
         {finalDocument && <FinalPaymentApprovalCard document={finalDocument} />}
 
-        {finalDocument && !existingResult && finalDocument.accidentStatus !== 'APPROVAL_REQUIRED' && (
-          <InvestigationApprovalPanel
-            accidentNumber={normalizedAccidentNumber}
-            disabled={!finalDocument}
-            isSubmitting={loadingAction === 'approval'}
-            onSubmit={handleRequestApproval}
-          />
-        )}
+        {finalDocument && ['DRAFT', 'OPINION_SAVED'].includes(finalDocument.submissionStatus) && (
+  <InvestigationApprovalPanel
+    accidentNumber={normalizedAccidentNumber}
+    disabled={!finalDocument}
+    isSubmitting={loadingAction === 'approval'}
+    onSubmit={handleRequestApproval}
+  />
+)}
 
         {finalDocument?.accidentStatus === 'APPROVAL_REQUIRED' && (
           <aside className="work-panel empty-result next-step-panel">
