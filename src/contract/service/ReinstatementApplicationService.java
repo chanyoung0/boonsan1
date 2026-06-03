@@ -2,6 +2,7 @@ package contract.service;
 
 import contract.dto.ReinstatementCreateRequest;
 import contract.dto.ReinstatementResponse;
+import contract.dto.ReinstatementUnpaidSummaryResponse;
 import contract.dto.UnderwritingRequestCompleteRequest;
 import contract.dto.UnderwritingRequestCreateRequest;
 import contract.dto.UnderwritingRequestResponse;
@@ -63,17 +64,12 @@ public class ReinstatementApplicationService {
         if (request.getHasHealthChanged() == null) {
             throw new IllegalArgumentException("hasHealthChanged is required.");
         }
-        if (request.getUnpaidInstallmentCount() == null || request.getUnpaidInstallmentCount() < 1) {
-            throw new IllegalArgumentException("unpaidInstallmentCount must be >= 1.");
-        }
-        if (request.getPremiumPerInstallment() == null || request.getPremiumPerInstallment().signum() <= 0) {
-            throw new IllegalArgumentException("premiumPerInstallment must be greater than 0.");
+        ReinstatementUnpaidSummaryResponse unpaidSummary = getUnpaidSummary(contract.getPolicyNumber());
+        if (unpaidSummary.getUnpaidInstallmentCount() < 1 || unpaidSummary.getUnpaidPremium().signum() <= 0) {
+            throw new IllegalArgumentException("No unpaid premium exists for reinstatement.");
         }
 
         // 미납보험료 = 보험료 × 미납회차 (insurance-system-architecture 스킬 명시)
-        BigDecimal unpaidPremium = request.getPremiumPerInstallment()
-                .multiply(BigDecimal.valueOf(request.getUnpaidInstallmentCount()));
-
         LocalDateTime appliedAt = LocalDateTime.now();
         String reinstatementId = generateReinstatementId();
 
@@ -83,10 +79,10 @@ public class ReinstatementApplicationService {
                 request.getReinstatementReason().name(),
                 request.getDesiredDate(),
                 request.getHasHealthChanged(),
-                request.getLastPaidDate(),
-                request.getUnpaidInstallmentCount(),
-                request.getPremiumPerInstallment(),
-                unpaidPremium,
+                request.getLastPaidDate() == null ? unpaidSummary.getLastPaidDate() : request.getLastPaidDate(),
+                unpaidSummary.getUnpaidInstallmentCount(),
+                unpaidSummary.getPremiumPerInstallment(),
+                unpaidSummary.getUnpaidPremium(),
                 ReinstatementStatus.APPLIED.name(),
                 appliedAt
         );
@@ -112,6 +108,34 @@ public class ReinstatementApplicationService {
     public List<ReinstatementResponse> listByPolicyNumber(String policyNumber) {
         Contract contract = contractApplicationService.requireContract(policyNumber);
         return reinstatementMapper.findByPolicyNumber(contract.getPolicyNumber());
+    }
+
+    @Transactional(readOnly = true)
+    public ReinstatementUnpaidSummaryResponse getUnpaidSummary(String policyNumber) {
+        Contract contract = contractApplicationService.requireContract(policyNumber);
+        ReinstatementUnpaidSummaryResponse summary =
+                reinstatementMapper.findUnpaidSummary(contract.getPolicyNumber());
+
+        if (!Boolean.TRUE.equals(contract.getHasUnpaidPremium())) {
+            return new ReinstatementUnpaidSummaryResponse(
+                    contract.getPolicyNumber(),
+                    0,
+                    contract.getPremiumAmount(),
+                    BigDecimal.ZERO,
+                    summary == null ? null : summary.getLastPaidDate()
+            );
+        }
+        if (summary == null || summary.getUnpaidInstallmentCount() == null
+                || summary.getUnpaidInstallmentCount() < 1) {
+            return new ReinstatementUnpaidSummaryResponse(
+                    contract.getPolicyNumber(),
+                    1,
+                    contract.getPremiumAmount(),
+                    contract.getPremiumAmount(),
+                    summary == null ? null : summary.getLastPaidDate()
+            );
+        }
+        return summary;
     }
 
     @Transactional

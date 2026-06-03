@@ -9,6 +9,7 @@ import {
   cancelEndorsement,
   completeEndorsementUnderwriting,
   getActiveEndorsement,
+  getContract,
   getEndorsementUnderwriting,
   listEndorsements,
   rejectEndorsement,
@@ -75,6 +76,12 @@ const SURCHARGE_CONDITION_OPTIONS: SurchargeCondition[] = [
   'HAZARDOUS_ACTIVITY',
   'NONE'
 ];
+
+function requiresEndorsementUnderwriting(changeReason: ChangeReason) {
+  return changeReason === 'INSURED_AMOUNT_CHANGE'
+    || changeReason === 'SPECIAL_CONTRACT_ADD'
+    || changeReason === 'SPECIAL_CONTRACT_REMOVE';
+}
 
 export function EndorsementPage() {
   const [contract, setContract] = useState<ContractResponse | null>(null);
@@ -185,6 +192,7 @@ export function EndorsementPage() {
     setActionError(null);
     try {
       await action();
+      setContract(await getContract(contract.policyNumber));
       await refresh(contract.policyNumber);
     } catch (caught) {
       setActionError(caught instanceof Error ? caught.message : '처리에 실패했습니다.');
@@ -205,10 +213,11 @@ export function EndorsementPage() {
   };
 
   const canApply = contract && !active;
+  const activeRequiresUnderwriting = active ? requiresEndorsementUnderwriting(active.changeReason) : false;
 
   return (
     <AppLayout activeMenuId="contract-endorsement">
-      <div className="page-stack">
+      <div className="page-stack contract-page">
         <header className="page-header">
           <nav className="breadcrumb" aria-label="현재 위치">
             <span>계약 관리</span>
@@ -218,14 +227,14 @@ export function EndorsementPage() {
           <div className="page-heading-row">
             <div>
               <h1>배서 관리</h1>
-              <p>계약 내용 변경 신청 → 심사 요청 → 심사 완료 → 승인/반려. 변경 내용은 기록만 남기고 contract 컬럼은 갱신하지 않습니다.</p>
+              <p>계약 내용 변경 신청과 심사, 승인 또는 반려 이력을 관리합니다.</p>
             </div>
             <span className="page-kicker">계약 관리 · 관리자 페이지</span>
           </div>
         </header>
 
         <ContractLookupCard
-          title="계약 조회"
+          title="배서 대상 계약 조회"
           description="배서 신청할 계약의 증권번호를 입력하세요."
           placeholder="POL-2024-000001"
           onContractLoaded={handleContractLoaded}
@@ -235,7 +244,7 @@ export function EndorsementPage() {
         {contract && (
           <>
             {loadError && <AlertMessage type="error" message={loadError} />}
-            {isLoading && <div className="work-panel">배서 정보를 불러오는 중...</div>}
+            {isLoading && <div className="work-panel contract-loading-panel">배서 정보를 불러오는 중...</div>}
 
             {!isLoading && canApply && (
               <form className="work-panel" onSubmit={handleApply}>
@@ -324,7 +333,13 @@ export function EndorsementPage() {
 
                 {active.endorsementStatus === 'APPLIED' && (
                   <>
-                    {!active.underwritingRequestId && (
+                    {!activeRequiresUnderwriting && (
+                      <div className="notice-box">
+                        <strong>심사 불필요 배서</strong>
+                        <p>납입주기 변경과 수익자 변경은 확인 후 바로 승인할 수 있습니다.</p>
+                      </div>
+                    )}
+                    {activeRequiresUnderwriting && !active.underwritingRequestId && (
                       <div className="form-actions">
                         <label>
                           <span>심사 유형</span>
@@ -424,17 +439,32 @@ export function EndorsementPage() {
                         className="button primary"
                         type="button"
                         onClick={() => runAction(() => approveEndorsement(contract.policyNumber))}
-                        disabled={isBusy || !activeUw || activeUw.underwritingResult !== 'APPROVED'}
+                        disabled={
+                          isBusy
+                          || (
+                            activeRequiresUnderwriting
+                            && (!activeUw
+                              || (
+                                activeUw.underwritingResult !== 'APPROVED'
+                                && activeUw.underwritingResult !== 'SURCHARGE'
+                              ))
+                          )
+                        }
                       >
-                        배서 승인 (UW=APPROVED 필요)
+                        배서 승인
                       </button>
                       <button
                         className="button"
                         type="button"
                         onClick={() => runAction(() => rejectEndorsement(contract.policyNumber))}
-                        disabled={isBusy || !activeUw || activeUw.underwritingResult !== 'REJECTED'}
+                        disabled={
+                          isBusy
+                          || !activeRequiresUnderwriting
+                          || !activeUw
+                          || activeUw.underwritingResult !== 'REJECTED'
+                        }
                       >
-                        배서 반려 (UW=REJECTED 필요)
+                        배서 반려
                       </button>
                       <button
                         className="button"
@@ -455,7 +485,7 @@ export function EndorsementPage() {
                 <div className="panel-header compact">
                   <div>
                     <h2>배서 이력 ({history.length}건)</h2>
-                    <p>이 계약의 배서 전체 기록.</p>
+                    <p>이 계약에서 처리된 배서 신청 이력을 확인합니다.</p>
                   </div>
                 </div>
                 <div className="payout-table">

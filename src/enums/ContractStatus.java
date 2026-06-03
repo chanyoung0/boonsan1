@@ -1,5 +1,5 @@
 package enums;
 
 public enum ContractStatus {
-    ACTIVE, TERMINATED, SUSPENDED, EXPIRED, PENDING
+    ACTIVE, TERMINATED, SUSPENDED, MATURED, EXPIRED, PENDING
 }

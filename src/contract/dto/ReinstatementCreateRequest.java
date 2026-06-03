@@ -1,8 +1,6 @@
 package contract.dto;
 
 import enums.ReinstatementReason;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -21,12 +19,8 @@ public class ReinstatementCreateRequest {
 
     private LocalDate lastPaidDate;
 
-    @NotNull
-    @Min(1)
     private Integer unpaidInstallmentCount;
 
-    @NotNull
-    @DecimalMin(value = "0.01", inclusive = true)
     private BigDecimal premiumPerInstallment;
 
     public ReinstatementReason getReinstatementReason() { return reinstatementReason; }

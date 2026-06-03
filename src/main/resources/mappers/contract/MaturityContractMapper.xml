@@ -4,10 +4,106 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="contract.mapper.MaturityContractMapper">
 
+    <resultMap id="MaturityTargetMap" type="contract.dto.MaturityTargetResponse">
+        <id property="policyNumber" column="policy_number"/>
+        <result property="insuredName" column="insured_name"/>
+        <result property="insuredContact" column="insured_contact"/>
+        <result property="contractStartDate" column="contract_start_date"/>
+        <result property="contractEndDate" column="contract_end_date"/>
+        <result property="contractStatus" column="contract_status" javaType="enums.ContractStatus"/>
+        <result property="insuredAmount" column="insured_amount"/>
+        <result property="maturityRefundAmount" column="maturity_refund_amount"/>
+        <result property="daysUntilMaturity" column="days_until_maturity"/>
+        <result property="maturityTiming" column="maturity_timing"/>
+        <result property="noticeSentAt" column="notice_sent_at"/>
+        <result property="renewalIntention" column="renewal_intention"/>
+        <result property="renewalCheckedAt" column="renewal_checked_at"/>
+    </resultMap>
+
     <update id="updateStatusToExpired">
         UPDATE contract
         SET contract_status = #{nextStatus}
         WHERE policy_number = #{policyNumber}
           AND contract_status = #{currentStatus}
+    </update>
+
+    <select id="findMaturityTargets" resultMap="MaturityTargetMap">
+        SELECT
+            c.policy_number,
+            c.insured_name,
+            c.insured_contact,
+            c.contract_start_date,
+            c.contract_end_date,
+            c.contract_status,
+            COALESCE(c.insured_amount, p.insured_amount) AS insured_amount,
+            COALESCE(c.maturity_refund_amount, p.maturity_refund, 0) AS maturity_refund_amount,
+            (c.contract_end_date - CURRENT_DATE)::BIGINT AS days_until_maturity,
+            CASE
+                WHEN c.contract_end_date &lt;= CURRENT_DATE THEN 'DUE'
+                ELSE 'UPCOMING'
+            END AS maturity_timing,
+            n.sent_at AS notice_sent_at,
+            n.renewal_intention,
+            n.renewal_checked_at
+        FROM contract c
+        LEFT JOIN product p ON p.product_code = c.product_code
+        LEFT JOIN contract_maturity_notice n ON n.policy_number = c.policy_number
+        WHERE c.contract_status = 'ACTIVE'
+          AND c.contract_end_date &lt;= #{targetEndDate}
+        ORDER BY c.contract_end_date, c.policy_number
+    </select>
+
+    <select id="findRenewalTargets" resultMap="MaturityTargetMap">
+        SELECT
+            c.policy_number,
+            c.insured_name,
+            c.insured_contact,
+            c.contract_start_date,
+            c.contract_end_date,
+            c.contract_status,
+            COALESCE(c.insured_amount, p.insured_amount) AS insured_amount,
+            COALESCE(c.maturity_refund_amount, p.maturity_refund, 0) AS maturity_refund_amount,
+            (c.contract_end_date - CURRENT_DATE)::BIGINT AS days_until_maturity,
+            CASE
+                WHEN c.contract_end_date &lt;= CURRENT_DATE THEN 'DUE'
+                ELSE 'UPCOMING'
+            END AS maturity_timing,
+            n.sent_at AS notice_sent_at,
+            n.renewal_intention,
+            n.renewal_checked_at
+        FROM contract c
+        LEFT JOIN product p ON p.product_code = c.product_code
+        JOIN contract_maturity_notice n ON n.policy_number = c.policy_number
+        WHERE c.contract_status IN ('ACTIVE', 'MATURED')
+          AND c.contract_end_date &lt;= CURRENT_DATE
+          AND n.renewal_intention IS NULL
+        ORDER BY c.contract_end_date, c.policy_number
+    </select>
+
+    <insert id="upsertNotice">
+        INSERT INTO contract_maturity_notice (
+            notice_id, policy_number, delivery_method, notice_message,
+            sent_at, created_at
+        ) VALUES (
+            #{noticeId}, #{policyNumber}, #{deliveryMethod}, #{noticeMessage},
+            #{sentAt}, #{createdAt}
+        )
+        ON CONFLICT (policy_number) DO UPDATE
+        SET delivery_method = EXCLUDED.delivery_method,
+            notice_message = EXCLUDED.notice_message,
+            sent_at = EXCLUDED.sent_at
+    </insert>
+
+    <update id="updateRenewalIntention">
+        UPDATE contract_maturity_notice
+        SET renewal_intention = #{renewalIntention},
+            renewal_checked_at = #{renewalCheckedAt}
+        WHERE policy_number = #{policyNumber}
+    </update>
+
+    <update id="updateContractStatus">
+        UPDATE contract
+        SET contract_status = #{nextStatus}
+        WHERE policy_number = #{policyNumber}
     </update>
 </mapper>

@@ -10,6 +10,9 @@
         <result property="contractStatus" column="contract_status" javaType="enums.ContractStatus"/>
         <result property="paymentCycle" column="payment_cycle" javaType="enums.PaymentCycle"/>
         <result property="premiumAmount" column="premium_amount"/>
+        <result property="insuredAmount" column="insured_amount"/>
+        <result property="specialContractList" column="special_contract_list"/>
+        <result property="maturityRefundAmount" column="maturity_refund_amount"/>
         <result property="installmentCount" column="installment_count"/>
         <result property="hasUnpaidPremium" column="has_unpaid_premium"/>
         <result property="contractStartDate" column="contract_start_date"/>
@@ -24,22 +27,44 @@
 
     <select id="findByPolicyNumber" resultMap="ContractResultMap">
         SELECT
-            policy_number,
-            product_code,
-            contract_status,
-            payment_cycle,
-            premium_amount,
-            installment_count,
-            has_unpaid_premium,
-            contract_start_date,
-            contract_end_date,
-            insured_name,
-            insured_rrn,
-            insured_contact,
-            account_number,
-            account_bank,
-            created_at
-        FROM contract
-        WHERE policy_number = #{policyNumber}
+            c.policy_number,
+            c.product_code,
+            c.contract_status,
+            c.payment_cycle,
+            c.premium_amount,
+            COALESCE(c.insured_amount, p.insured_amount) AS insured_amount,
+            COALESCE(c.special_contract_list, p.special_contract_info) AS special_contract_list,
+            COALESCE(c.maturity_refund_amount, p.maturity_refund, 0) AS maturity_refund_amount,
+            c.installment_count,
+            c.has_unpaid_premium,
+            c.contract_start_date,
+            c.contract_end_date,
+            c.insured_name,
+            c.insured_rrn,
+            c.insured_contact,
+            c.account_number,
+            c.account_bank,
+            c.created_at
+        FROM contract c
+        LEFT JOIN product p ON p.product_code = c.product_code
+        WHERE c.policy_number = #{policyNumber}
     </select>
+
+    <update id="updateInsuredAmount">
+        UPDATE contract
+        SET insured_amount = #{insuredAmount}
+        WHERE policy_number = #{policyNumber}
+    </update>
+
+    <update id="updatePaymentCycle">
+        UPDATE contract
+        SET payment_cycle = #{paymentCycle}
+        WHERE policy_number = #{policyNumber}
+    </update>
+
+    <update id="updateSpecialContractList">
+        UPDATE contract
+        SET special_contract_list = #{specialContractList}
+        WHERE policy_number = #{policyNumber}
+    </update>
 </mapper>

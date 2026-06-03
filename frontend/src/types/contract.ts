@@ -1,4 +1,4 @@
-export type ContractStatus = 'ACTIVE' | 'TERMINATED' | 'SUSPENDED' | 'EXPIRED' | 'PENDING';
+export type ContractStatus = 'ACTIVE' | 'TERMINATED' | 'SUSPENDED' | 'MATURED' | 'EXPIRED' | 'PENDING';
 
 export type PaymentCycle = 'MONTHLY' | 'QUARTERLY' | 'SEMI_ANNUALLY' | 'ANNUALLY';
 
@@ -17,6 +17,9 @@ export interface ContractResponse {
   insuredContact: string;
   accountNumber: string | null;
   accountBank: string | null;
+  insuredAmount: number | null;
+  specialContractList: string | null;
+  maturityRefundAmount: number;
   createdAt: string;
 }
 
@@ -24,7 +27,8 @@ export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
   ACTIVE: '유효',
   TERMINATED: '해지',
   SUSPENDED: '실효',
-  EXPIRED: '만기',
+  MATURED: '만기',
+  EXPIRED: '만기종료',
   PENDING: '대기'
 };
 
@@ -52,6 +56,10 @@ export interface MaturityNoticeResponse {
   daysUntilMaturity: number;
   noticeMessage: string;
   deliveryMethod: string;
+  maturityRefundAmount: number;
+  sentAt: string | null;
+  renewalIntention: boolean | null;
+  renewalCheckedAt: string | null;
 }
 
 export interface MaturityProcessResponse {
@@ -60,6 +68,30 @@ export interface MaturityProcessResponse {
   contractStatus: ContractStatus;
   contractEndDate: string;
   processedAt: string;
+  message: string;
+}
+
+export interface MaturityTargetResponse {
+  policyNumber: string;
+  insuredName: string;
+  insuredContact: string;
+  contractStartDate: string;
+  contractEndDate: string;
+  contractStatus: ContractStatus;
+  insuredAmount: number | null;
+  maturityRefundAmount: number;
+  daysUntilMaturity: number;
+  maturityTiming: 'DUE' | 'UPCOMING';
+  noticeSentAt: string | null;
+  renewalIntention: boolean | null;
+  renewalCheckedAt: string | null;
+}
+
+export interface MaturityRenewalResponse {
+  policyNumber: string;
+  renewalIntention: boolean;
+  contractStatus: ContractStatus;
+  checkedAt: string;
   message: string;
 }
 
@@ -167,6 +199,35 @@ export interface PaymentCollectionResponse {
   createdAt: string;
 }
 
+export interface PaymentCollectionTargetResponse {
+  policyNumber: string;
+  insuredName: string;
+  installmentNo: number;
+  dueDate: string;
+  plannedAmount: number;
+  accountNumber: string | null;
+  accountBank: string | null;
+}
+
+export interface PaymentCollectionBatchRequest {
+  policyNumbers: string[];
+}
+
+export interface PaymentCollectionBatchResponse {
+  targetCount: number;
+  successCount: number;
+  failureCount: number;
+  totalCollectedAmount: number;
+  results: PaymentCollectionResponse[];
+}
+
+export interface PaymentCollectionTransferTargetResponse {
+  policyNumber: string;
+  insuredName: string;
+  unpaidInstallmentCount: number;
+  unpaidAmount: number;
+}
+
 export interface UnpaidNoticeResponse {
   collectionId: string;
   policyNumber: string;
@@ -229,8 +290,16 @@ export interface ReinstatementCreateRequest {
   desiredDate: string;
   hasHealthChanged: boolean;
   lastPaidDate: string | null;
+  unpaidInstallmentCount?: number;
+  premiumPerInstallment?: number;
+}
+
+export interface ReinstatementUnpaidSummaryResponse {
+  policyNumber: string;
   unpaidInstallmentCount: number;
   premiumPerInstallment: number;
+  unpaidPremium: number;
+  lastPaidDate: string | null;
 }
 
 export interface ReinstatementResponse {

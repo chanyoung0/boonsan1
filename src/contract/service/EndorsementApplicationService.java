@@ -5,8 +5,11 @@ import contract.dto.EndorsementResponse;
 import contract.dto.UnderwritingRequestCompleteRequest;
 import contract.dto.UnderwritingRequestCreateRequest;
 import contract.dto.UnderwritingRequestResponse;
+import contract.mapper.ContractMapper;
 import contract.mapper.EndorsementMapper;
+import enums.ChangeReason;
 import enums.EndorsementStatus;
+import enums.PaymentCycle;
 import enums.RequestReason;
 import enums.RequestStatus;
 import enums.UnderwritingResultType;
@@ -14,10 +17,14 @@ import model.contract.Contract;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -25,15 +32,18 @@ public class EndorsementApplicationService {
 
     private final ContractApplicationService contractApplicationService;
     private final UnderwritingRequestApplicationService underwritingRequestApplicationService;
+    private final ContractMapper contractMapper;
     private final EndorsementMapper endorsementMapper;
 
     public EndorsementApplicationService(
             ContractApplicationService contractApplicationService,
             UnderwritingRequestApplicationService underwritingRequestApplicationService,
+            ContractMapper contractMapper,
             EndorsementMapper endorsementMapper
     ) {
         this.contractApplicationService = contractApplicationService;
         this.underwritingRequestApplicationService = underwritingRequestApplicationService;
+        this.contractMapper = contractMapper;
         this.endorsementMapper = endorsementMapper;
     }
 
@@ -97,6 +107,10 @@ public class EndorsementApplicationService {
             throw new IllegalArgumentException(
                     "Underwriting request already exists for endorsement: " + active.getEndorsementId());
         }
+        if (!requiresUnderwriting(active.getChangeReason())) {
+            throw new IllegalArgumentException(
+                    "This endorsement does not require underwriting: " + active.getChangeReason());
+        }
 
         UnderwritingRequestResponse uw = underwritingRequestApplicationService.createForSource(
                 contract.getPolicyNumber(),
@@ -133,7 +147,11 @@ public class EndorsementApplicationService {
     public EndorsementResponse approve(String policyNumber) {
         Contract contract = contractApplicationService.requireContract(policyNumber);
         EndorsementResponse active = requireActive(contract.getPolicyNumber());
-        requireUnderwritingResult(active, UnderwritingResultType.APPROVED, "approve");
+        if (requiresUnderwriting(active.getChangeReason())) {
+            requireApprovedOrSurchargeUnderwriting(active);
+        }
+
+        applyContractChange(contract, active);
 
         int updated = endorsementMapper.updateStatusToApproved(
                 active.getEndorsementId(),
@@ -199,6 +217,119 @@ public class EndorsementApplicationService {
                     "Underwriting result must be " + expected + " to " + action + ". Current: "
                             + uw.getUnderwritingResult());
         }
+    }
+
+    private void requireApprovedOrSurchargeUnderwriting(EndorsementResponse endorsement) {
+        if (endorsement.getUnderwritingRequestId() == null) {
+            throw new IllegalArgumentException(
+                    "Cannot approve endorsement without completed underwriting request.");
+        }
+        UnderwritingRequestResponse uw = underwritingRequestApplicationService
+                .requireById(endorsement.getUnderwritingRequestId());
+        if (uw.getRequestStatus() != RequestStatus.COMPLETED) {
+            throw new IllegalArgumentException(
+                    "Underwriting request must be COMPLETED to approve. Current: " + uw.getRequestStatus());
+        }
+        if (uw.getUnderwritingResult() != UnderwritingResultType.APPROVED
+                && uw.getUnderwritingResult() != UnderwritingResultType.SURCHARGE) {
+            throw new IllegalArgumentException(
+                    "Underwriting result must be APPROVED or SURCHARGE to approve. Current: "
+                            + uw.getUnderwritingResult());
+        }
+    }
+
+    private boolean requiresUnderwriting(ChangeReason changeReason) {
+        return changeReason == ChangeReason.INSURED_AMOUNT_CHANGE
+                || changeReason == ChangeReason.SPECIAL_CONTRACT_ADD
+                || changeReason == ChangeReason.SPECIAL_CONTRACT_REMOVE;
+    }
+
+    private void applyContractChange(Contract contract, EndorsementResponse endorsement) {
+        int updated;
+        switch (endorsement.getChangeReason()) {
+            case INSURED_AMOUNT_CHANGE:
+                BigDecimal insuredAmount = parsePositiveAmount(endorsement.getNewContent(), "insuredAmount");
+                updated = contractMapper.updateInsuredAmount(contract.getPolicyNumber(), insuredAmount);
+                break;
+            case PAYMENT_CYCLE_CHANGE:
+                PaymentCycle paymentCycle = parsePaymentCycle(endorsement.getNewContent());
+                updated = contractMapper.updatePaymentCycle(contract.getPolicyNumber(), paymentCycle.name());
+                break;
+            case SPECIAL_CONTRACT_ADD:
+                String addedList = updateSpecialContractList(
+                        contract.getSpecialContractList(),
+                        endorsement.getNewContent(),
+                        true
+                );
+                updated = contractMapper.updateSpecialContractList(contract.getPolicyNumber(), addedList);
+                break;
+            case SPECIAL_CONTRACT_REMOVE:
+                String removedList = updateSpecialContractList(
+                        contract.getSpecialContractList(),
+                        endorsement.getNewContent(),
+                        false
+                );
+                updated = contractMapper.updateSpecialContractList(contract.getPolicyNumber(), removedList);
+                break;
+            case BENEFICIARY_CHANGE:
+                // The current contract schema has no beneficiary column. The confirmed change remains in endorsement history.
+                return;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported endorsement change reason: " + endorsement.getChangeReason());
+        }
+        if (updated == 0) {
+            throw new IllegalArgumentException(
+                    "Contract update failed for endorsement: " + endorsement.getEndorsementId());
+        }
+    }
+
+    private BigDecimal parsePositiveAmount(String value, String fieldName) {
+        try {
+            BigDecimal amount = new BigDecimal(value.replace(",", "").trim());
+            if (amount.signum() <= 0) {
+                throw new IllegalArgumentException(fieldName + " must be greater than 0.");
+            }
+            return amount;
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(fieldName + " must be a number.");
+        }
+    }
+
+    private PaymentCycle parsePaymentCycle(String value) {
+        try {
+            return PaymentCycle.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Unsupported payment cycle: " + value);
+        }
+    }
+
+    private String updateSpecialContractList(String currentValue, String requestedValue, boolean add) {
+        Set<String> items = new LinkedHashSet<>(splitItems(currentValue));
+        List<String> requestedItems = splitItems(requestedValue);
+        if (requestedItems.isEmpty()) {
+            throw new IllegalArgumentException("special contract item is required.");
+        }
+        if (add) {
+            items.addAll(requestedItems);
+        } else {
+            items.removeAll(requestedItems);
+        }
+        return items.isEmpty() ? null : String.join(", ", items);
+    }
+
+    private List<String> splitItems(String value) {
+        List<String> items = new ArrayList<>();
+        if (value == null || value.trim().isEmpty()) {
+            return items;
+        }
+        for (String item : value.split("[,\\n]")) {
+            String normalized = item.trim();
+            if (!normalized.isEmpty()) {
+                items.add(normalized);
+            }
+        }
+        return items;
     }
 
     private EndorsementResponse requireActive(String policyNumber) {

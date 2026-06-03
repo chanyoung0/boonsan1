@@ -535,6 +535,10 @@ INSERT INTO contract (
      'TEST-ACCOUNT-0004', 'SHINHAN', '2024-03-01 11:00:00')
 ON CONFLICT (policy_number) DO NOTHING;
 
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS insured_amount NUMERIC(15,2);
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS special_contract_list TEXT;
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS maturity_refund_amount NUMERIC(15,2);
+
 CREATE TABLE IF NOT EXISTS contract_payout (
     payout_id VARCHAR(50) PRIMARY KEY,
     policy_number VARCHAR(50) NOT NULL,
@@ -644,3 +648,17 @@ CREATE INDEX IF NOT EXISTS idx_contract_endorsement_policy_number
 CREATE UNIQUE INDEX IF NOT EXISTS idx_contract_endorsement_active_policy
     ON contract_endorsement (policy_number)
     WHERE endorsement_status = 'APPLIED';
+
+CREATE TABLE IF NOT EXISTS contract_maturity_notice (
+    notice_id VARCHAR(50) PRIMARY KEY,
+    policy_number VARCHAR(50) NOT NULL,
+    delivery_method VARCHAR(50) NOT NULL,
+    notice_message TEXT NOT NULL,
+    sent_at TIMESTAMP NOT NULL,
+    renewal_intention BOOLEAN,
+    renewal_checked_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_contract_maturity_notice_policy_number
+    ON contract_maturity_notice (policy_number);

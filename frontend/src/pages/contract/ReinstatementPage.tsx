@@ -9,6 +9,8 @@ import {
   completeReinstatement,
   completeReinstatementUnderwriting,
   getActiveReinstatement,
+  getContract,
+  getReinstatementUnpaidSummary,
   getReinstatementUnderwriting,
   listReinstatements,
   requestReinstatementUnderwriting,
@@ -28,6 +30,7 @@ import {
   type RejectionReason,
   type ReinstatementReason,
   type ReinstatementResponse,
+  type ReinstatementUnpaidSummaryResponse,
   type SurchargeCondition,
   type UnderwritingRequestResponse,
   type UnderwritingResultType,
@@ -70,6 +73,7 @@ export function ReinstatementPage() {
   const [contract, setContract] = useState<ContractResponse | null>(null);
   const [active, setActive] = useState<ReinstatementResponse | null>(null);
   const [activeUw, setActiveUw] = useState<UnderwritingRequestResponse | null>(null);
+  const [unpaidSummary, setUnpaidSummary] = useState<ReinstatementUnpaidSummaryResponse | null>(null);
   const [history, setHistory] = useState<ReinstatementResponse[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -84,24 +88,23 @@ export function ReinstatementPage() {
   const [reason, setReason] = useState<ReinstatementReason>('FINANCIAL_DIFFICULTY');
   const [desiredDate, setDesiredDate] = useState('');
   const [hasHealthChanged, setHasHealthChanged] = useState(false);
-  const [lastPaidDate, setLastPaidDate] = useState('');
-  const [unpaidInstallmentCount, setUnpaidInstallmentCount] = useState('1');
-  const [premiumPerInstallment, setPremiumPerInstallment] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
   const refresh = async (policyNumber: string) => {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const [activeResult, historyResult] = await Promise.all([
+      const [activeResult, historyResult, unpaidSummaryResult] = await Promise.all([
         getActiveReinstatement(policyNumber).catch((caught) => {
           if (caught instanceof ApiError && caught.status === 404) return null;
           throw caught;
         }),
-        listReinstatements(policyNumber)
+        listReinstatements(policyNumber),
+        getReinstatementUnpaidSummary(policyNumber)
       ]);
       setActive(activeResult);
       setHistory(historyResult);
+      setUnpaidSummary(unpaidSummaryResult);
       if (activeResult?.underwritingRequestId) {
         try {
           setActiveUw(await getReinstatementUnderwriting(policyNumber));
@@ -124,6 +127,7 @@ export function ReinstatementPage() {
     } else {
       setActive(null);
       setHistory([]);
+      setUnpaidSummary(null);
     }
   }, [contract]);
 
@@ -137,6 +141,7 @@ export function ReinstatementPage() {
     setContract(null);
     setActive(null);
     setActiveUw(null);
+    setUnpaidSummary(null);
     setHistory([]);
     setLoadError(null);
     setActionError(null);
@@ -156,19 +161,13 @@ export function ReinstatementPage() {
   const handleApply = async (event: FormEvent) => {
     event.preventDefault();
     if (!contract) return;
-    const installment = Number(unpaidInstallmentCount);
-    const premium = Number(premiumPerInstallment);
 
     if (!desiredDate) {
       setFormError('부활 희망일을 입력하세요.');
       return;
     }
-    if (!Number.isInteger(installment) || installment < 1) {
-      setFormError('미납 회차는 1 이상 정수여야 합니다.');
-      return;
-    }
-    if (!Number.isFinite(premium) || premium <= 0) {
-      setFormError('회차당 보험료는 0보다 커야 합니다.');
+    if (!unpaidSummary || unpaidSummary.unpaidInstallmentCount < 1 || unpaidSummary.unpaidPremium <= 0) {
+      setFormError('조회된 미납 보험료가 없어 부활을 신청할 수 없습니다.');
       return;
     }
 
@@ -179,14 +178,9 @@ export function ReinstatementPage() {
         reinstatementReason: reason,
         desiredDate,
         hasHealthChanged,
-        lastPaidDate: lastPaidDate || null,
-        unpaidInstallmentCount: installment,
-        premiumPerInstallment: premium
+        lastPaidDate: null
       });
       setDesiredDate('');
-      setLastPaidDate('');
-      setUnpaidInstallmentCount('1');
-      setPremiumPerInstallment('');
       setHasHealthChanged(false);
       setReason('FINANCIAL_DIFFICULTY');
       await refresh(contract.policyNumber);
@@ -203,6 +197,7 @@ export function ReinstatementPage() {
     setActionError(null);
     try {
       await action();
+      setContract(await getContract(contract.policyNumber));
       await refresh(contract.policyNumber);
     } catch (caught) {
       setActionError(caught instanceof Error ? caught.message : '처리에 실패했습니다.');
@@ -216,7 +211,7 @@ export function ReinstatementPage() {
 
   return (
     <AppLayout activeMenuId="contract-revival">
-      <div className="page-stack">
+      <div className="page-stack contract-page">
         <header className="page-header">
           <nav className="breadcrumb" aria-label="현재 위치">
             <span>계약 관리</span>
@@ -226,15 +221,15 @@ export function ReinstatementPage() {
           <div className="page-heading-row">
             <div>
               <h1>부활 관리</h1>
-              <p>실효(SUSPENDED) 계약을 부활합니다. 신청 → 미납 납부 → 부활 완료(SUSPENDED → ACTIVE) 흐름. 심사요청은 슬라이스 5에서 추가 예정.</p>
+              <p>실효된 계약의 미납보험료 정산과 심사 절차를 거쳐 계약 부활을 처리합니다.</p>
             </div>
             <span className="page-kicker">계약 관리 · 관리자 페이지</span>
           </div>
         </header>
 
         <ContractLookupCard
-          title="계약 조회"
-          description="부활 신청할 계약의 증권번호를 입력하세요. (시드: POL-2024-000111)"
+          title="부활 대상 계약 조회"
+          description="부활 신청할 계약의 증권번호를 입력하세요."
           placeholder="POL-2024-000111"
           onContractLoaded={handleContractLoaded}
           onCleared={handleContractCleared}
@@ -245,18 +240,18 @@ export function ReinstatementPage() {
             {notSuspended && (
               <AlertMessage
                 type="error"
-                message={`현재 계약 상태(${getContractStatusLabel(contract.contractStatus)})는 부활 대상이 아닙니다. SUSPENDED 계약만 가능.`}
+                message={`현재 계약 상태(${getContractStatusLabel(contract.contractStatus)})는 부활 대상이 아닙니다. 실효 상태의 계약만 신청할 수 있습니다.`}
               />
             )}
             {loadError && <AlertMessage type="error" message={loadError} />}
-            {isLoading && <div className="work-panel">부활 정보를 불러오는 중...</div>}
+            {isLoading && <div className="work-panel contract-loading-panel">부활 정보를 불러오는 중...</div>}
 
             {!isLoading && canApply && (
               <form className="work-panel" onSubmit={handleApply}>
                 <div className="panel-header compact">
                   <div>
                     <h2>부활 신청</h2>
-                    <p>사유/희망일/미납회차/회차당 보험료를 입력합니다. 미납보험료는 보험료 × 미납회차로 자동 산정.</p>
+                    <p>계약의 미납 내역을 자동 조회한 뒤 부활 사유와 희망일을 입력합니다.</p>
                   </div>
                 </div>
                 <div className="form-grid">
@@ -285,37 +280,31 @@ export function ReinstatementPage() {
                     />
                   </label>
                   <label>
-                    <span>최종 납입일 (선택)</span>
+                    <span>최종 납입일</span>
                     <input
-                      type="date"
-                      value={lastPaidDate}
-                      onChange={(event) => setLastPaidDate(event.target.value)}
-                      disabled={isBusy}
+                      value={unpaidSummary?.lastPaidDate ?? '-'}
+                      readOnly
                     />
                   </label>
                   <label>
                     <span>미납 회차</span>
                     <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={unpaidInstallmentCount}
-                      onChange={(event) => setUnpaidInstallmentCount(event.target.value)}
-                      disabled={isBusy}
-                      required
+                      value={unpaidSummary ? `${unpaidSummary.unpaidInstallmentCount}회` : '-'}
+                      readOnly
                     />
                   </label>
                   <label>
                     <span>회차당 보험료 (원)</span>
                     <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={premiumPerInstallment}
-                      onChange={(event) => setPremiumPerInstallment(event.target.value)}
-                      placeholder="예: 150000"
-                      disabled={isBusy}
-                      required
+                      value={unpaidSummary ? unpaidSummary.premiumPerInstallment.toLocaleString() : '-'}
+                      readOnly
+                    />
+                  </label>
+                  <label>
+                    <span>미납 보험료 합계 (원)</span>
+                    <input
+                      value={unpaidSummary ? unpaidSummary.unpaidPremium.toLocaleString() : '-'}
+                      readOnly
                     />
                   </label>
                   <label>
@@ -480,7 +469,7 @@ export function ReinstatementPage() {
                       onClick={() => runAction(() => completeReinstatement(contract.policyNumber))}
                       disabled={isBusy}
                     >
-                      부활 완료 (SUSPENDED → ACTIVE)
+                      부활 완료 처리
                     </button>
                   )}
                   <button
@@ -500,7 +489,7 @@ export function ReinstatementPage() {
                 <div className="panel-header compact">
                   <div>
                     <h2>부활 이력 ({history.length}건)</h2>
-                    <p>이 계약의 부활 신청 기록 전체.</p>
+                    <p>이 계약에서 처리된 부활 신청 이력을 확인합니다.</p>
                   </div>
                 </div>
                 <div className="payout-table">

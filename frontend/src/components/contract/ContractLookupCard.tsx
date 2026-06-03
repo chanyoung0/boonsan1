@@ -1,5 +1,18 @@
 import { KeyboardEvent, useState } from 'react';
-import { Search } from 'lucide-react';
+import {
+  BadgeDollarSign,
+  CalendarDays,
+  CircleAlert,
+  CircleCheck,
+  CreditCard,
+  FileText,
+  Phone,
+  Search,
+  ShieldCheck,
+  ListChecks,
+  UserRound,
+  WalletCards
+} from 'lucide-react';
 import { getContract } from '../../api/contractApi';
 import {
   getContractStatusLabel,
@@ -57,12 +70,17 @@ export function ContractLookupCard({
   };
 
   return (
-    <section className="search-section">
-      <div className="work-panel search-panel">
-        <div className="panel-header compact">
-          <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+    <section className="search-section contract-lookup-section">
+      <div className="work-panel search-panel contract-search-panel">
+        <div className="panel-header compact contract-panel-heading">
+          <div className="contract-panel-heading-content">
+            <span className="contract-heading-icon" aria-hidden="true">
+              <Search size={20} />
+            </span>
+            <div>
+              <h2>{title}</h2>
+              <p>{description}</p>
+            </div>
           </div>
         </div>
         <div className="search-row">
@@ -83,25 +101,95 @@ export function ContractLookupCard({
       </div>
 
       {contract && (
-        <div className="work-panel">
-          <div className="panel-header compact">
-            <div>
-              <h3>계약 정보</h3>
-              <p>{contract.policyNumber} · {getContractStatusLabel(contract.contractStatus)}</p>
+        <div className="work-panel contract-summary-panel">
+          <div className="contract-summary-header">
+            <div className="contract-summary-identity">
+              <span className="contract-summary-icon" aria-hidden="true">
+                <FileText size={22} />
+              </span>
+              <div>
+                <span className="contract-summary-eyebrow">조회된 계약</span>
+                <h3>{contract.policyNumber}</h3>
+                <p>{contract.productCode}</p>
+              </div>
             </div>
+            <span className={`status-tag contract-status ${contract.contractStatus.toLowerCase()}`}>
+              {getContractStatusLabel(contract.contractStatus)}
+            </span>
           </div>
-          <dl className="detail-grid">
-            <div><dt>상품코드</dt><dd>{contract.productCode}</dd></div>
-            <div><dt>계약상태</dt><dd>{getContractStatusLabel(contract.contractStatus)}</dd></div>
-            <div><dt>납입주기</dt><dd>{getPaymentCycleLabel(contract.paymentCycle)}</dd></div>
-            <div><dt>보험료</dt><dd>{contract.premiumAmount.toLocaleString()} 원</dd></div>
-            <div><dt>계약 시작일</dt><dd>{contract.contractStartDate}</dd></div>
-            <div><dt>계약 만기일</dt><dd>{contract.contractEndDate}</dd></div>
-            <div><dt>피보험자</dt><dd>{contract.insuredName}</dd></div>
-            <div><dt>주민번호</dt><dd>{contract.insuredRrn}</dd></div>
-            <div><dt>연락처</dt><dd>{contract.insuredContact}</dd></div>
-            <div><dt>자동이체 계좌</dt><dd>{contract.accountBank ?? '-'} {contract.accountNumber ?? ''}</dd></div>
-            <div><dt>미납 보험료</dt><dd>{contract.hasUnpaidPremium ? '있음' : '없음'}</dd></div>
+          <dl className="contract-summary-grid">
+            <div className="contract-summary-item">
+              <ShieldCheck aria-hidden="true" size={19} />
+              <div>
+                <dt>상품코드</dt>
+                <dd className="mono">{contract.productCode}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <WalletCards aria-hidden="true" size={19} />
+              <div>
+                <dt>납입 정보</dt>
+                <dd>{getPaymentCycleLabel(contract.paymentCycle)} · {contract.premiumAmount.toLocaleString()}원</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <BadgeDollarSign aria-hidden="true" size={19} />
+              <div>
+                <dt>보험가입금액</dt>
+                <dd>{contract.insuredAmount == null ? '-' : `${contract.insuredAmount.toLocaleString()}원`}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <ListChecks aria-hidden="true" size={19} />
+              <div>
+                <dt>특약 정보</dt>
+                <dd title={contract.specialContractList ?? undefined}>{contract.specialContractList ?? '-'}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <CalendarDays aria-hidden="true" size={19} />
+              <div>
+                <dt>계약 기간</dt>
+                <dd>{contract.contractStartDate} ~ {contract.contractEndDate}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <UserRound aria-hidden="true" size={19} />
+              <div>
+                <dt>피보험자</dt>
+                <dd>{contract.insuredName} · {contract.insuredRrn}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <Phone aria-hidden="true" size={19} />
+              <div>
+                <dt>연락처</dt>
+                <dd>{contract.insuredContact}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <CreditCard aria-hidden="true" size={19} />
+              <div>
+                <dt>자동이체 계좌</dt>
+                <dd>{contract.accountBank ?? '-'} {contract.accountNumber ?? ''}</dd>
+              </div>
+            </div>
+            <div className="contract-summary-item">
+              <WalletCards aria-hidden="true" size={19} />
+              <div>
+                <dt>만기환급금</dt>
+                <dd>{contract.maturityRefundAmount.toLocaleString()}원</dd>
+              </div>
+            </div>
+            <div className={`contract-summary-item ${contract.hasUnpaidPremium ? 'warning' : 'success'}`}>
+              {contract.hasUnpaidPremium
+                ? <CircleAlert aria-hidden="true" size={19} />
+                : <CircleCheck aria-hidden="true" size={19} />}
+              <div>
+                <dt>미납 보험료</dt>
+                <dd>{contract.hasUnpaidPremium ? '미납 내역 있음' : '미납 내역 없음'}</dd>
+              </div>
+            </div>
           </dl>
         </div>
       )}

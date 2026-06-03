@@ -75,7 +75,7 @@ export function PaymentCollectionForm({ policyNumber, onCreated }: PaymentCollec
       <div className="panel-header compact">
         <div>
           <h2>수금 처리</h2>
-          <p>회차/납기/예정 보험료/수금 금액을 입력합니다. 수금액이 보험료보다 적으면 미수금 + 연체료 자동 산정.</p>
+          <p>납입 회차와 수금 금액을 입력하면 미수금과 연체료를 자동으로 산정합니다.</p>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ package contract.controller;
 import common.ApiResponse;
 import contract.dto.ReinstatementCreateRequest;
 import contract.dto.ReinstatementResponse;
+import contract.dto.ReinstatementUnpaidSummaryResponse;
 import contract.dto.UnderwritingRequestCompleteRequest;
 import contract.dto.UnderwritingRequestCreateRequest;
 import contract.dto.UnderwritingRequestResponse;
@@ -47,6 +48,12 @@ public class ReinstatementController {
     public ApiResponse<List<ReinstatementResponse>> list(@PathVariable String policyNumber) {
         List<ReinstatementResponse> response = reinstatementApplicationService.listByPolicyNumber(policyNumber);
         return ApiResponse.success(response, "Reinstatements found");
+    }
+
+    @GetMapping("/unpaid-summary")
+    public ApiResponse<ReinstatementUnpaidSummaryResponse> getUnpaidSummary(@PathVariable String policyNumber) {
+        ReinstatementUnpaidSummaryResponse response = reinstatementApplicationService.getUnpaidSummary(policyNumber);
+        return ApiResponse.success(response, "Unpaid premium summary found");
     }
 
     @PatchMapping("/current/settle-unpaid")

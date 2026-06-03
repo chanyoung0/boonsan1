@@ -19,6 +19,9 @@ public class Contract {
     private String policyNumber;
     private String productCode;
     private BigDecimal premiumAmount;
+    private BigDecimal insuredAmount;
+    private String specialContractList;
+    private BigDecimal maturityRefundAmount;
     private LocalDate contractStartDate;
     private LocalDate contractEndDate;
     private String insuredName;
@@ -81,6 +84,20 @@ public class Contract {
     public BigDecimal getPremiumAmount() { return premiumAmount; }
 
     public void setPremiumAmount(BigDecimal premiumAmount) { this.premiumAmount = premiumAmount; }
+
+    public BigDecimal getInsuredAmount() { return insuredAmount; }
+
+    public void setInsuredAmount(BigDecimal insuredAmount) { this.insuredAmount = insuredAmount; }
+
+    public String getSpecialContractList() { return specialContractList; }
+
+    public void setSpecialContractList(String specialContractList) { this.specialContractList = specialContractList; }
+
+    public BigDecimal getMaturityRefundAmount() { return maturityRefundAmount; }
+
+    public void setMaturityRefundAmount(BigDecimal maturityRefundAmount) {
+        this.maturityRefundAmount = maturityRefundAmount;
+    }
 
     public LocalDate getContractStartDate() { return contractStartDate; }
 

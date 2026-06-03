@@ -73,6 +73,32 @@
         ORDER BY applied_at DESC
     </select>
 
+    <select id="findUnpaidSummary" resultType="contract.dto.ReinstatementUnpaidSummaryResponse">
+        WITH latest_collection AS (
+            SELECT DISTINCT ON (installment_no)
+                installment_no,
+                due_date,
+                unpaid_amount,
+                processing_result
+            FROM contract_payment_collection
+            WHERE policy_number = #{policyNumber}
+            ORDER BY installment_no, created_at DESC
+        )
+        SELECT
+            c.policy_number AS policy_number,
+            c.premium_amount AS premium_per_installment,
+            COUNT(*) FILTER (WHERE lc.processing_result = 'FAILED')::INTEGER AS unpaid_installment_count,
+            COALESCE(
+                SUM(lc.unpaid_amount) FILTER (WHERE lc.processing_result = 'FAILED'),
+                0
+            ) AS unpaid_premium,
+            MAX(lc.due_date) FILTER (WHERE lc.processing_result = 'SUCCESS') AS last_paid_date
+        FROM contract c
+        LEFT JOIN latest_collection lc ON TRUE
+        WHERE c.policy_number = #{policyNumber}
+        GROUP BY c.policy_number, c.premium_amount
+    </select>
+
     <update id="updateStatusFromAppliedToSettled">
         UPDATE contract_reinstatement
         SET reinstatement_status = 'UNPAID_SETTLED',

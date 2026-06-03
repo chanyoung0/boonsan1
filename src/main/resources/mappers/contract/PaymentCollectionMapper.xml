@@ -21,6 +21,23 @@
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
+    <resultMap id="PaymentCollectionTargetMap" type="contract.dto.PaymentCollectionTargetResponse">
+        <id property="policyNumber" column="policy_number"/>
+        <result property="insuredName" column="insured_name"/>
+        <result property="installmentNo" column="installment_no"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="plannedAmount" column="planned_amount"/>
+        <result property="accountNumber" column="account_number"/>
+        <result property="accountBank" column="account_bank"/>
+    </resultMap>
+
+    <resultMap id="PaymentCollectionTransferTargetMap" type="contract.dto.PaymentCollectionTransferTargetResponse">
+        <id property="policyNumber" column="policy_number"/>
+        <result property="insuredName" column="insured_name"/>
+        <result property="unpaidInstallmentCount" column="unpaid_installment_count"/>
+        <result property="unpaidAmount" column="unpaid_amount"/>
+    </resultMap>
+
     <insert id="insertCollection">
         INSERT INTO contract_payment_collection (
             collection_id, policy_number, installment_no, due_date,
@@ -54,11 +71,107 @@
         ORDER BY installment_no DESC, created_at DESC
     </select>
 
+    <select id="findCollectionTargets" resultMap="PaymentCollectionTargetMap">
+        WITH latest_collection AS (
+            SELECT DISTINCT ON (policy_number, installment_no)
+                policy_number,
+                installment_no
+            FROM contract_payment_collection
+            ORDER BY policy_number, installment_no, created_at DESC
+        ),
+        processed AS (
+            SELECT policy_number, MAX(installment_no) AS last_installment_no
+            FROM latest_collection
+            GROUP BY policy_number
+        ),
+        candidate AS (
+            SELECT
+                c.policy_number,
+                c.insured_name,
+                c.premium_amount AS planned_amount,
+                c.account_number,
+                c.account_bank,
+                COALESCE(p.last_installment_no, 0) + 1 AS installment_no,
+                (
+                    c.contract_start_date
+                    + (
+                        (COALESCE(p.last_installment_no, 0))
+                        * CASE c.payment_cycle
+                            WHEN 'MONTHLY' THEN 1
+                            WHEN 'QUARTERLY' THEN 3
+                            WHEN 'SEMI_ANNUALLY' THEN 6
+                            WHEN 'ANNUALLY' THEN 12
+                            ELSE 1
+                          END
+                      ) * INTERVAL '1 month'
+                )::DATE AS due_date,
+                c.installment_count
+            FROM contract c
+            LEFT JOIN processed p ON p.policy_number = c.policy_number
+            WHERE c.contract_status = 'ACTIVE'
+        )
+        SELECT
+            policy_number,
+            insured_name,
+            installment_no,
+            due_date,
+            planned_amount,
+            account_number,
+            account_bank
+        FROM candidate
+        WHERE installment_no &lt;= installment_count
+          AND due_date &lt;= CURRENT_DATE
+        ORDER BY due_date, policy_number
+    </select>
+
+    <select id="findTransferTargets" resultMap="PaymentCollectionTransferTargetMap">
+        WITH latest_collection AS (
+            SELECT DISTINCT ON (policy_number, installment_no)
+                policy_number,
+                installment_no,
+                unpaid_amount,
+                processing_result
+            FROM contract_payment_collection
+            ORDER BY policy_number, installment_no, created_at DESC
+        )
+        SELECT
+            c.policy_number,
+            c.insured_name,
+            COUNT(*)::INTEGER AS unpaid_installment_count,
+            SUM(lc.unpaid_amount) AS unpaid_amount
+        FROM contract c
+        JOIN latest_collection lc ON lc.policy_number = c.policy_number
+        WHERE lc.processing_result = 'FAILED'
+        GROUP BY c.policy_number, c.insured_name
+        HAVING COUNT(*) &gt;= 2
+        ORDER BY unpaid_installment_count DESC, c.policy_number
+    </select>
+
+    <select id="countLatestFailedInstallments" resultType="int">
+        WITH latest_collection AS (
+            SELECT DISTINCT ON (installment_no)
+                installment_no,
+                processing_result
+            FROM contract_payment_collection
+            WHERE policy_number = #{policyNumber}
+            ORDER BY installment_no, created_at DESC
+        )
+        SELECT COUNT(*)::INTEGER
+        FROM latest_collection
+        WHERE processing_result = 'FAILED'
+    </select>
+
     <update id="updateTransfer">
         UPDATE contract_payment_collection
         SET transfer_type = #{transferType},
             transferred_at = #{transferredAt}
         WHERE collection_id = #{collectionId}
           AND transfer_type IS NULL
+    </update>
+
+    <update id="updateContractUnpaidStatus">
+        UPDATE contract
+        SET has_unpaid_premium = #{hasUnpaidPremium}
+        WHERE policy_number = #{policyNumber}
     </update>
 </mapper>

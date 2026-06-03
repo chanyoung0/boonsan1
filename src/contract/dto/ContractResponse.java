@@ -15,6 +15,9 @@ public class ContractResponse {
     private final ContractStatus contractStatus;
     private final PaymentCycle paymentCycle;
     private final BigDecimal premiumAmount;
+    private final BigDecimal insuredAmount;
+    private final String specialContractList;
+    private final BigDecimal maturityRefundAmount;
     private final int installmentCount;
     private final Boolean hasUnpaidPremium;
     private final LocalDate contractStartDate;
@@ -32,6 +35,9 @@ public class ContractResponse {
             ContractStatus contractStatus,
             PaymentCycle paymentCycle,
             BigDecimal premiumAmount,
+            BigDecimal insuredAmount,
+            String specialContractList,
+            BigDecimal maturityRefundAmount,
             int installmentCount,
             Boolean hasUnpaidPremium,
             LocalDate contractStartDate,
@@ -48,6 +54,9 @@ public class ContractResponse {
         this.contractStatus = contractStatus;
         this.paymentCycle = paymentCycle;
         this.premiumAmount = premiumAmount;
+        this.insuredAmount = insuredAmount;
+        this.specialContractList = specialContractList;
+        this.maturityRefundAmount = maturityRefundAmount;
         this.installmentCount = installmentCount;
         this.hasUnpaidPremium = hasUnpaidPremium;
         this.contractStartDate = contractStartDate;
@@ -67,6 +76,9 @@ public class ContractResponse {
                 contract.getContractStatus(),
                 contract.getPaymentCycle(),
                 contract.getPremiumAmount(),
+                contract.getInsuredAmount(),
+                contract.getSpecialContractList(),
+                contract.getMaturityRefundAmount(),
                 contract.getInstallmentCount(),
                 contract.getHasUnpaidPremium(),
                 contract.getContractStartDate(),
@@ -111,6 +123,12 @@ public class ContractResponse {
     public PaymentCycle getPaymentCycle() { return paymentCycle; }
 
     public BigDecimal getPremiumAmount() { return premiumAmount; }
+
+    public BigDecimal getInsuredAmount() { return insuredAmount; }
+
+    public String getSpecialContractList() { return specialContractList; }
+
+    public BigDecimal getMaturityRefundAmount() { return maturityRefundAmount; }
 
     public int getInstallmentCount() { return installmentCount; }
 

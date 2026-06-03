@@ -3,9 +3,15 @@ import type {
   ContractResponse,
   MaturityNoticeResponse,
   MaturityProcessResponse,
+  MaturityRenewalResponse,
+  MaturityTargetResponse,
+  PaymentCollectionBatchRequest,
+  PaymentCollectionBatchResponse,
   PaymentCollectionCreateRequest,
   PaymentCollectionResponse,
+  PaymentCollectionTargetResponse,
   PaymentCollectionTransferRequest,
+  PaymentCollectionTransferTargetResponse,
   PayoutApproveRequest,
   PayoutCreateRequest,
   PayoutResponse,
@@ -13,6 +19,7 @@ import type {
   EndorsementResponse,
   ReinstatementCreateRequest,
   ReinstatementResponse,
+  ReinstatementUnpaidSummaryResponse,
   UnderwritingRequestCompleteRequest,
   UnderwritingRequestCreateRequest,
   UnderwritingRequestResponse,
@@ -35,6 +42,31 @@ export function processMaturity(policyNumber: string) {
   return apiRequest<MaturityProcessResponse>(
     `/api/contracts/${encodeURIComponent(policyNumber)}/maturity`,
     { method: 'POST' }
+  );
+}
+
+export function listMaturityTargets() {
+  return apiRequest<MaturityTargetResponse[]>('/api/contracts/maturity/targets');
+}
+
+export function sendMaturityNotice(policyNumber: string) {
+  return apiRequest<MaturityNoticeResponse>(
+    `/api/contracts/${encodeURIComponent(policyNumber)}/maturity/notice`,
+    { method: 'POST' }
+  );
+}
+
+export function listMaturityRenewalTargets() {
+  return apiRequest<MaturityTargetResponse[]>('/api/contracts/maturity/renewal-targets');
+}
+
+export function recordMaturityRenewalIntention(policyNumber: string, renewalIntention: boolean) {
+  return apiRequest<MaturityRenewalResponse>(
+    `/api/contracts/${encodeURIComponent(policyNumber)}/maturity/renewal-intention`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ renewalIntention })
+    }
   );
 }
 
@@ -94,6 +126,23 @@ export function createPaymentCollection(policyNumber: string, request: PaymentCo
   );
 }
 
+export function listPaymentCollectionTargets() {
+  return apiRequest<PaymentCollectionTargetResponse[]>('/api/contracts/payment-collections/targets');
+}
+
+export function processPaymentCollectionBatch(request: PaymentCollectionBatchRequest) {
+  return apiRequest<PaymentCollectionBatchResponse>('/api/contracts/payment-collections/batch', {
+    method: 'POST',
+    body: JSON.stringify(request)
+  });
+}
+
+export function listPaymentCollectionTransferTargets() {
+  return apiRequest<PaymentCollectionTransferTargetResponse[]>(
+    '/api/contracts/payment-collections/transfer-targets'
+  );
+}
+
 export function listPaymentCollections(policyNumber: string) {
   return apiRequest<PaymentCollectionResponse[]>(
     `/api/contracts/${encodeURIComponent(policyNumber)}/payment-collections`
@@ -133,6 +182,12 @@ export function applyReinstatement(policyNumber: string, request: ReinstatementC
       method: 'POST',
       body: JSON.stringify(request)
     }
+  );
+}
+
+export function getReinstatementUnpaidSummary(policyNumber: string) {
+  return apiRequest<ReinstatementUnpaidSummaryResponse>(
+    `/api/contracts/${encodeURIComponent(policyNumber)}/reinstatements/unpaid-summary`
   );
 }
 

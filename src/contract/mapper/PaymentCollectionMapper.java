@@ -1,6 +1,8 @@
 package contract.mapper;
 
 import contract.dto.PaymentCollectionResponse;
+import contract.dto.PaymentCollectionTargetResponse;
+import contract.dto.PaymentCollectionTransferTargetResponse;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
@@ -28,6 +30,17 @@ public interface PaymentCollectionMapper {
     PaymentCollectionResponse findByCollectionId(@Param("collectionId") String collectionId);
 
     List<PaymentCollectionResponse> findByPolicyNumber(@Param("policyNumber") String policyNumber);
+
+    List<PaymentCollectionTargetResponse> findCollectionTargets();
+
+    List<PaymentCollectionTransferTargetResponse> findTransferTargets();
+
+    int countLatestFailedInstallments(@Param("policyNumber") String policyNumber);
+
+    int updateContractUnpaidStatus(
+            @Param("policyNumber") String policyNumber,
+            @Param("hasUnpaidPremium") boolean hasUnpaidPremium
+    );
 
     int updateTransfer(
             @Param("collectionId") String collectionId,

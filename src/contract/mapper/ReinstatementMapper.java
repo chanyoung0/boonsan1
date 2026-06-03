@@ -1,6 +1,7 @@
 package contract.mapper;
 
 import contract.dto.ReinstatementResponse;
+import contract.dto.ReinstatementUnpaidSummaryResponse;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
@@ -29,6 +30,8 @@ public interface ReinstatementMapper {
     ReinstatementResponse findActiveByPolicyNumber(@Param("policyNumber") String policyNumber);
 
     List<ReinstatementResponse> findByPolicyNumber(@Param("policyNumber") String policyNumber);
+
+    ReinstatementUnpaidSummaryResponse findUnpaidSummary(@Param("policyNumber") String policyNumber);
 
     int updateStatusFromAppliedToSettled(
             @Param("reinstatementId") String reinstatementId,

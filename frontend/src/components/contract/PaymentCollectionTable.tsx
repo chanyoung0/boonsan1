@@ -69,7 +69,7 @@ export function PaymentCollectionTable({ policyNumber, collections, onUpdated }:
       <div className="panel-header compact">
         <div>
           <h2>수금 내역 ({collections.length}건)</h2>
-          <p>미수금(FAILED)은 미납안내 조회 및 이관 가능. 이관은 1회만 허용.</p>
+          <p>미수금 내역은 미납 안내를 확인하고 필요한 후속 처리로 이관할 수 있습니다.</p>
         </div>
       </div>
       {error && <AlertMessage type="error" message={error} />}

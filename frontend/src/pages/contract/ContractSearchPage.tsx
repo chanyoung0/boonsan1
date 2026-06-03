@@ -4,7 +4,7 @@ import { ContractLookupCard } from '../../components/contract/ContractLookupCard
 export function ContractSearchPage() {
   return (
     <AppLayout activeMenuId="contract-search">
-      <div className="page-stack">
+      <div className="page-stack contract-page">
         <header className="page-header">
           <nav className="breadcrumb" aria-label="현재 위치">
             <span>계약 관리</span>
