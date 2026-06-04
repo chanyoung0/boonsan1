@@ -51,6 +51,18 @@ type LoadingAction =
   | 'history'
   | null;
 
+type OutsourceStep = 'partner' | 'materials' | 'preview';
+
+interface OutsourcePartner {
+  id: string;
+  name: string;
+  type: string;
+  phone: string;
+  duty: string;
+  contractTerms: string;
+  grade: string;
+}
+
 const emptyRejectForm = {
   employeeNo: '',
   rejectionReason: ''
@@ -64,9 +76,58 @@ const emptyFraudForm = {
 const emptyOutsourceForm = {
   employeeNo: '',
   partnerName: '',
-  materialChecklist: '보험계약사항, 청구서류, 진단서, 사고경위서, 현장사진, 블랙박스, 수리견적서',
+  materialChecklist: '',
   requestDetails: ''
 };
+
+const emptyNewPartnerForm = {
+  name: '',
+  type: '',
+  duty: '',
+  phone: '',
+  contractTerms: '',
+  grade: ''
+};
+
+const initialOutsourcePartners: OutsourcePartner[] = [
+  {
+    id: 'partner-daehan',
+    name: '대한손해사정',
+    type: '차량 대물',
+    phone: '02-1000-1000',
+    duty: '종합 손해조사',
+    contractTerms: '표준 위탁 계약',
+    grade: 'A'
+  },
+  {
+    id: 'partner-hanbit',
+    name: '한빛손해사정',
+    type: '인명 피해',
+    phone: '02-2000-2000',
+    duty: '상해·진단 검토',
+    contractTerms: '상해 사고 우선 배정',
+    grade: 'B+'
+  },
+  {
+    id: 'partner-joongang',
+    name: '중앙손해사정',
+    type: '고액 사고',
+    phone: '02-3000-3000',
+    duty: '고액·복합 사고',
+    contractTerms: '고액 사고 전담',
+    grade: 'A+'
+  }
+];
+
+const outsourceMaterialOptions = [
+  '보험계약 내용',
+  '청구서류',
+  '진단서',
+  '사고경위서',
+  '사고현장 사진',
+  '블랙박스 영상',
+  '수리 견적'
+];
 
 export function DamageInvestigationPage() {
   const [accidentNumberInput, setAccidentNumberInput] = useState('');
@@ -79,6 +140,12 @@ export function DamageInvestigationPage() {
   const [rejectForm, setRejectForm] = useState(emptyRejectForm);
   const [fraudForm, setFraudForm] = useState(emptyFraudForm);
   const [outsourceForm, setOutsourceForm] = useState(emptyOutsourceForm);
+  const [outsourcePartners, setOutsourcePartners] = useState<OutsourcePartner[]>(initialOutsourcePartners);
+  const [selectedOutsourcePartnerId, setSelectedOutsourcePartnerId] = useState('');
+  const [selectedOutsourceMaterials, setSelectedOutsourceMaterials] = useState<string[]>(outsourceMaterialOptions);
+  const [outsourceStep, setOutsourceStep] = useState<OutsourceStep>('partner');
+  const [showNewPartnerForm, setShowNewPartnerForm] = useState(false);
+  const [newPartnerForm, setNewPartnerForm] = useState(emptyNewPartnerForm);
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -107,6 +174,8 @@ export function DamageInvestigationPage() {
   );
   const canCompleteOutsourceInvestigation =
     accident?.accidentStatus === 'OUTSOURCED_INVESTIGATION' || hasOpenOutsourceRequest;
+  const selectedOutsourcePartner = outsourcePartners.find((partner) => partner.id === selectedOutsourcePartnerId) ?? null;
+  const outsourceMaterialChecklist = selectedOutsourceMaterials.join(', ');
 
   const handleLookup = async () => {
     const accidentNumber = accidentNumberInput.trim();
@@ -124,6 +193,7 @@ export function DamageInvestigationPage() {
     setExistingResult(null);
     setFinalDocument(null);
     setAlternativeHistory([]);
+    setOutsourceStep('partner');
     try {
       const response = await getAccidentReportForInvestigation(accidentNumber);
       setAccident(response);
@@ -249,13 +319,18 @@ export function DamageInvestigationPage() {
   const handleRequestOutsourceInvestigation = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!accident) return;
-    if (
-      !outsourceForm.employeeNo.trim() ||
-      !outsourceForm.partnerName.trim() ||
-      !outsourceForm.materialChecklist.trim() ||
-      !outsourceForm.requestDetails.trim()
-    ) {
-      setError('담당자 번호, 위탁 업체, 전달 서류, 위탁 요청 내용을 모두 입력하세요.');
+    if (!selectedOutsourcePartner) {
+      setError('협력업체를 선택하세요.');
+      setOutsourceStep('partner');
+      return;
+    }
+    if (!selectedOutsourceMaterials.length) {
+      setError('전달할 자료를 하나 이상 선택하세요.');
+      setOutsourceStep('materials');
+      return;
+    }
+    if (!outsourceForm.employeeNo.trim() || !outsourceForm.requestDetails.trim()) {
+      setError('담당자 번호와 위탁 요청 내용을 입력하세요.');
       return;
     }
 
@@ -265,12 +340,17 @@ export function DamageInvestigationPage() {
     try {
       const response = await requestOutsourceInvestigation(accident.accidentNumber, {
         employeeNo: outsourceForm.employeeNo.trim(),
-        partnerName: outsourceForm.partnerName.trim(),
-        materialChecklist: outsourceForm.materialChecklist.trim(),
+        partnerName: selectedOutsourcePartner.name,
+        materialChecklist: outsourceMaterialChecklist,
         requestDetails: outsourceForm.requestDetails.trim()
       });
       setAccident((prev) => (prev ? { ...prev, accidentStatus: 'OUTSOURCED_INVESTIGATION' } : prev));
-      setSuccess(response.resultMessage || '손해조사 위탁 요청이 완료되었습니다.');
+      setOutsourceForm((prev) => ({
+        ...prev,
+        partnerName: selectedOutsourcePartner.name,
+        materialChecklist: outsourceMaterialChecklist
+      }));
+      setSuccess(response.resultMessage || '협력업체에게 위탁 의뢰서를 전달하고 자사 DB에 저장했습니다.');
       await loadAlternativeHistory(accident.accidentNumber, false);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '손해조사 위탁 요청에 실패했습니다.');
@@ -289,14 +369,59 @@ export function DamageInvestigationPage() {
       const response = await completeOutsourceInvestigation(accident.accidentNumber);
       const refreshed = await getAccidentReportForInvestigation(accident.accidentNumber);
       setAccident(refreshed);
-      setSuccess(response.resultMessage || '위탁 손해조사 결과가 반영되었습니다.');
+      setSuccess(response.resultMessage || '손해조사 위탁 결과가 도착했습니다. 손해액 입력 흐름으로 복귀할 수 있습니다.');
       setOutsourceForm(emptyOutsourceForm);
+      setSelectedOutsourcePartnerId('');
+      setSelectedOutsourceMaterials(outsourceMaterialOptions);
+      setOutsourceStep('partner');
       await loadAlternativeHistory(accident.accidentNumber, false);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '위탁 손해조사 완료 처리에 실패했습니다.');
     } finally {
       setLoadingAction(null);
     }
+  };
+
+  const handleOutsourceMaterialChange = (material: string) => {
+    setSelectedOutsourceMaterials((prev) =>
+      prev.includes(material) ? prev.filter((item) => item !== material) : [...prev, material]
+    );
+  };
+
+  const handleRegisterNewPartner = () => {
+    if (
+      !newPartnerForm.name.trim() ||
+      !newPartnerForm.type.trim() ||
+      !newPartnerForm.duty.trim() ||
+      !newPartnerForm.phone.trim() ||
+      !newPartnerForm.contractTerms.trim() ||
+      !newPartnerForm.grade.trim()
+    ) {
+      setError('업체명, 업체유형, 담당업무, 연락처, 계약조건, 평가등급을 모두 입력하세요.');
+      return;
+    }
+    const partner: OutsourcePartner = {
+      id: `partner-${Date.now()}`,
+      name: newPartnerForm.name.trim(),
+      type: newPartnerForm.type.trim(),
+      duty: newPartnerForm.duty.trim(),
+      phone: newPartnerForm.phone.trim(),
+      contractTerms: newPartnerForm.contractTerms.trim(),
+      grade: newPartnerForm.grade.trim()
+    };
+    setOutsourcePartners((prev) => [...prev, partner]);
+    setSelectedOutsourcePartnerId(partner.id);
+    setNewPartnerForm(emptyNewPartnerForm);
+    setShowNewPartnerForm(false);
+    setError(null);
+    setSuccess('협력업체 관리 부서에 업데이트 요청이 반영되었습니다.');
+  };
+
+  const handleOutsourceSystemFailure = () => {
+    if (!accident) return;
+    setAccident((prev) => (prev ? { ...prev, accidentStatus: 'TEMP_SAVED' } : prev));
+    setError(null);
+    setSuccess('손해조사 위탁 요청에 실패했습니다. 현재 문서를 임시저장했습니다. 협력업체 시스템 복구 후 다시 진행하세요.');
   };
 
   const handleCreateDraft = async (request: DamageAssessmentRequest) => {
@@ -410,16 +535,16 @@ export function DamageInvestigationPage() {
         {accident && <AccidentReportInvestigationSummary data={accident} />}
 
         {accident && (
-          <section className="work-panel form-panel">
+          <section className="work-panel form-panel claim-alternative-panel">
             <div className="panel-header">
               <div>
                 <h2>손해조사 Alternative Flow</h2>
-                <p>시나리오 기반 반려, 보험사기 조사 요청, 외부 손해조사 위탁을 처리합니다.</p>
+                <p>시나리오 기반 반려와 보험사기 조사 요청을 처리합니다.</p>
               </div>
             </div>
 
-            <div className="field-grid three">
-              <form className="form-section" onSubmit={handleRejectInsuranceProcessing}>
+            <div className="claim-alternative-quick-grid">
+              <form className="form-section compact-flow-card" onSubmit={handleRejectInsuranceProcessing}>
                 <h3>보험 처리 반려</h3>
                 <label className="field full">
                   <span>담당자 번호</span>
@@ -444,7 +569,7 @@ export function DamageInvestigationPage() {
                 </button>
               </form>
 
-              <form className="form-section" onSubmit={handleRequestFraudInvestigation}>
+              <form className="form-section compact-flow-card" onSubmit={handleRequestFraudInvestigation}>
                 <h3>보험사기 조사 요청</h3>
                 <label className="field full">
                   <span>담당자 번호</span>
@@ -468,62 +593,265 @@ export function DamageInvestigationPage() {
                   {loadingAction === 'fraud' ? '요청 중...' : '보험사기 조사 요청'}
                 </button>
               </form>
+            </div>
+          </section>
+        )}
 
-              <form className="form-section" onSubmit={handleRequestOutsourceInvestigation}>
-                <h3>손해조사 위탁</h3>
-                <label className="field full">
-                  <span>담당자 번호</span>
-                  <input
-                    value={outsourceForm.employeeNo}
-                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
-                    placeholder="EMP-001"
-                    disabled={loadingAction === 'outsource'}
-                  />
-                </label>
-                <label className="field full">
-                  <span>위탁 업체</span>
-                  <input
-                    value={outsourceForm.partnerName}
-                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, partnerName: event.target.value }))}
-                    placeholder="대한손해사정"
-                    disabled={loadingAction === 'outsource'}
-                  />
-                </label>
-                <label className="field full">
-                  <span>전달 서류</span>
-                  <textarea
-                    value={outsourceForm.materialChecklist}
-                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, materialChecklist: event.target.value }))}
-                    disabled={loadingAction === 'outsource'}
-                  />
-                </label>
-                <label className="field full">
-                  <span>위탁 요청 내용</span>
-                  <textarea
-                    value={outsourceForm.requestDetails}
-                    onChange={(event) => setOutsourceForm((prev) => ({ ...prev, requestDetails: event.target.value }))}
-                    placeholder="자체 조사 범위를 초과하여 전문 손해사정 위탁 요청"
-                    disabled={loadingAction === 'outsource'}
-                  />
-                </label>
-                <div className="form-actions">
-                  <button className="button secondary" type="submit" disabled={loadingAction === 'outsource'}>
-                    {loadingAction === 'outsource' ? '위탁 요청 중...' : '손해조사 위탁'}
-                  </button>
+        {accident && (
+          <section className="work-panel form-panel claim-outsource-panel">
+            <div className="panel-header">
+              <div>
+                <h2>손해조사 위탁 흐름</h2>
+                <p>피해 규모가 자사 조사 범위를 초과할 때 협력업체를 선택하고 위탁 의뢰서를 제출합니다.</p>
+              </div>
+            </div>
+
+            <form className="form-section outsource-flow-form" onSubmit={handleRequestOutsourceInvestigation}>
+              <div className="outsource-step-summary">
+                <div className={`document-item ${outsourceStep === 'partner' ? 'selected' : ''}`}>
+                  <div>
+                    <span>1. 협력업체 선택</span>
+                    <strong>{selectedOutsourcePartner?.name ?? '선택된 협력업체 없음'}</strong>
+                    <em>피해 규모가 자사 조사 범위를 초과할 때 등록 협력업체를 선택합니다.</em>
+                  </div>
+                </div>
+                <div className={`document-item ${outsourceStep === 'materials' ? 'selected' : ''}`}>
+                  <div>
+                    <span>2. 전달 자료 선택</span>
+                    <strong>{selectedOutsourceMaterials.length}개 자료 선택</strong>
+                    <em>{outsourceMaterialChecklist || '전달할 자료를 선택하세요.'}</em>
+                  </div>
+                </div>
+                <div className={`document-item ${outsourceStep === 'preview' ? 'selected' : ''}`}>
+                  <div>
+                    <span>3. 의뢰서 미리보기</span>
+                    <strong>{outsourceStep === 'preview' ? '작성 완료' : '작성 대기'}</strong>
+                    <em>선택한 자료와 요청 내용을 위탁 의뢰서 형태로 확인합니다.</em>
+                  </div>
+                </div>
+              </div>
+
+              <label className="field outsource-employee-field">
+                <span>담당자 번호</span>
+                <input
+                  value={outsourceForm.employeeNo}
+                  onChange={(event) => setOutsourceForm((prev) => ({ ...prev, employeeNo: event.target.value }))}
+                  placeholder="EMP-001"
+                  disabled={loadingAction === 'outsource'}
+                />
+              </label>
+
+              {outsourceStep === 'partner' && (
+                <div className="outsource-step-body">
+                  <div className="outsource-section-heading">
+                    <span>협력업체 리스트</span>
+                    <button
+                      className="button secondary"
+                      type="button"
+                      onClick={() => setShowNewPartnerForm((prev) => !prev)}
+                    >
+                      신규 협력업체 등록 요청
+                    </button>
+                  </div>
+                  <div className="outsource-partner-grid">
+                    {outsourcePartners.map((partner) => (
+                      <button
+                        className={`document-item ${selectedOutsourcePartnerId === partner.id ? 'selected' : ''}`}
+                        key={partner.id}
+                        type="button"
+                        onClick={() => setSelectedOutsourcePartnerId(partner.id)}
+                        disabled={loadingAction === 'outsource'}
+                      >
+                        <div>
+                          <span>{partner.name}</span>
+                          <strong>{partner.type} · {partner.grade}</strong>
+                          <em>{partner.phone} · {partner.duty}</em>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {showNewPartnerForm && (
+                    <div className="new-partner-box">
+                      <div className="field-grid two">
+                        <label className="field">
+                          <span>업체명</span>
+                          <input
+                            value={newPartnerForm.name}
+                            onChange={(event) => setNewPartnerForm((prev) => ({ ...prev, name: event.target.value }))}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>업체유형</span>
+                          <input
+                            value={newPartnerForm.type}
+                            onChange={(event) => setNewPartnerForm((prev) => ({ ...prev, type: event.target.value }))}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>담당업무</span>
+                          <input
+                            value={newPartnerForm.duty}
+                            onChange={(event) => setNewPartnerForm((prev) => ({ ...prev, duty: event.target.value }))}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>연락처</span>
+                          <input
+                            value={newPartnerForm.phone}
+                            onChange={(event) => setNewPartnerForm((prev) => ({ ...prev, phone: event.target.value }))}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>계약조건</span>
+                          <input
+                            value={newPartnerForm.contractTerms}
+                            onChange={(event) => setNewPartnerForm((prev) => ({ ...prev, contractTerms: event.target.value }))}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>평가등급</span>
+                          <input
+                            value={newPartnerForm.grade}
+                            onChange={(event) => setNewPartnerForm((prev) => ({ ...prev, grade: event.target.value }))}
+                          />
+                        </label>
+                      </div>
+                      <button className="button primary" type="button" onClick={handleRegisterNewPartner}>
+                        반영
+                      </button>
+                    </div>
+                  )}
                   <button
                     className="button primary"
                     type="button"
-                    onClick={handleCompleteOutsourceInvestigation}
-                    disabled={loadingAction === 'outsourceComplete' || !canCompleteOutsourceInvestigation}
+                    onClick={() => {
+                      if (!selectedOutsourcePartner) {
+                        setError('협력업체를 선택하세요.');
+                        return;
+                      }
+                      setError(null);
+                      setOutsourceStep('materials');
+                    }}
                   >
-                    {loadingAction === 'outsourceComplete' ? '완료 처리 중...' : '위탁 결과 반영'}
+                    다음
                   </button>
                 </div>
-                {!canCompleteOutsourceInvestigation && (
-                  <p className="empty-value">위탁 요청 상태 또는 미완료 위탁 이력이 있을 때만 결과를 반영할 수 있습니다.</p>
-                )}
-              </form>
-            </div>
+              )}
+
+              {outsourceStep === 'materials' && (
+                <div className="outsource-step-body">
+                  <span className="outsource-section-title">전달 자료 체크리스트</span>
+                  <div className="outsource-material-grid">
+                    {outsourceMaterialOptions.map((material) => (
+                      <label className="checkbox-field" key={material}>
+                        <input
+                          type="checkbox"
+                          checked={selectedOutsourceMaterials.includes(material)}
+                          onChange={() => handleOutsourceMaterialChange(material)}
+                        />
+                        <span>{material}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <label className="field full">
+                    <span>위탁 요청 내용</span>
+                    <textarea
+                      value={outsourceForm.requestDetails}
+                      onChange={(event) => setOutsourceForm((prev) => ({ ...prev, requestDetails: event.target.value }))}
+                      placeholder="자체 조사 범위를 초과하여 전문 손해사정 위탁 요청"
+                      disabled={loadingAction === 'outsource'}
+                    />
+                  </label>
+                  <div className="form-actions">
+                    <button className="button secondary" type="button" onClick={() => setOutsourceStep('partner')}>
+                      이전
+                    </button>
+                    <button
+                      className="button primary"
+                      type="button"
+                      onClick={() => {
+                        if (!selectedOutsourceMaterials.length || !outsourceForm.requestDetails.trim()) {
+                          setError('전달 자료와 위탁 요청 내용을 입력하세요.');
+                          return;
+                        }
+                        setError(null);
+                        setOutsourceStep('preview');
+                      }}
+                    >
+                      다음
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {outsourceStep === 'preview' && selectedOutsourcePartner && (
+                <div className="outsource-step-body">
+                  <div className="outsource-preview-card">
+                    <h3>손해사정 위탁 의뢰서</h3>
+                    <div className="detail-grid">
+                      <div>
+                        <dt>사고 접수번호</dt>
+                        <dd>{accident.accidentNumber}</dd>
+                      </div>
+                      <div>
+                        <dt>담당자 번호</dt>
+                        <dd>{outsourceForm.employeeNo || '미입력'}</dd>
+                      </div>
+                      <div>
+                        <dt>선택된 협력업체</dt>
+                        <dd>{selectedOutsourcePartner.name}</dd>
+                      </div>
+                      <div>
+                        <dt>업체 연락처</dt>
+                        <dd>{selectedOutsourcePartner.phone}</dd>
+                      </div>
+                      <div>
+                        <dt>업체 유형</dt>
+                        <dd>{selectedOutsourcePartner.type}</dd>
+                      </div>
+                      <div>
+                        <dt>담당 업무</dt>
+                        <dd>{selectedOutsourcePartner.duty}</dd>
+                      </div>
+                      <div>
+                        <dt>선택된 전달 자료</dt>
+                        <dd>{outsourceMaterialChecklist}</dd>
+                      </div>
+                      <div>
+                        <dt>위탁 요청 내용</dt>
+                        <dd>{outsourceForm.requestDetails || '미입력'}</dd>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="form-actions outsource-submit-actions">
+                    <button className="button secondary" type="button" onClick={() => setOutsourceStep('materials')}>
+                      이전
+                    </button>
+                    <button
+                      className="button secondary"
+                      type="submit"
+                      disabled={loadingAction === 'outsource'}
+                    >
+                      {loadingAction === 'outsource' ? '제출 중...' : '제출한다'}
+                    </button>
+                    <button
+                      className="button primary"
+                      type="button"
+                      onClick={handleCompleteOutsourceInvestigation}
+                      disabled={loadingAction === 'outsourceComplete' || !canCompleteOutsourceInvestigation}
+                    >
+                      {loadingAction === 'outsourceComplete' ? '완료 처리 중...' : '위탁 결과 반영'}
+                    </button>
+                    <button className="button secondary" type="button" onClick={handleOutsourceSystemFailure}>
+                      협력업체 시스템 장애로 처리
+                    </button>
+                  </div>
+                  {!canCompleteOutsourceInvestigation && (
+                    <p className="empty-value">위탁 요청 상태 또는 미완료 위탁 이력이 있을 때만 결과를 반영할 수 있습니다.</p>
+                  )}
+                </div>
+              )}
+            </form>
           </section>
         )}
 
