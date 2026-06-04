@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boonsan.domain.accident.mapper.DamageInvestigationMapper">
+
+    <resultMap id="AccidentReportForInvestigationResultMap" type="com.boonsan.domain.model.accident.AccidentReport">
+        <id property="reportNo" column="report_no"/>
+        <result property="policyNumber" column="policy_number"/>
+        <result property="accidentAt" column="accident_at"/>
+        <result property="accidentDescription" column="accident_description"/>
+        <result property="damageDetails" column="damage_details"/>
+        <result property="accidentType" column="accident_type" javaType="enums.AccidentDetailsType"/>
+        <result property="accidentStatus" column="accident_status" javaType="enums.AccidentReportStatus"/>
+        <result property="accidentReportDocumentName" column="accident_report_document_name"/>
+        <result property="medicalCertificateFileName" column="medical_certificate_file_name"/>
+        <result property="claimDocumentName" column="claim_document_name"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <resultMap id="PaymentApprovalDocumentResponseResultMap" type="com.boonsan.domain.accident.dto.PaymentApprovalDocumentResponse">
+        <id property="documentId" column="document_id"/>
+        <result property="accidentNumber" column="report_no"/>
+        <result property="investigationId" column="investigation_id"/>
+        <result property="documentType" column="document_type"/>
+        <result property="submissionStatus" column="submission_status"/>
+        <result property="totalDamageAmount" column="damage_amount"/>
+        <result property="faultRatio" column="fault_ratio"/>
+        <result property="calculatedPaymentAmount" column="calculated_payment_amount"/>
+        <result property="faultRatioOpinion" column="fault_ratio_opinion"/>
+        <result property="adjusterOpinion" column="adjuster_opinion"/>
+        <result property="employeeNo" column="employee_no"/>
+        <result property="accidentStatus" column="accident_status" javaType="enums.AccidentReportStatus"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="submittedAt" column="submitted_at"/>
+    </resultMap>
+
+    <resultMap id="DamageInvestigationResultResponseResultMap" type="com.boonsan.domain.accident.dto.DamageInvestigationResultResponse">
+        <id property="investigationId" column="investigation_id"/>
+        <result property="accidentNumber" column="report_no"/>
+        <result property="adjusterId" column="adjuster_id"/>
+        <result property="investigationAt" column="investigation_at"/>
+        <result property="medicalExpense" column="medical_expense"/>
+        <result property="lostIncome" column="lost_income"/>
+        <result property="repairCost" column="repair_cost"/>
+        <result property="settlementAmount" column="settlement_amount"/>
+        <result property="faultRatio" column="fault_ratio"/>
+        <result property="totalDamageAmount" column="total_damage_amount"/>
+        <result property="calculatedPaymentAmount" column="calculated_payment_amount"/>
+        <result property="documentId" column="document_id"/>
+        <result property="documentType" column="document_type"/>
+        <result property="submissionStatus" column="submission_status"/>
+        <result property="faultRatioOpinion" column="fault_ratio_opinion"/>
+        <result property="adjusterOpinion" column="adjuster_opinion"/>
+        <result property="employeeNo" column="employee_no"/>
+        <result property="accidentStatus" column="accident_status" javaType="enums.AccidentReportStatus"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="submittedAt" column="submitted_at"/>
+    </resultMap>
+
+    <select id="findAccidentReportForInvestigation" resultMap="AccidentReportForInvestigationResultMap">
+        SELECT
+            report_no,
+            policy_number,
+            accident_at,
+            accident_description,
+            damage_details,
+            accident_type,
+            accident_status,
+            accident_report_document_name,
+            medical_certificate_file_name,
+            claim_document_name,
+            created_at
+        FROM accident_report
+        WHERE report_no = #{accidentNumber}
+    </select>
+
+    <insert id="insertDamageInvestigation">
+        INSERT INTO damage_investigation (
+            investigation_id,
+            report_no,
+            adjuster_id,
+            investigation_at,
+            medical_expense,
+            lost_income,
+            repair_cost,
+            settlement_amount,
+            fault_ratio,
+            created_at
+        ) VALUES (
+            #{investigationId},
+            #{request.accidentNumber},
+            #{request.adjusterId},
+            #{request.investigationAt},
+            #{request.medicalExpense},
+            #{request.lostIncome},
+            #{request.repairCost},
+            #{request.settlementAmount},
+            #{request.faultRatio},
+            #{createdAt}
+        )
+    </insert>
+
+    <insert id="insertPaymentApprovalDocument">
+        INSERT INTO payment_approval_document (
+            document_id,
+            report_no,
+            investigation_id,
+            document_type,
+            submission_status,
+            damage_amount,
+            fault_ratio,
+            created_at
+        ) VALUES (
+            #{documentId},
+            #{accidentNumber},
+            #{investigationId},
+            #{documentType},
+            #{submissionStatus},
+            #{totalDamageAmount},
+            #{faultRatio},
+            #{createdAt}
+        )
+    </insert>
+
+    <update id="updateLatestPaymentApprovalOpinion">
+        UPDATE payment_approval_document
+        SET
+            fault_ratio_opinion = #{faultRatioOpinion},
+            adjuster_opinion = #{adjusterOpinion},
+            submission_status = #{submissionStatus}
+        WHERE document_id = (
+            SELECT document_id
+            FROM payment_approval_document
+            WHERE report_no = #{accidentNumber}
+            ORDER BY created_at DESC
+            LIMIT 1
+        )
+    </update>
+
+    <update id="submitLatestPaymentApprovalDocument">
+        UPDATE payment_approval_document
+        SET
+            employee_no = #{employeeNo},
+            submission_status = #{submissionStatus},
+            submitted_at = #{submittedAt}
+        WHERE document_id = (
+            SELECT document_id
+            FROM payment_approval_document
+            WHERE report_no = #{accidentNumber}
+            ORDER BY created_at DESC
+            LIMIT 1
+        )
+    </update>
+
+    <update id="updateLatestPaymentApprovalStatus">
+        UPDATE payment_approval_document
+        SET submission_status = #{submissionStatus}
+        WHERE document_id = (
+            SELECT document_id
+            FROM payment_approval_document
+            WHERE report_no = #{accidentNumber}
+            ORDER BY created_at DESC
+            LIMIT 1
+        )
+        AND submission_status = #{currentStatus}
+    </update>
+
+    <select id="findPaymentApprovalDocumentByAccidentNumber" resultMap="PaymentApprovalDocumentResponseResultMap">
+        SELECT
+            pad.document_id,
+            pad.report_no,
+            pad.investigation_id,
+            pad.document_type,
+            pad.submission_status,
+            pad.damage_amount,
+            pad.fault_ratio,
+            ROUND((pad.damage_amount * pad.fault_ratio::numeric / 100), 2) AS calculated_payment_amount,
+            pad.fault_ratio_opinion,
+            pad.adjuster_opinion,
+            pad.employee_no,
+            ar.accident_status,
+            pad.created_at,
+            pad.submitted_at
+        FROM payment_approval_document pad
+        JOIN accident_report ar ON ar.report_no = pad.report_no
+        WHERE pad.report_no = #{accidentNumber}
+        ORDER BY pad.created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="findDamageInvestigationResultByAccidentNumber" resultMap="DamageInvestigationResultResponseResultMap">
+        SELECT
+            di.investigation_id,
+            di.report_no,
+            di.adjuster_id,
+            di.investigation_at,
+            di.medical_expense,
+            di.lost_income,
+            di.repair_cost,
+            di.settlement_amount,
+            di.fault_ratio,
+            COALESCE(
+                pad.damage_amount,
+                di.medical_expense + di.lost_income + di.repair_cost + di.settlement_amount
+            ) AS total_damage_amount,
+            ROUND((
+                COALESCE(
+                    pad.damage_amount,
+                    di.medical_expense + di.lost_income + di.repair_cost + di.settlement_amount
+                ) * di.fault_ratio::numeric / 100
+            ), 2) AS calculated_payment_amount,
+            pad.document_id,
+            pad.document_type,
+            pad.submission_status,
+            pad.fault_ratio_opinion,
+            pad.adjuster_opinion,
+            pad.employee_no,
+            ar.accident_status,
+            COALESCE(pad.created_at, di.created_at) AS created_at,
+            pad.submitted_at
+        FROM damage_investigation di
+        JOIN accident_report ar ON ar.report_no = di.report_no
+        LEFT JOIN LATERAL (
+            SELECT
+                document_id,
+                document_type,
+                submission_status,
+                damage_amount,
+                fault_ratio_opinion,
+                adjuster_opinion,
+                employee_no,
+                created_at,
+                submitted_at
+            FROM payment_approval_document
+            WHERE report_no = di.report_no
+            ORDER BY created_at DESC
+            LIMIT 1
+        ) pad ON true
+        WHERE di.report_no = #{accidentNumber}
+        ORDER BY di.created_at DESC
+        LIMIT 1
+    </select>
+
+    <update id="updateAccidentStatusToApprovalRequired">
+        UPDATE accident_report
+        SET accident_status = 'APPROVAL_REQUIRED'
+        WHERE report_no = #{accidentNumber}
+    </update>
+
+    <update id="updateAccidentStatus">
+        UPDATE accident_report
+        SET accident_status = #{accidentStatus}
+        WHERE report_no = #{accidentNumber}
+    </update>
+</mapper>

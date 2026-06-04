@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.boonsan.product.mapper.ProductMapper">
+<mapper namespace="com.boonsan.domain.product.mapper.ProductMapper">
 
-    <resultMap id="ProductBaseResultMap" type="com.boonsan.model.insurance.Insurance">
+    <resultMap id="ProductBaseResultMap" type="com.boonsan.domain.model.insurance.Insurance">
         <id property="productCode" column="product_code"/>
         <result property="productName" column="product_name"/>
         <result property="insuranceTypeCode" column="insurance_type"/>
@@ -28,22 +28,22 @@
         </discriminator>
     </resultMap>
 
-    <resultMap id="AutoInsuranceResultMap" type="com.boonsan.model.insurance.AutoInsurance" extends="ProductBaseResultMap">
+    <resultMap id="AutoInsuranceResultMap" type="com.boonsan.domain.model.insurance.AutoInsurance" extends="ProductBaseResultMap">
         <result property="driverAge" column="driver_age"/>
         <result property="vehicleType" column="vehicle_type"/>
     </resultMap>
 
-    <resultMap id="FireInsuranceResultMap" type="com.boonsan.model.insurance.FireInsurance" extends="ProductBaseResultMap">
+    <resultMap id="FireInsuranceResultMap" type="com.boonsan.domain.model.insurance.FireInsurance" extends="ProductBaseResultMap">
         <result property="buildingType" column="building_type"/>
         <result property="location" column="location"/>
     </resultMap>
 
-    <resultMap id="MarineInsuranceResultMap" type="com.boonsan.model.insurance.MarineInsurance" extends="ProductBaseResultMap">
+    <resultMap id="MarineInsuranceResultMap" type="com.boonsan.domain.model.insurance.MarineInsurance" extends="ProductBaseResultMap">
         <result property="shippingRoute" column="shipping_route"/>
         <result property="vesselType" column="vessel_type"/>
     </resultMap>
 
-    <insert id="insertProduct" parameterType="com.boonsan.model.insurance.Insurance">
+    <insert id="insertProduct" parameterType="com.boonsan.domain.model.insurance.Insurance">
         INSERT INTO product (
             product_code,
             product_name,

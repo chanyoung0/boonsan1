@@ -1,0 +1,6 @@
+package com.boonsan.domain.enums;
+
+public enum ChangeReason {
+    INSURED_AMOUNT_CHANGE, PAYMENT_CYCLE_CHANGE, SPECIAL_CONTRACT_ADD,
+    SPECIAL_CONTRACT_REMOVE, BENEFICIARY_CHANGE
+}

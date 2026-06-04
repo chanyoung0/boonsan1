@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.boonsan.product.mapper.AuthorizationMapper">
+<mapper namespace="com.boonsan.domain.product.mapper.AuthorizationMapper">
 
-    <resultMap id="AuthorizationResultMap" type="com.boonsan.model.insurance.Authorization">
+    <resultMap id="AuthorizationResultMap" type="com.boonsan.domain.model.insurance.Authorization">
         <id property="requestId" column="request_id"/>
         <result property="productCode" column="product_code"/>
         <result property="requestedAt" column="requested_at"/>
@@ -21,7 +21,7 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
-    <resultMap id="AuthorizationEligibilityResultMap" type="com.boonsan.product.dto.AuthorizationEligibilityResponse">
+    <resultMap id="AuthorizationEligibilityResultMap" type="com.boonsan.domain.product.dto.AuthorizationEligibilityResponse">
         <id property="productCode" column="product_code"/>
         <result property="productName" column="product_name"/>
         <result property="insuranceTypeCode" column="insurance_type"/>
@@ -60,7 +60,7 @@
         LIMIT 1
     </select>
 
-    <insert id="insertAuthorization" parameterType="com.boonsan.model.insurance.Authorization">
+    <insert id="insertAuthorization" parameterType="com.boonsan.domain.model.insurance.Authorization">
         INSERT INTO product_authorization (
             request_id,
             product_code,

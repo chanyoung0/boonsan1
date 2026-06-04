@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.boonsan.dashboard.mapper.DashboardMapper">
+<mapper namespace="com.boonsan.domain.dashboard.mapper.DashboardMapper">
 
     <select id="countUnderwritingInProgress" resultType="int">
         SELECT COUNT(*)
