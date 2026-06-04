@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="contract.mapper.ContractMapper">
+<mapper namespace="com.boonsan.contract.mapper.ContractMapper">
 
-    <resultMap id="ContractResultMap" type="model.contract.Contract">
+    <resultMap id="ContractResultMap" type="com.boonsan.model.contract.Contract">
         <id property="policyNumber" column="policy_number"/>
         <result property="productCode" column="product_code"/>
         <result property="contractStatus" column="contract_status" javaType="enums.ContractStatus"/>

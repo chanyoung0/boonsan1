@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="contract.mapper.PaymentCollectionMapper">
+<mapper namespace="com.boonsan.contract.mapper.PaymentCollectionMapper">
 
-    <resultMap id="PaymentCollectionMap" type="contract.dto.PaymentCollectionResponse">
+    <resultMap id="PaymentCollectionMap" type="com.boonsan.contract.dto.PaymentCollectionResponse">
         <id property="collectionId" column="collection_id"/>
         <result property="policyNumber" column="policy_number"/>
         <result property="installmentNo" column="installment_no"/>

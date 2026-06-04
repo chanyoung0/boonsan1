@@ -1,12 +1,12 @@
-import service.underwriting.UnderwritingService;
-import service.contract.EndorsementService;
-import service.contract.ReinstatementService;
-import service.contract.PaymentCollectionService;
-import service.contract.MaturityContractService;
-import service.accident.AccidentReportService;
-import service.accident.DamageInvestigationService;
+import com.boonsan.service.underwriting.UnderwritingService;
+import com.boonsan.service.contract.EndorsementService;
+import com.boonsan.service.contract.ReinstatementService;
+import com.boonsan.service.contract.PaymentCollectionService;
+import com.boonsan.service.contract.MaturityContractService;
+import com.boonsan.service.accident.AccidentReportService;
+import com.boonsan.service.accident.DamageInvestigationService;
 
-import static common.ConsoleUtil.*;
+import static com.boonsan.common.ConsoleUtil.*;
 
 public class Main {
 

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="contract.mapper.EndorsementMapper">
+<mapper namespace="com.boonsan.contract.mapper.EndorsementMapper">
 
-    <resultMap id="EndorsementMap" type="contract.dto.EndorsementResponse">
+    <resultMap id="EndorsementMap" type="com.boonsan.contract.dto.EndorsementResponse">
         <id property="endorsementId" column="endorsement_id"/>
         <result property="policyNumber" column="policy_number"/>
         <result property="endorsementType" column="endorsement_type" javaType="enums.EndorsementType"/>

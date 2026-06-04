@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="contract.mapper.ReinstatementMapper">
+<mapper namespace="com.boonsan.contract.mapper.ReinstatementMapper">
 
-    <resultMap id="ReinstatementMap" type="contract.dto.ReinstatementResponse">
+    <resultMap id="ReinstatementMap" type="com.boonsan.contract.dto.ReinstatementResponse">
         <id property="reinstatementId" column="reinstatement_id"/>
         <result property="policyNumber" column="policy_number"/>
         <result property="reinstatementReason" column="reinstatement_reason" javaType="enums.ReinstatementReason"/>

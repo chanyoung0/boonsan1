@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="contract.mapper.PayoutMapper">
+<mapper namespace="com.boonsan.contract.mapper.PayoutMapper">
 
-    <resultMap id="PayoutResponseMap" type="contract.dto.PayoutResponse">
+    <resultMap id="PayoutResponseMap" type="com.boonsan.contract.dto.PayoutResponse">
         <id property="payoutId" column="payout_id"/>
         <result property="policyNumber" column="policy_number"/>
         <result property="calculationBasis" column="calculation_basis" javaType="enums.CalculationBasis"/>

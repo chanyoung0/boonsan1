@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="claim.mapper.ObjectionMapper">
+<mapper namespace="com.boonsan.claim.mapper.ObjectionMapper">
 
-    <resultMap id="ObjectionEligibilityResultMap" type="claim.dto.ObjectionEligibilityResponse">
+    <resultMap id="ObjectionEligibilityResultMap" type="com.boonsan.claim.dto.ObjectionEligibilityResponse">
         <id property="accidentNumber" column="accident_number"/>
         <result property="accidentStatus" column="accident_status"/>
         <result property="documentId" column="document_id"/>
@@ -12,7 +12,7 @@
         <result property="finalPaymentAmount" column="final_payment_amount"/>
     </resultMap>
 
-    <resultMap id="ObjectionResponseResultMap" type="claim.dto.ObjectionResponse">
+    <resultMap id="ObjectionResponseResultMap" type="com.boonsan.claim.dto.ObjectionResponse">
         <id property="objectionId" column="objection_id"/>
         <result property="accidentNumber" column="accident_number"/>
         <result property="accidentStatus" column="accident_status"/>

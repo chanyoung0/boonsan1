@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="underwriting.mapper.UnderwritingMapper">
+<mapper namespace="com.boonsan.underwriting.mapper.UnderwritingMapper">
 
-    <resultMap id="ApplicationResponseResultMap" type="underwriting.dto.UnderwritingApplicationResponse">
+    <resultMap id="ApplicationResponseResultMap" type="com.boonsan.underwriting.dto.UnderwritingApplicationResponse">
         <id property="applicationId" column="application_id"/>
         <result property="applicationStatus" column="application_status"/>
         <result property="appliedAt" column="applied_at"/>
@@ -34,7 +34,7 @@
         <result property="hasOtherContract" column="has_other_contract"/>
     </resultMap>
 
-    <resultMap id="ReviewResponseResultMap" type="underwriting.dto.UnderwritingReviewResponse">
+    <resultMap id="ReviewResponseResultMap" type="com.boonsan.underwriting.dto.UnderwritingReviewResponse">
         <id property="reviewId" column="review_id"/>
         <result property="applicationId" column="application_id"/>
         <result property="underwritingStatus" column="underwriting_status"/>
@@ -56,7 +56,7 @@
         <result property="finalizedAt" column="finalized_at"/>
     </resultMap>
 
-    <resultMap id="HistoryResponseResultMap" type="underwriting.dto.UnderwritingHistoryResponse">
+    <resultMap id="HistoryResponseResultMap" type="com.boonsan.underwriting.dto.UnderwritingHistoryResponse">
         <id property="historyId" column="history_id"/>
         <result property="applicationId" column="application_id"/>
         <result property="reviewId" column="review_id"/>
