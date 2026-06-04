@@ -18,6 +18,7 @@ export type AccidentStatus =
 export type ClaimAlternativeActionType =
   | 'INVESTIGATION_REJECTED'
   | 'FRAUD_INVESTIGATION_REQUESTED'
+  | 'OUTSOURCE_REQUESTED'
   | 'OUTSOURCE_INVESTIGATION_REQUESTED'
   | 'OUTSOURCE_INVESTIGATION_COMPLETED';
 
@@ -281,6 +282,7 @@ export const ACCIDENT_STATUS_LABELS: Record<AccidentStatus, string> = {
 export const CLAIM_ALTERNATIVE_ACTION_LABELS: Record<ClaimAlternativeActionType, string> = {
   INVESTIGATION_REJECTED: '보험 처리 반려',
   FRAUD_INVESTIGATION_REQUESTED: '보험사기 조사 요청',
+  OUTSOURCE_REQUESTED: '손해조사 위탁 요청',
   OUTSOURCE_INVESTIGATION_REQUESTED: '손해조사 위탁 요청',
   OUTSOURCE_INVESTIGATION_COMPLETED: '손해조사 위탁 완료'
 };

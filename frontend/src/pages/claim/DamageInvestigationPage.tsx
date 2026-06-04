@@ -58,7 +58,7 @@ const emptyRejectForm = {
 
 const emptyFraudForm = {
   employeeNo: '',
-  confirmation: '확인합니다'
+  confirmation: '실시한다'
 };
 
 const emptyOutsourceForm = {
@@ -94,6 +94,19 @@ export function DamageInvestigationPage() {
   }, [accident, existingResult, materials, draft, finalDocument]);
 
   const normalizedAccidentNumber = accident?.accidentNumber ?? accidentNumberInput.trim();
+  const isAlternativeFlowBlockingStatus =
+    accident?.accidentStatus === 'REJECTED' ||
+    accident?.accidentStatus === 'FRAUD_INVESTIGATION' ||
+    accident?.accidentStatus === 'OUTSOURCED_INVESTIGATION' ||
+    accident?.accidentStatus === 'TEMP_SAVED';
+  const hasOpenOutsourceRequest = alternativeHistory.some(
+    (item) =>
+      (item.actionType === 'OUTSOURCE_REQUESTED' ||
+        item.actionType === 'OUTSOURCE_INVESTIGATION_REQUESTED') &&
+      !item.completedAt
+  );
+  const canCompleteOutsourceInvestigation =
+    accident?.accidentStatus === 'OUTSOURCED_INVESTIGATION' || hasOpenOutsourceRequest;
 
   const handleLookup = async () => {
     const accidentNumber = accidentNumberInput.trim();
@@ -447,7 +460,7 @@ export function DamageInvestigationPage() {
                   <input
                     value={fraudForm.confirmation}
                     onChange={(event) => setFraudForm((prev) => ({ ...prev, confirmation: event.target.value }))}
-                    placeholder="확인합니다"
+                    placeholder="실시한다"
                     disabled={loadingAction === 'fraud'}
                   />
                 </label>
@@ -501,11 +514,14 @@ export function DamageInvestigationPage() {
                     className="button primary"
                     type="button"
                     onClick={handleCompleteOutsourceInvestigation}
-                    disabled={loadingAction === 'outsourceComplete'}
+                    disabled={loadingAction === 'outsourceComplete' || !canCompleteOutsourceInvestigation}
                   >
                     {loadingAction === 'outsourceComplete' ? '완료 처리 중...' : '위탁 결과 반영'}
                   </button>
                 </div>
+                {!canCompleteOutsourceInvestigation && (
+                  <p className="empty-value">위탁 요청 상태 또는 미완료 위탁 이력이 있을 때만 결과를 반영할 수 있습니다.</p>
+                )}
               </form>
             </div>
           </section>
@@ -552,13 +568,20 @@ export function DamageInvestigationPage() {
         <FieldInvestigationMaterialCard
           materials={materials}
           isLoading={loadingAction === 'materials'}
-          disabled={!accident}
+          disabled={!accident || isAlternativeFlowBlockingStatus}
           onLoad={handleLoadMaterials}
         />
 
+        {accident && isAlternativeFlowBlockingStatus && !existingResult && (
+          <AlertMessage
+            type="success"
+            message="현재 사고는 Alternative Flow 상태입니다. 반려, 보험사기 조사, 위탁 조사 또는 임시저장 상태에서는 Basic Path 입력을 진행할 수 없습니다."
+          />
+        )}
+
         {existingResult && <DamageInvestigationResultCard result={existingResult} />}
 
-        {accident && materials && !existingResult && (
+        {accident && materials && !existingResult && !isAlternativeFlowBlockingStatus && (
           <DamageAssessmentForm
             accidentNumber={normalizedAccidentNumber}
             disabled={!materials}
@@ -567,6 +590,7 @@ export function DamageInvestigationPage() {
           />
         )}
 
+        {/* TODO: 지급품의서 REJECTED 상태의 손해액/소견 재작성 흐름은 다음 단계에서 별도 보정한다. */}
         {draft && !existingResult && <PaymentApprovalDraftCard draft={draft} />}
 
         {draft && !existingResult && (
