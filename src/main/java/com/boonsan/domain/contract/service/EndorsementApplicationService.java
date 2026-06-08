@@ -6,10 +6,12 @@ import com.boonsan.domain.contract.dto.UnderwritingRequestCompleteRequest;
 import com.boonsan.domain.contract.dto.UnderwritingRequestCreateRequest;
 import com.boonsan.domain.contract.dto.UnderwritingRequestResponse;
 import com.boonsan.domain.contract.mapper.EndorsementMapper;
+import com.boonsan.domain.contract.mapper.UnderwritingRequestMapper;
 import com.boonsan.domain.enums.EndorsementStatus;
 import com.boonsan.domain.enums.RequestReason;
 import com.boonsan.domain.enums.RequestStatus;
 import com.boonsan.domain.enums.UnderwritingResultType;
+import com.boonsan.domain.enums.UnderwritingType;
 import com.boonsan.domain.model.contract.Contract;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +26,17 @@ import java.util.concurrent.ThreadLocalRandom;
 public class EndorsementApplicationService {
 
     private final ContractApplicationService contractApplicationService;
-    private final UnderwritingRequestApplicationService underwritingRequestApplicationService;
     private final EndorsementMapper endorsementMapper;
+    private final UnderwritingRequestMapper underwritingRequestMapper;
 
     public EndorsementApplicationService(
             ContractApplicationService contractApplicationService,
-            UnderwritingRequestApplicationService underwritingRequestApplicationService,
-            EndorsementMapper endorsementMapper
+            EndorsementMapper endorsementMapper,
+            UnderwritingRequestMapper underwritingRequestMapper
     ) {
         this.contractApplicationService = contractApplicationService;
-        this.underwritingRequestApplicationService = underwritingRequestApplicationService;
         this.endorsementMapper = endorsementMapper;
+        this.underwritingRequestMapper = underwritingRequestMapper;
     }
 
     @Transactional
@@ -98,9 +100,8 @@ public class EndorsementApplicationService {
                     "Underwriting request already exists for endorsement: " + active.getEndorsementId());
         }
 
-        UnderwritingRequestResponse uw = underwritingRequestApplicationService.createForSource(
+        UnderwritingRequestResponse uw = createUnderwritingRequest(
                 contract.getPolicyNumber(),
-                RequestReason.ENDORSEMENT,
                 active.getEndorsementId(),
                 request == null ? null : request.getUnderwritingType()
         );
@@ -126,7 +127,13 @@ public class EndorsementApplicationService {
             throw new IllegalArgumentException(
                     "No underwriting request linked to endorsement: " + active.getEndorsementId());
         }
-        return underwritingRequestApplicationService.complete(active.getUnderwritingRequestId(), request);
+        return completeUnderwritingRequest(active.getUnderwritingRequestId(), request);
+    }
+
+    // 컨트롤러가 배서에 연결된 심사요청을 조회할 때 사용
+    @Transactional(readOnly = true)
+    public UnderwritingRequestResponse findUnderwritingRequestById(String requestId) {
+        return requireUnderwritingRequest(requestId);
     }
 
     @Transactional
@@ -188,8 +195,7 @@ public class EndorsementApplicationService {
             throw new IllegalArgumentException(
                     "Cannot " + action + " endorsement without completed underwriting request.");
         }
-        UnderwritingRequestResponse uw = underwritingRequestApplicationService
-                .requireById(endorsement.getUnderwritingRequestId());
+        UnderwritingRequestResponse uw = requireUnderwritingRequest(endorsement.getUnderwritingRequestId());
         if (uw.getRequestStatus() != RequestStatus.COMPLETED) {
             throw new IllegalArgumentException(
                     "Underwriting request must be COMPLETED to " + action + ". Current: " + uw.getRequestStatus());
@@ -199,6 +205,69 @@ public class EndorsementApplicationService {
                     "Underwriting result must be " + expected + " to " + action + ". Current: "
                             + uw.getUnderwritingResult());
         }
+    }
+
+    // 배서 유스케이스에서 심사요청 생성을 인라인 처리
+    private UnderwritingRequestResponse createUnderwritingRequest(
+            String policyNumber,
+            String endorsementId,
+            UnderwritingType underwritingType
+    ) {
+        String requestId = generateUnderwritingRequestId();
+        underwritingRequestMapper.insertRequest(
+                requestId,
+                policyNumber,
+                RequestReason.ENDORSEMENT.name(),
+                endorsementId,
+                underwritingType == null ? null : underwritingType.name(),
+                RequestStatus.PENDING.name(),
+                LocalDateTime.now()
+        );
+        return requireUnderwritingRequest(requestId);
+    }
+
+    // 배서 유스케이스에서 심사요청 완료 처리를 인라인 처리
+    private UnderwritingRequestResponse completeUnderwritingRequest(
+            String requestId,
+            UnderwritingRequestCompleteRequest request
+    ) {
+        UnderwritingRequestResponse existing = requireUnderwritingRequest(requestId);
+        if (existing.getRequestStatus() != RequestStatus.PENDING) {
+            throw new IllegalArgumentException(
+                    "Underwriting request can be completed only from PENDING. Current: " + existing.getRequestStatus());
+        }
+        if (request.getUnderwritingResult() == null) {
+            throw new IllegalArgumentException("underwritingResult is required.");
+        }
+        if (request.getUnderwritingResult() == UnderwritingResultType.REJECTED
+                && request.getRejectionReason() == null) {
+            throw new IllegalArgumentException("rejectionReason is required when result is REJECTED.");
+        }
+        if (request.getUnderwritingResult() == UnderwritingResultType.SURCHARGE
+                && request.getSurchargeCondition() == null) {
+            throw new IllegalArgumentException("surchargeCondition is required when result is SURCHARGE.");
+        }
+
+        int updated = underwritingRequestMapper.updateCompleteResult(
+                requestId,
+                request.getUnderwritingResult().name(),
+                request.getRejectionReason() == null ? null : request.getRejectionReason().name(),
+                request.getSurchargeCondition() == null ? null : request.getSurchargeCondition().name(),
+                LocalDateTime.now()
+        );
+        if (updated == 0) {
+            throw new IllegalArgumentException(
+                    "Underwriting request complete failed (concurrent modification): " + requestId);
+        }
+        return requireUnderwritingRequest(requestId);
+    }
+
+    private UnderwritingRequestResponse requireUnderwritingRequest(String requestId) {
+        UnderwritingRequestResponse response = underwritingRequestMapper.findById(requestId);
+        if (response == null) {
+            throw new NoSuchElementException("Underwriting request not found: " + requestId);
+        }
+        return response;
     }
 
     private EndorsementResponse requireActive(String policyNumber) {
@@ -212,6 +281,11 @@ public class EndorsementApplicationService {
     private String generateEndorsementId() {
         int sequence = ThreadLocalRandom.current().nextInt(1, 1_000_000);
         return "END-" + Year.now().getValue() + "-" + String.format("%06d", sequence);
+    }
+
+    private String generateUnderwritingRequestId() {
+        int sequence = ThreadLocalRandom.current().nextInt(1, 1_000_000);
+        return "REQ-" + Year.now().getValue() + "-" + String.format("%06d", sequence);
     }
 
     private String requireText(String value, String fieldName) {

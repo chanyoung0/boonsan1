@@ -1,5 +1,6 @@
 package com.boonsan.global.health;
 
+import com.boonsan.global.response.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

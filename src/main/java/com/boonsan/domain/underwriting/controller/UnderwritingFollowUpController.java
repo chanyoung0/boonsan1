@@ -17,16 +17,26 @@ import com.boonsan.domain.underwriting.dto.ReinsuranceCreateRequest;
 import com.boonsan.domain.underwriting.dto.ReinsuranceProcessResponse;
 import com.boonsan.domain.underwriting.dto.ReinsuranceResultRequest;
 import com.boonsan.domain.underwriting.dto.UnderwritingFollowUpEligibilityResponse;
-import com.boonsan.domain.underwriting.service.UnderwritingFollowUpApplicationService;
+import com.boonsan.domain.underwriting.service.CoinsuranceApplicationService;
+import com.boonsan.domain.underwriting.service.PolicyIssuanceApplicationService;
+import com.boonsan.domain.underwriting.service.ReinsuranceApplicationService;
 
 @RestController
 @RequestMapping("/api/underwriting/applications/{applicationId}")
 public class UnderwritingFollowUpController {
 
-    private final UnderwritingFollowUpApplicationService followUpApplicationService;
+    private final CoinsuranceApplicationService coinsuranceApplicationService;
+    private final ReinsuranceApplicationService reinsuranceApplicationService;
+    private final PolicyIssuanceApplicationService policyIssuanceApplicationService;
 
-    public UnderwritingFollowUpController(UnderwritingFollowUpApplicationService followUpApplicationService) {
-        this.followUpApplicationService = followUpApplicationService;
+    public UnderwritingFollowUpController(
+            CoinsuranceApplicationService coinsuranceApplicationService,
+            ReinsuranceApplicationService reinsuranceApplicationService,
+            PolicyIssuanceApplicationService policyIssuanceApplicationService
+    ) {
+        this.coinsuranceApplicationService = coinsuranceApplicationService;
+        this.reinsuranceApplicationService = reinsuranceApplicationService;
+        this.policyIssuanceApplicationService = policyIssuanceApplicationService;
     }
 
     @GetMapping("/coinsurance/eligibility")
@@ -34,7 +44,7 @@ public class UnderwritingFollowUpController {
             @PathVariable String applicationId
     ) {
         return ApiResponse.success(
-                followUpApplicationService.getCoinsuranceEligibility(applicationId),
+                coinsuranceApplicationService.getCoinsuranceEligibility(applicationId),
                 "Coinsurance eligibility loaded"
         );
     }
@@ -45,7 +55,7 @@ public class UnderwritingFollowUpController {
             @Valid @RequestBody CoinsuranceCreateRequest request
     ) {
         return ApiResponse.success(
-                followUpApplicationService.createCoinsurance(applicationId, request),
+                coinsuranceApplicationService.createCoinsurance(applicationId, request),
                 "Coinsurance process created"
         );
     }
@@ -53,7 +63,7 @@ public class UnderwritingFollowUpController {
     @GetMapping("/coinsurance")
     public ApiResponse<CoinsuranceProcessResponse> getCoinsurance(@PathVariable String applicationId) {
         return ApiResponse.success(
-                followUpApplicationService.getCoinsurance(applicationId),
+                coinsuranceApplicationService.getCoinsurance(applicationId),
                 "Coinsurance process loaded"
         );
     }
@@ -64,7 +74,7 @@ public class UnderwritingFollowUpController {
             @Valid @RequestBody CoinsuranceResultRequest request
     ) {
         return ApiResponse.success(
-                followUpApplicationService.updateCoinsuranceResult(applicationId, request),
+                coinsuranceApplicationService.updateCoinsuranceResult(applicationId, request),
                 "Coinsurance result saved"
         );
     }
@@ -74,7 +84,7 @@ public class UnderwritingFollowUpController {
             @PathVariable String applicationId
     ) {
         return ApiResponse.success(
-                followUpApplicationService.getReinsuranceEligibility(applicationId),
+                reinsuranceApplicationService.getReinsuranceEligibility(applicationId),
                 "Reinsurance eligibility loaded"
         );
     }
@@ -85,7 +95,7 @@ public class UnderwritingFollowUpController {
             @Valid @RequestBody ReinsuranceCreateRequest request
     ) {
         return ApiResponse.success(
-                followUpApplicationService.createReinsurance(applicationId, request),
+                reinsuranceApplicationService.createReinsurance(applicationId, request),
                 "Reinsurance process created"
         );
     }
@@ -93,7 +103,7 @@ public class UnderwritingFollowUpController {
     @GetMapping("/reinsurance")
     public ApiResponse<ReinsuranceProcessResponse> getReinsurance(@PathVariable String applicationId) {
         return ApiResponse.success(
-                followUpApplicationService.getReinsurance(applicationId),
+                reinsuranceApplicationService.getReinsurance(applicationId),
                 "Reinsurance process loaded"
         );
     }
@@ -104,7 +114,7 @@ public class UnderwritingFollowUpController {
             @Valid @RequestBody ReinsuranceResultRequest request
     ) {
         return ApiResponse.success(
-                followUpApplicationService.updateReinsuranceResult(applicationId, request),
+                reinsuranceApplicationService.updateReinsuranceResult(applicationId, request),
                 "Reinsurance result saved"
         );
     }
@@ -114,7 +124,7 @@ public class UnderwritingFollowUpController {
             @PathVariable String applicationId
     ) {
         return ApiResponse.success(
-                followUpApplicationService.getPolicyIssueEligibility(applicationId),
+                policyIssuanceApplicationService.getPolicyIssueEligibility(applicationId),
                 "Policy issue eligibility loaded"
         );
     }
@@ -122,7 +132,7 @@ public class UnderwritingFollowUpController {
     @PostMapping("/policy-issue")
     public ApiResponse<PolicyIssueResponse> issuePolicy(@PathVariable String applicationId) {
         return ApiResponse.success(
-                followUpApplicationService.issuePolicy(applicationId),
+                policyIssuanceApplicationService.issuePolicy(applicationId),
                 "Policy issued"
         );
     }
@@ -130,7 +140,7 @@ public class UnderwritingFollowUpController {
     @GetMapping("/policy-issue")
     public ApiResponse<PolicyIssueResponse> getPolicyIssue(@PathVariable String applicationId) {
         return ApiResponse.success(
-                followUpApplicationService.getPolicyIssue(applicationId),
+                policyIssuanceApplicationService.getPolicyIssue(applicationId),
                 "Policy issue loaded"
         );
     }

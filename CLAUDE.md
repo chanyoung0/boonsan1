@@ -71,7 +71,7 @@ src/
  │   └─ AccidentReportRepository
  │
  └─ external/                        # 외부 시스템 Mock (랜덤값으로 외부 응답 시뮬레이션)
-     ├─ FinancialSupervisoryService   # 금융감독원 Mock
+     ├─ FinancialSupervisoryAuthority # 금융감독원 Mock
      ├─ IcisApiMock                   # 신용정보원 API Mock
      ├─ CoinsuranceSystemMock         # 공동인수사 시스템 Mock
      ├─ ReinsuranceSystemMock         # 재보험사 시스템 Mock
@@ -167,7 +167,7 @@ include/extend 호출 형식:
 - 화재보험 → FireInsurance
 - 해상보험 → MarineInsurance
 - 인가 → Authorization
-- 금융감독원 → FinancialSupervisoryService
+- 금융감독원 → FinancialSupervisoryAuthority
 
 U/W:
 - 청약 → InsuranceApplication

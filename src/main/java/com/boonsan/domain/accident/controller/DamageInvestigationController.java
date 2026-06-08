@@ -9,6 +9,7 @@ import com.boonsan.domain.accident.dto.InvestigationApprovalRequest;
 import com.boonsan.domain.accident.dto.PaymentApprovalDocumentResponse;
 import com.boonsan.domain.accident.dto.PaymentApprovalDraftResponse;
 import com.boonsan.domain.accident.service.DamageInvestigationApplicationService;
+import com.boonsan.domain.accident.service.InsurancePaymentApplicationService;
 import com.boonsan.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class DamageInvestigationController {
 
     private final DamageInvestigationApplicationService damageInvestigationApplicationService;
+    private final InsurancePaymentApplicationService insurancePaymentApplicationService;
 
     public DamageInvestigationController(
-            DamageInvestigationApplicationService damageInvestigationApplicationService
+            DamageInvestigationApplicationService damageInvestigationApplicationService,
+            InsurancePaymentApplicationService insurancePaymentApplicationService
     ) {
         this.damageInvestigationApplicationService = damageInvestigationApplicationService;
+        this.insurancePaymentApplicationService = insurancePaymentApplicationService;
     }
 
     @GetMapping("/investigation")
@@ -90,7 +94,7 @@ public class DamageInvestigationController {
             @PathVariable String accidentNumber
     ) {
         PaymentApprovalDocumentResponse response =
-                damageInvestigationApplicationService.payPaymentApprovalDocument(accidentNumber);
+                insurancePaymentApplicationService.payPaymentApprovalDocument(accidentNumber);
         return ApiResponse.success(response, "Insurance payment completed");
     }
 

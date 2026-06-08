@@ -1,7 +1,7 @@
 package com.boonsan.domain.model.insurance;
 
 // 금융감독원 도메인 모델 — 보험 상품 인가 요청 및 결과 수신 처리
-public class FinancialSupervisoryService {
+public class FinancialSupervisoryAuthority {
 
     private String institutionCode;
     private String institutionName;

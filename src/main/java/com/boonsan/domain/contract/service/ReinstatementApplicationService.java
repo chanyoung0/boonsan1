@@ -6,11 +6,13 @@ import com.boonsan.domain.contract.dto.UnderwritingRequestCompleteRequest;
 import com.boonsan.domain.contract.dto.UnderwritingRequestCreateRequest;
 import com.boonsan.domain.contract.dto.UnderwritingRequestResponse;
 import com.boonsan.domain.contract.mapper.ReinstatementMapper;
+import com.boonsan.domain.contract.mapper.UnderwritingRequestMapper;
 import com.boonsan.domain.enums.ContractStatus;
 import com.boonsan.domain.enums.ReinstatementStatus;
 import com.boonsan.domain.enums.RequestReason;
 import com.boonsan.domain.enums.RequestStatus;
 import com.boonsan.domain.enums.UnderwritingResultType;
+import com.boonsan.domain.enums.UnderwritingType;
 import com.boonsan.domain.model.contract.Contract;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,17 +28,17 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ReinstatementApplicationService {
 
     private final ContractApplicationService contractApplicationService;
-    private final UnderwritingRequestApplicationService underwritingRequestApplicationService;
     private final ReinstatementMapper reinstatementMapper;
+    private final UnderwritingRequestMapper underwritingRequestMapper;
 
     public ReinstatementApplicationService(
             ContractApplicationService contractApplicationService,
-            UnderwritingRequestApplicationService underwritingRequestApplicationService,
-            ReinstatementMapper reinstatementMapper
+            ReinstatementMapper reinstatementMapper,
+            UnderwritingRequestMapper underwritingRequestMapper
     ) {
         this.contractApplicationService = contractApplicationService;
-        this.underwritingRequestApplicationService = underwritingRequestApplicationService;
         this.reinstatementMapper = reinstatementMapper;
+        this.underwritingRequestMapper = underwritingRequestMapper;
     }
 
     @Transactional
@@ -124,8 +126,7 @@ public class ReinstatementApplicationService {
         }
         // 심사요청이 연결돼 있으면 결과 APPROVED 필요. 연결 X(슬라이스 4 이전 데이터)면 통과.
         if (active.getUnderwritingRequestId() != null) {
-            UnderwritingRequestResponse uw = underwritingRequestApplicationService
-                    .requireById(active.getUnderwritingRequestId());
+            UnderwritingRequestResponse uw = requireUnderwritingRequest(active.getUnderwritingRequestId());
             if (uw.getRequestStatus() != RequestStatus.COMPLETED) {
                 throw new IllegalArgumentException(
                         "Underwriting request must be COMPLETED before settling unpaid. Current: "
@@ -166,9 +167,8 @@ public class ReinstatementApplicationService {
                             + active.getReinstatementStatus());
         }
 
-        UnderwritingRequestResponse uw = underwritingRequestApplicationService.createForSource(
+        UnderwritingRequestResponse uw = createUnderwritingRequest(
                 contract.getPolicyNumber(),
-                RequestReason.REINSTATEMENT,
                 active.getReinstatementId(),
                 request == null ? null : request.getUnderwritingType()
         );
@@ -194,7 +194,7 @@ public class ReinstatementApplicationService {
             throw new IllegalArgumentException(
                     "No underwriting request linked to reinstatement: " + active.getReinstatementId());
         }
-        return underwritingRequestApplicationService.complete(active.getUnderwritingRequestId(), request);
+        return completeUnderwritingRequest(active.getUnderwritingRequestId(), request);
     }
 
     @Transactional(readOnly = true)
@@ -205,7 +205,7 @@ public class ReinstatementApplicationService {
             throw new NoSuchElementException(
                     "No underwriting request linked to reinstatement: " + active.getReinstatementId());
         }
-        return underwritingRequestApplicationService.findById(active.getUnderwritingRequestId());
+        return requireUnderwritingRequest(active.getUnderwritingRequestId());
     }
 
     @Transactional
@@ -258,6 +258,69 @@ public class ReinstatementApplicationService {
         return reinstatementMapper.findById(active.getReinstatementId());
     }
 
+    // 부활 유스케이스에서 심사요청 생성을 인라인 처리
+    private UnderwritingRequestResponse createUnderwritingRequest(
+            String policyNumber,
+            String reinstatementId,
+            UnderwritingType underwritingType
+    ) {
+        String requestId = generateUnderwritingRequestId();
+        underwritingRequestMapper.insertRequest(
+                requestId,
+                policyNumber,
+                RequestReason.REINSTATEMENT.name(),
+                reinstatementId,
+                underwritingType == null ? null : underwritingType.name(),
+                RequestStatus.PENDING.name(),
+                LocalDateTime.now()
+        );
+        return requireUnderwritingRequest(requestId);
+    }
+
+    // 부활 유스케이스에서 심사요청 완료 처리를 인라인 처리
+    private UnderwritingRequestResponse completeUnderwritingRequest(
+            String requestId,
+            UnderwritingRequestCompleteRequest request
+    ) {
+        UnderwritingRequestResponse existing = requireUnderwritingRequest(requestId);
+        if (existing.getRequestStatus() != RequestStatus.PENDING) {
+            throw new IllegalArgumentException(
+                    "Underwriting request can be completed only from PENDING. Current: " + existing.getRequestStatus());
+        }
+        if (request.getUnderwritingResult() == null) {
+            throw new IllegalArgumentException("underwritingResult is required.");
+        }
+        if (request.getUnderwritingResult() == UnderwritingResultType.REJECTED
+                && request.getRejectionReason() == null) {
+            throw new IllegalArgumentException("rejectionReason is required when result is REJECTED.");
+        }
+        if (request.getUnderwritingResult() == UnderwritingResultType.SURCHARGE
+                && request.getSurchargeCondition() == null) {
+            throw new IllegalArgumentException("surchargeCondition is required when result is SURCHARGE.");
+        }
+
+        int updated = underwritingRequestMapper.updateCompleteResult(
+                requestId,
+                request.getUnderwritingResult().name(),
+                request.getRejectionReason() == null ? null : request.getRejectionReason().name(),
+                request.getSurchargeCondition() == null ? null : request.getSurchargeCondition().name(),
+                LocalDateTime.now()
+        );
+        if (updated == 0) {
+            throw new IllegalArgumentException(
+                    "Underwriting request complete failed (concurrent modification): " + requestId);
+        }
+        return requireUnderwritingRequest(requestId);
+    }
+
+    private UnderwritingRequestResponse requireUnderwritingRequest(String requestId) {
+        UnderwritingRequestResponse response = underwritingRequestMapper.findById(requestId);
+        if (response == null) {
+            throw new NoSuchElementException("Underwriting request not found: " + requestId);
+        }
+        return response;
+    }
+
     private ReinstatementResponse requireActive(String policyNumber) {
         ReinstatementResponse active = reinstatementMapper.findActiveByPolicyNumber(policyNumber);
         if (active == null) {
@@ -269,5 +332,10 @@ public class ReinstatementApplicationService {
     private String generateReinstatementId() {
         int sequence = ThreadLocalRandom.current().nextInt(1, 1_000_000);
         return "RST-" + Year.now().getValue() + "-" + String.format("%06d", sequence);
+    }
+
+    private String generateUnderwritingRequestId() {
+        int sequence = ThreadLocalRandom.current().nextInt(1, 1_000_000);
+        return "REQ-" + Year.now().getValue() + "-" + String.format("%06d", sequence);
     }
 }

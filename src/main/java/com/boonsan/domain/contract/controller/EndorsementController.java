@@ -7,7 +7,6 @@ import com.boonsan.domain.contract.dto.UnderwritingRequestCompleteRequest;
 import com.boonsan.domain.contract.dto.UnderwritingRequestCreateRequest;
 import com.boonsan.domain.contract.dto.UnderwritingRequestResponse;
 import com.boonsan.domain.contract.service.EndorsementApplicationService;
-import com.boonsan.domain.contract.service.UnderwritingRequestApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,14 +23,9 @@ import java.util.List;
 public class EndorsementController {
 
     private final EndorsementApplicationService endorsementApplicationService;
-    private final UnderwritingRequestApplicationService underwritingRequestApplicationService;
 
-    public EndorsementController(
-            EndorsementApplicationService endorsementApplicationService,
-            UnderwritingRequestApplicationService underwritingRequestApplicationService
-    ) {
+    public EndorsementController(EndorsementApplicationService endorsementApplicationService) {
         this.endorsementApplicationService = endorsementApplicationService;
-        this.underwritingRequestApplicationService = underwritingRequestApplicationService;
     }
 
     @PostMapping
@@ -85,7 +79,7 @@ public class EndorsementController {
                     "No underwriting request linked to endorsement: " + active.getEndorsementId());
         }
         UnderwritingRequestResponse response =
-                underwritingRequestApplicationService.findById(active.getUnderwritingRequestId());
+                endorsementApplicationService.findUnderwritingRequestById(active.getUnderwritingRequestId());
         return ApiResponse.success(response, "Underwriting request found");
     }
 

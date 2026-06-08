@@ -20,6 +20,7 @@ import java.time.Year;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 
+
 @Service
 public class DamageInvestigationApplicationService {
 
@@ -29,8 +30,6 @@ public class DamageInvestigationApplicationService {
     private static final String APPROVAL_REQUESTED_STATUS = "APPROVAL_REQUESTED";
     private static final String APPROVED_STATUS = "APPROVED";
     private static final String REJECTED_STATUS = "REJECTED";
-    private static final String PAID_STATUS = "PAID";
-    private static final String COMPLETED_ACCIDENT_STATUS = "COMPLETED";
 
     private final DamageInvestigationMapper damageInvestigationMapper;
 
@@ -98,19 +97,6 @@ public class DamageInvestigationApplicationService {
                 REJECTED_STATUS,
                 "Payment approval document can only be rejected from APPROVAL_REQUESTED status."
         );
-        return requirePaymentApprovalDocument(normalizedAccidentNumber);
-    }
-
-    @Transactional
-    public PaymentApprovalDocumentResponse payPaymentApprovalDocument(String accidentNumber) {
-        String normalizedAccidentNumber = requireAccidentReport(accidentNumber).getReportNo();
-        updatePaymentApprovalStatus(
-                normalizedAccidentNumber,
-                APPROVED_STATUS,
-                PAID_STATUS,
-                "Payment approval document can only be paid from APPROVED status."
-        );
-        damageInvestigationMapper.updateAccidentStatus(normalizedAccidentNumber, COMPLETED_ACCIDENT_STATUS);
         return requirePaymentApprovalDocument(normalizedAccidentNumber);
     }
 
